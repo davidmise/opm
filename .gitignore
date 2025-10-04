@@ -1,0 +1,73 @@
+# .gitignore for Overland PM (CodeIgniter / PHP project)
+# Created: 2025-10-04
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Environment files
+.env
+.env.*.local
+.env.local
+
+# Node / frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Composer (vendor at repo root)
+/vendor/
+
+# PHPStorm caches
+.idea/
+*.iml
+
+# PHPUnit, php-cs, other caches
+.phpunit.result.cache
+.php_cs.cache
+
+# Logs and debug
+writable/logs/
+writable/debugbar/
+
+# Cache, sessions, uploads and temporary files (runtime)
+writable/cache/
+writable/session/
+writable/uploads/
+files/temp/
+files/timeline_files/
+files/project_files/
+
+# Uploaded profile images and other user files
+files/profile_images/
+
+# Generated asset maps / builds
+public/build/
+public/assets/build/
+public/*.map
+
+# Database files (local)
+*.sqlite
+*.sqlite3
+
+# Packages
+.pnpm/
+
+# System files
+npm-debug.log*
+
+# Allowlist any explicitly committed third-party vendored code in app/ThirdParty
+# (Many ThirdParty components include their own vendor directories and .gitignore files.)
+# Ignore vendor/ directories recursively (common for bundled composer packages)
+**/vendor/
+
+# End of file
