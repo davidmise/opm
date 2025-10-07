@@ -23,7 +23,7 @@ if ($can_order) {
         <span id="js-cart-min-icon" data-type="open" class="chat-min-icon"><i data-feather="shopping-bag" class='icon-16'></i></span>
     </div>
 
-    <div id="js-rise-cart-wrapper" class="rise-chat-wrapper hide rise-cart-wrapper"></div>
+    <div id="js-overland-cart-wrapper" class="overland-chat-wrapper hide overland-cart-wrapper"></div>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -39,9 +39,9 @@ if ($can_order) {
                 $("#js-cart-min-icon").attr("data-type", type).html(count ? "<i data-feather='shopping-bag' class='icon-16'></i><span class='badge bg-danger up cart-badge'>" + count + "</span>" : cartIconContent[type]);
 
                 if (type === "open") {
-                    $("#js-rise-cart-wrapper").addClass("hide"); //hide cart box
+                    $("#js-overland-cart-wrapper").addClass("hide"); //hide cart box
                 } else if (type === "close") {
-                    $("#js-rise-cart-wrapper").removeClass("hide"); //show cart box
+                    $("#js-overland-cart-wrapper").removeClass("hide"); //show cart box
                 }
 
                 if (count > 0) {
@@ -61,7 +61,7 @@ if ($can_order) {
                         right: "90px"
                     });
                 }
-                if (!$("#js-rise-chat-wrapper").hasClass("hide")) {
+                if (!$("#js-overland-chat-wrapper").hasClass("hide")) {
                     //chat box is open
                     $cartIcon.css({
                         right: "430px"
@@ -70,7 +70,7 @@ if ($can_order) {
             }
 
             $cartIcon.click(function() {
-                $("#js-rise-cart-wrapper").html("");
+                $("#js-overland-cart-wrapper").html("");
                 var $cartIcon = $("#js-cart-min-icon");
                 var windowSize = window.matchMedia("(max-width: 767px)");
 
@@ -104,7 +104,7 @@ if ($can_order) {
                 var itemId = $itemRow.attr("data-id");
 
                 appLoader.show({
-                    container: "#js-rise-cart-wrapper",
+                    container: "#js-overland-cart-wrapper",
                     css: "bottom: 35px"
                 });
 
@@ -159,7 +159,7 @@ if ($can_order) {
                                 $("#cart-total-section").html(response.cart_total_view);
 
                                 //reload cart to show empty message if there is no item
-                                if (!$(".rise-cart-body div").find(".cart-total-value").attr("data-value")) {
+                                if (!$(".overland-cart-body div").find(".cart-total-value").attr("data-value")) {
                                     loadCartTabs();
                                 }
 
@@ -178,7 +178,7 @@ if ($can_order) {
 
         window.placeCartBox = function() {
             var $cartIcon = $("#js-init-cart-icon"),
-                $cartBox = $("#js-rise-cart-wrapper"),
+                $cartBox = $("#js-overland-cart-wrapper"),
                 cartBtnState = $("#js-cart-min-icon").attr("data-type");
 
             if ($("#js-init-chat-icon").length) {
@@ -186,7 +186,7 @@ if ($can_order) {
                 if (cartBtnState === "open" || cartBtnState === "has_item") {
                     //cart box closed
                     //move back to it's previous position
-                    if (!$("#js-rise-chat-wrapper").hasClass("hide")) {
+                    if (!$("#js-overland-chat-wrapper").hasClass("hide")) {
                         //chat box is visible
                         $cartIcon.css({
                             right: "430px"
@@ -199,7 +199,7 @@ if ($can_order) {
                     }
                 } else {
                     //cart box is open
-                    if (!$("#js-rise-chat-wrapper").hasClass("hide")) {
+                    if (!$("#js-overland-chat-wrapper").hasClass("hide")) {
                         //chat box is visible
                         $cartIcon.css({
                             right: "430px"
@@ -226,14 +226,14 @@ if ($can_order) {
         function loadCartTabs() {
             setCartIcon("close"); //show close icon
             appLoader.show({
-                container: "#js-rise-cart-wrapper",
+                container: "#js-overland-cart-wrapper",
                 css: "bottom: 31%; right: 41%;"
             });
 
             appAjaxRequest({
                 url: "<?php echo get_uri("store/load_cart_items"); ?>",
                 success: function(response) {
-                    $("#js-rise-cart-wrapper").html(response);
+                    $("#js-overland-cart-wrapper").html(response);
                     appLoader.hide();
                 }
             });
@@ -264,7 +264,7 @@ if ($can_order) {
             setCartIcon("has_item", totalItems); //show close icon
 
             //reload cart if it's shown
-            if (!$("#js-rise-cart-wrapper").hasClass("hide")) {
+            if (!$("#js-overland-cart-wrapper").hasClass("hide")) {
                 loadCartTabs();
                 setCartIcon("close");
             }

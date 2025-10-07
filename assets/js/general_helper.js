@@ -15,8 +15,8 @@ function appAjaxRequest(options) {
 }
 
 const IDBHelper = (() => {
-    const DB_NAME = 'RISE_indexedDB';
-    const STORE_NAME = 'rise_store';
+    const DB_NAME = 'OVERLAND_PM_indexedDB';
+    const STORE_NAME = 'overland_pm_store';
     const DB_VERSION = 1;
 
     function isSupported() {
@@ -129,11 +129,32 @@ $(document).ready(function () {
         }, 200);
     }
 
-    //call the feather.replace() method
-    feather.replace();
+    // Safe feather icon replacement function
+    function safeFeatherReplace() {
+        try {
+            if (typeof feather !== 'undefined' && feather.replace) {
+                // Check for icons with invalid names
+                var elements = document.querySelectorAll('[data-feather]');
+                elements.forEach(function(element) {
+                    var iconName = element.getAttribute('data-feather');
+                    if (iconName && feather.icons && !feather.icons[iconName]) {
+                        console.warn('Feather icon not found: ' + iconName);
+                        element.removeAttribute('data-feather');
+                        element.innerHTML = '<span class="icon-missing">?</span>';
+                    }
+                });
+                feather.replace();
+            }
+        } catch (error) {
+            console.error('Feather icon replacement error:', error);
+        }
+    }
+
+    //call the feather.replace() method safely
+    safeFeatherReplace();
 
     $(document).bind("ajaxComplete", function () {
-        feather.replace();
+        safeFeatherReplace();
     });
 
     //expand or collapse sidebar menu 

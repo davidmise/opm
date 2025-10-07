@@ -173,7 +173,7 @@ class Left_menu {
             }
 
             // Add Departments menu
-            if ($this->ci->login_user->is_admin || get_array_value($permissions, "can_manage_departments")) {
+            if (get_setting("module_departments") == "1" && ($this->ci->login_user->is_admin || get_array_value($permissions, "can_manage_departments"))) {
                 $sidebar_menu["departments"] = array("name" => "departments", "url" => "departments", "class" => "grid");
             }
 
@@ -257,7 +257,7 @@ class Left_menu {
                         "ticket_types/index",
                         "lead_status/index",
                         "pages/index",
-                        "rise_plugins/index"
+                        "overland_pm_plugins/index"
                     )
                 );
             }

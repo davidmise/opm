@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-class Rise_plugins extends Security_Controller {
+class OverlandPM_plugins extends Security_Controller {
 
     function __construct() {
         parent::__construct();
@@ -308,20 +308,20 @@ class Rise_plugins extends Security_Controller {
 
 
         if ($action_type == "installed") {
-            $action = '<li role="presentation">' . modal_anchor(get_uri("rise_plugins/install_modal_form/$plugin"), "<i data-feather='$icon' class='icon-16'></i> " . app_lang($lang_key), array("title" => app_lang("install") . " " . $plugin, "class" => "dropdown-item")) . '</li>';
+            $action = '<li role="presentation">' . modal_anchor(get_uri("overland_pm_plugins/install_modal_form/$plugin"), "<i data-feather='$icon' class='icon-16'></i> " . app_lang($lang_key), array("title" => app_lang("install") . " " . $plugin, "class" => "dropdown-item")) . '</li>';
         } else {
-            $action = '<li role="presentation">' . ajax_anchor(get_uri("rise_plugins/save_status_of_plugin/$plugin/$action_type/1"), "<i data-feather='$icon' class='icon-16'></i> " . app_lang($lang_key), array("data-reload-on-success" => true, "class" => "dropdown-item", "data-show-response" => true)) . '</li>';
+            $action = '<li role="presentation">' . ajax_anchor(get_uri("overland_pm_plugins/save_status_of_plugin/$plugin/$action_type/1"), "<i data-feather='$icon' class='icon-16'></i> " . app_lang($lang_key), array("data-reload-on-success" => true, "class" => "dropdown-item", "data-show-response" => true)) . '</li>';
         }
 
 
         $update = "";
         if ($status === "activated") {
-            $update = '<li role="presentation">' . modal_anchor(get_uri("rise_plugins/updates/$plugin"), "<i data-feather='refresh-cw' class='icon-16'></i> " . app_lang('updates'), array("title" => app_lang('updates'), "class" => "dropdown-item")) . '</li>';
+            $update = '<li role="presentation">' . modal_anchor(get_uri("overland_pm_plugins/updates/$plugin"), "<i data-feather='refresh-cw' class='icon-16'></i> " . app_lang('updates'), array("title" => app_lang('updates'), "class" => "dropdown-item")) . '</li>';
         }
 
         $delete = "";
         if ($status !== "activated") {
-            $delete = '<li role="presentation">' . js_anchor("<i data-feather='x' class='icon-16'></i>" . app_lang('delete'), array('title' => app_lang('delete'), "class" => "delete dropdown-item", "data-action-url" => get_uri("rise_plugins/delete/$plugin"), "data-action" => "delete-confirmation", "data-reload-on-success" => true)) . '</li>';
+            $delete = '<li role="presentation">' . js_anchor("<i data-feather='x' class='icon-16'></i>" . app_lang('delete'), array('title' => app_lang('delete'), "class" => "delete dropdown-item", "data-action-url" => get_uri("overland_pm_plugins/delete/$plugin"), "data-action" => "delete-confirmation", "data-reload-on-success" => true)) . '</li>';
         }
 
         $option = '
@@ -412,5 +412,5 @@ class Rise_plugins extends Security_Controller {
     }
 }
 
-/* End of file plugins.php */
-/* Location: ./app/controllers/plugins.php */
+/* End of file OverlandPM_plugins.php */
+/* Location: ./app/controllers/OverlandPM_plugins.php */

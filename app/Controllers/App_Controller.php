@@ -107,7 +107,7 @@ class App_Controller extends Controller {
         //assign settings from database
         $settings = $this->Settings_model->get_all_required_settings($login_user_id)->getResult();
         foreach ($settings as $setting) {
-            config('Rise')->app_settings_array[$setting->setting_name] = $setting->setting_value;
+            config('OverlandPM')->app_settings_array[$setting->setting_name] = $setting->setting_value;
         }
 
         $users = $this->Users_model->get_one($login_user_id);

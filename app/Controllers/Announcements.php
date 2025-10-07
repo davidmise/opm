@@ -292,6 +292,11 @@ class Announcements extends Security_Controller {
     function get_departments_dropdown() {
         $this->access_only_allowed_members();
 
+        if (get_setting("module_departments") != "1") {
+            echo json_encode(array());
+            return;
+        }
+
         $departments = $this->Departments_model->get_all_where(array("deleted" => 0))->getResult();
         $departments_dropdown = array();
 

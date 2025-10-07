@@ -114,7 +114,7 @@ define ('PDF_HEADER_TITLE', 'fairsketch');
 /**
  * Header description string.
  */
-define ('PDF_HEADER_STRING', "by fairsketch - farisketch.com\nwww.fairsketch.com");
+define ('PDF_HEADER_STRING', "by David M. Mushi - Overland Project Manager\nOverland Project Manager");
 
 /**
  * Document unit of measure [pt=point, mm=millimeter, cm=centimeter, in=inch].

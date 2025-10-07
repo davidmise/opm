@@ -17,7 +17,7 @@
             <h1 class="headline"><?= lang('Errors.whoops') ?></h1>
 
             <p class="lead"><?= lang('Errors.weHitASnag') ?></p>
-            <p class="text-center"><a href="https://risedocs.fairsketch.com/doc/view/59" style="border: 1px solid #222;
+            <p class="text-center"><a href="#" style="border: 1px solid #222;
                                       border-radius: 5px;
                                       padding: 5px 20px;
                                       text-decoration: none;

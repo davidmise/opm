@@ -33,7 +33,7 @@ class Security extends BaseConfig
      *
      * Token name for Cross Site Request Forgery protection.
      */
-    public string $tokenName = 'rise_csrf_token';
+    public string $tokenName = 'overland_pm_csrf_token';
 
     /**
      * --------------------------------------------------------------------------
@@ -51,7 +51,7 @@ class Security extends BaseConfig
      *
      * Cookie name for Cross Site Request Forgery protection.
      */
-    public string $cookieName = 'rise_csrf_cookie';
+    public string $cookieName = 'overland_pm_csrf_cookie';
 
     /**
      * --------------------------------------------------------------------------

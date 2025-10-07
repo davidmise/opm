@@ -12,7 +12,7 @@
                 <div class="page-title clearfix">
                     <h4> <?php echo app_lang('updates'); ?></h4>
                     <div class="title-button-group">
-                       <a href='https://risedocs.fairsketch.com/doc/view/56' class='btn btn-info text-white' target='_blank'><i data-feather='help-circle' class='icon-16'></i> <?php echo app_lang('help'); ?></a>
+                       <a href='#' class='btn btn-info text-white disabled' target='_blank'><i data-feather='help-circle' class='icon-16'></i> <?php echo app_lang('help'); ?> (Disabled)</a>
                     </div>
                 </div>
 
@@ -60,7 +60,7 @@
                                 echo $supported_until . "<span class='badge bg-primary ml5'>Supported</span> ";
                             } else {
                                 echo $supported_until . "<span class='badge bg-danger ml5'>Support Expired</span> ";
-                                echo "<br>To purchase support, please visit <a href='https://codecanyon.net/item/rise-ultimate-project-manager/15455641'>here</a>.";
+                                echo "<br>Support for Overland Project Manager is provided by David M. Mushi.";
                             }
                         }
                         ?>

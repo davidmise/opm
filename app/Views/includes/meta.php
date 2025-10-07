@@ -16,6 +16,9 @@
     if (strpos(app_lang($controller_name), '.') === false) {
         $title = app_lang($controller_name) . " | " . $title;
     }
+    // Ensure any remaining Rise/RISE branding in the stored title is replaced
+    // so the browser tab displays the Overland Project Manager branding.
+    $title = preg_replace('/\b(?:RISE|Rise)\b/i', 'Overland Project Manager', $title);
     echo $title;
     ?>
 </title>

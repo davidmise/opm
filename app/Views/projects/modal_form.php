@@ -74,6 +74,7 @@
             </div>
         <?php } ?>
 
+        <?php if (get_setting("module_departments") == "1") { ?>
         <div class="form-group">
             <div class="row">
                 <label for="department_id" class=" col-md-3"><?php echo app_lang('department'); ?></label>
@@ -89,6 +90,7 @@
                 </div>
             </div>
         </div>
+        <?php } ?>
 
         <div class="form-group">
             <div class="row">

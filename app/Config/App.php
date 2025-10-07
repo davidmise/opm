@@ -31,18 +31,9 @@ class App extends BaseConfig {
 
     private function set_supported_languages() {
         if(count($this->supportedLocales)) return ;
-        $language_dropdown = array();
-        $dir = "./app/Language/";
-        if (is_dir($dir)) {
-            if ($dh = opendir($dir)) {
-                while (($file = readdir($dh)) !== false) {
-                    if ($file && $file != "." && $file != ".." && $file != "index.html" && $file != ".gitkeep" && $file != ".DS_Store") {
-                        array_push($language_dropdown, $file);
-                    }
-                }
-                closedir($dh);
-            }
-        }
+        
+        // Show English and Swahili languages
+        $language_dropdown = array('english', 'swahili');
 
         $this->supportedLocales = $language_dropdown;
     }

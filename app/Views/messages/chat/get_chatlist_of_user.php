@@ -1,4 +1,4 @@
-<div class="rise-chat-header box">
+<div class="overland-chat-header box">
     <div class="box-content chat-back" id="js-back-to-team-members-tab">
         <i data-feather="chevron-left" class="icon-16"></i>
     </div>
@@ -8,7 +8,7 @@
         </div>
     </div>
 </div>
-<div id="js-single-user-chat-list" class="rise-chat-body full-height">
+<div id="js-single-user-chat-list" class="overland-chat-body full-height">
 
     <div class='clearfix p10 b-b'>
         <?php

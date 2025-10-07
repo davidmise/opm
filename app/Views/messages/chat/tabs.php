@@ -1,4 +1,4 @@
-<div class="rise-chat-header box">
+<div class="overland-chat-header box">
     <!--    <div class="box-content chat-back">
             <i data-feather="chevron-left" class="icon-16"></i>
         </div>-->
@@ -28,7 +28,7 @@
 </div>
 
 
-<div class="rise-chat-body long clearfix">
+<div class="overland-chat-body long clearfix">
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane fade" id="chat-inbox-tab">
             <?php echo view("messages/chat/chat_list", array("messages" => $messages)); ?>

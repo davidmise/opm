@@ -64,8 +64,8 @@ Events::on('pre_system', static function (): void {
 
     load_plugin_indexes();
 
-    include APPPATH . 'Config/RiseHooks.php';
-    include APPPATH . 'Config/RiseCustomHooks.php';
+    include APPPATH . 'Config/OverlandPMHooks.php';
+    include APPPATH . 'Config/OverlandPMCustomHooks.php';
 
     set_default_csp_directives();
 });

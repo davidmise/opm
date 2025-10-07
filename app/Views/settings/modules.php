@@ -47,6 +47,7 @@
                             "project_timesheet" => app_lang('project_timesheet'),
                             "gantt" => app_lang('gantt'),
                             "help" => app_lang('help') . " (" . app_lang("team_members") . ")",
+                            "departments" => app_lang('departments'),
                         ],
                         "collaboration" => [
                             "message" => app_lang('message'),

@@ -7,7 +7,7 @@ if (get_setting("module_chat") && $can_chat) {
 ?>
 
 
-    <div id="js-rise-chat-wrapper" class="rise-chat-wrapper hide"></div>
+    <div id="js-overland-chat-wrapper" class="overland-chat-wrapper hide"></div>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -17,7 +17,7 @@ if (get_setting("module_chat") && $can_chat) {
             //allowed data-type= open/close/unread
             $chatIconWrapper.append(' <span id="js-chat-min-icon" data-type="open" class="chat-min-icon"><i data-feather="message-circle" class="icon"></i></span>');
 
-            var $chatBoxWrapper = '<div id="js-rise-chat-wrapper" class="rise-chat-wrapper hide"></div>';
+            var $chatBoxWrapper = '<div id="js-overland-chat-wrapper" class="overland-chat-wrapper hide"></div>';
             if (isMobile()) {
                 $('#mobile-chat-menu-button').append($chatIconWrapper).find(".init-chat-icon").removeClass("init-chat-icon");
                 $('#mobile-chat-menu-button').append($chatBoxWrapper);
@@ -47,10 +47,10 @@ if (get_setting("module_chat") && $can_chat) {
                 $("#js-chat-min-icon").attr("data-type", type).html(count ? count : chatIconContent[type]);
 
                 if (type === "open") {
-                    $("#js-rise-chat-wrapper").addClass("hide"); //hide chat box
+                    $("#js-overland-chat-wrapper").addClass("hide"); //hide chat box
                     $("#js-init-chat-icon").removeClass("has-message");
                 } else if (type === "close") {
-                    $("#js-rise-chat-wrapper").removeClass("hide"); //show chat box
+                    $("#js-overland-chat-wrapper").removeClass("hide"); //show chat box
                     $("#js-init-chat-icon").removeClass("has-message");
                 } else if (type === "unread") {
                     $("#js-init-chat-icon").addClass("has-message");
@@ -74,7 +74,7 @@ if (get_setting("module_chat") && $can_chat) {
 
 
             $chatIcon.click(function() {
-                $("#js-rise-chat-wrapper").html("");
+                $("#js-overland-chat-wrapper").html("");
 
                 NotificationHelper.updateLastMessageCheckingStatus();
 
@@ -143,15 +143,15 @@ if (get_setting("module_chat") && $can_chat) {
 
 
 
-            $('body #js-rise-chat-wrapper').on('click', '.js-message-row', function() {
+            $('body #js-overland-chat-wrapper').on('click', '.js-message-row', function() {
                 getActiveChat($(this).attr("data-id"));
             });
 
-            $('body #js-rise-chat-wrapper').on('click', '.js-message-row-of-team-members-tab', function() {
+            $('body #js-overland-chat-wrapper').on('click', '.js-message-row-of-team-members-tab', function() {
                 getChatlistOfUser($(this).attr("data-id"), "team_members");
             });
 
-            $('body #js-rise-chat-wrapper').on('click', '.js-message-row-of-clients-tab', function() {
+            $('body #js-overland-chat-wrapper').on('click', '.js-message-row-of-clients-tab', function() {
                 getChatlistOfUser($(this).attr("data-id"), "clients");
             });
 
@@ -163,7 +163,7 @@ if (get_setting("module_chat") && $can_chat) {
             setChatIcon("close"); //show close icon
 
             appLoader.show({
-                container: "#js-rise-chat-wrapper",
+                container: "#js-overland-chat-wrapper",
                 css: "bottom: 40%; right: 35%;"
             });
             appAjaxRequest({
@@ -174,7 +174,7 @@ if (get_setting("module_chat") && $can_chat) {
                     tab_type: tab_type
                 },
                 success: function(response) {
-                    $("#js-rise-chat-wrapper").html(response);
+                    $("#js-overland-chat-wrapper").html(response);
                     appLoader.hide();
                 }
             });
@@ -186,7 +186,7 @@ if (get_setting("module_chat") && $can_chat) {
 
             setCookie("active_chat_id", "");
             appLoader.show({
-                container: "#js-rise-chat-wrapper",
+                container: "#js-overland-chat-wrapper",
                 css: "bottom: 40%; right: 35%;"
             });
             appAjaxRequest({
@@ -195,7 +195,7 @@ if (get_setting("module_chat") && $can_chat) {
                     type: "inbox"
                 },
                 success: function(response) {
-                    $("#js-rise-chat-wrapper").html(response);
+                    $("#js-overland-chat-wrapper").html(response);
 
                     if (!trigger_from_user_chat) {
                         $("#chat-inbox-tab-button a").trigger("click");
@@ -215,7 +215,7 @@ if (get_setting("module_chat") && $can_chat) {
             setChatIcon("close"); //show close icon
 
             appLoader.show({
-                container: "#js-rise-chat-wrapper",
+                container: "#js-overland-chat-wrapper",
                 css: "bottom: 40%; right: 35%;"
             });
             appAjaxRequest({
@@ -225,7 +225,7 @@ if (get_setting("module_chat") && $can_chat) {
                     message_id: message_id
                 },
                 success: function(response) {
-                    $("#js-rise-chat-wrapper").html(response);
+                    $("#js-overland-chat-wrapper").html(response);
                     appLoader.hide();
                     setCookie("active_chat_id", message_id);
                     $("#js-chat-message-textarea").focus();

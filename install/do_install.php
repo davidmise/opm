@@ -78,7 +78,7 @@ try {
 
 
         //validate purchase code
-        $verification = verify_rise_purchase_code($purchase_code);
+        $verification = verify_overland_pm_purchase_code($purchase_code);
         if (!$verification || $verification != "verified") {
             echo json_encode(array("success" => false, "message" => "Please enter a valid purchase code."));
             exit();
@@ -155,13 +155,13 @@ try {
     echo json_encode(array("success" => false, "message" => "Something went wrong. Please check the error log (/writable/logs/install.log) for more details."));
 }
 
-function verify_rise_purchase_code($code) {
+function verify_overland_pm_purchase_code($code) {
 	return 'verified';
     $code = urlencode($code);
 
-    $app_update_url = "https://releases.fairsketch.com/rise/";
+    $app_update_url = "#"; // Disabled for Overland PM
 
-    $config_file_path = "../app/Config/Rise.php";
+    $config_file_path = "../app/Config/OverlandPM.php";
     if (is_file($config_file_path)) {
         $config_file = file_get_contents($config_file_path);
 

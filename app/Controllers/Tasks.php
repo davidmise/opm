@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\Excel_import;
 
-class Tasks extends Security_Controller {
+class Tasks extends Department_Access_Controller {
 
     use Excel_import;
 

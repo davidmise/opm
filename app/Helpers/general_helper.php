@@ -214,12 +214,12 @@ if (!function_exists('get_actual_controller_name')) {
 if (!function_exists('get_setting')) {
 
     function get_setting($key = "") {
-        $setting_value = get_array_value(config('Rise')->app_settings_array, $key);
+        $setting_value = get_array_value(config('OverlandPM')->app_settings_array, $key);
         if ($setting_value !== NULL) {
             return $setting_value;
         } else {
-            if (isset(config('Rise')->$key)) {
-                return config('Rise')->$key;
+            if (isset(config('OverlandPM')->$key)) {
+                return config('OverlandPM')->$key;
             } else if (isset(config('App')->$key)) {
                 return config('App')->$key;
             } else {

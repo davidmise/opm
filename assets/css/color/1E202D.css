@@ -610,13 +610,13 @@ pre {
   color: #ccc;
 }
 
-.rise-chat-wrapper {
+.overland-chat-wrapper {
   background: #272B35;
 }
-.rise-chat-wrapper .message-row {
+.overland-chat-wrapper .message-row {
   border-bottom-color: #2f3541;
 }
-.rise-chat-wrapper .message-row:hover {
+.overland-chat-wrapper .message-row:hover {
   background: #20242C;
 }
 
@@ -628,18 +628,18 @@ pre {
   background-color: #5867dd;
 }
 
-.rise-chat-footer {
+.overland-chat-footer {
   background: #272B35;
   border-color: #2f3541;
 }
-.rise-chat-footer textarea {
+.overland-chat-footer textarea {
   background: #272B35;
   color: #ccc;
 }
-.rise-chat-footer .chat-button-section .btn-default {
+.overland-chat-footer .chat-button-section .btn-default {
   background-color: transparent !important;
 }
-.rise-chat-footer .chat-button-section .btn-default:hover, .rise-chat-footer .chat-button-section .btn-default:focus {
+.overland-chat-footer .chat-button-section .btn-default:hover, .overland-chat-footer .chat-button-section .btn-default:focus {
   background-color: #20242C !important;
 }
 

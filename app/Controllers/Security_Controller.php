@@ -983,7 +983,7 @@ class Security_Controller extends App_Controller {
 
         $settings = $this->Project_settings_model->get_all_where(array("project_id" => $project_id))->getResult();
         foreach ($settings as $setting) {
-            config('Rise')->app_settings_array[$setting->setting_name] = $setting->setting_value;
+            config('OverlandPM')->app_settings_array[$setting->setting_name] = $setting->setting_value;
         }
     }
 

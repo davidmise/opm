@@ -74,6 +74,17 @@ class Projects_model extends Crud_model {
             $where .= " AND ($projects_table.start_date BETWEEN '$start_date_from' AND '$start_date_to') ";
         }
 
+        // Department filtering
+        $department_id = $this->_get_clean_value($options, "department_id");
+        if ($department_id) {
+            $where .= " AND $projects_table.department_id=$department_id";
+        }
+
+        $department_ids = $this->_get_clean_value($options, "department_ids");
+        if ($department_ids && is_array($department_ids)) {
+            $department_ids_string = implode(',', $department_ids);
+            $where .= " AND ($projects_table.department_id IN ($department_ids_string) OR $projects_table.department_id IS NULL)";
+        }
 
         $extra_join = "";
         $extra_where = "";

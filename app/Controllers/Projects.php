@@ -6,7 +6,7 @@ use App\Libraries\Excel_import;
 use App\Libraries\App_folders;
 use App\Libraries\Dropdown_list;
 
-class Projects extends Security_Controller {
+class Projects extends Department_Access_Controller {
 
     use Excel_import;
     use App_folders;
@@ -275,7 +275,7 @@ class Projects extends Security_Controller {
         $view_data["can_edit_projects"] = $this->can_edit_projects();
         
         // Get departments dropdown - use regular dropdown (not JSON)
-        $view_data['departments_dropdown'] = $this->Departments_model->get_departments_dropdown(true);
+        $view_data['departments_dropdown'] = get_setting("module_departments") == "1" ? $this->Departments_model->get_departments_dropdown(true) : array();
 
         return $this->template->view('projects/modal_form', $view_data);
     }
@@ -774,6 +774,17 @@ class Projects extends Security_Controller {
             "deadline" => $this->request->getPost('deadline'),
             "custom_field_filter" => $this->prepare_custom_field_filter_values("projects", $this->login_user->is_admin, $this->login_user->user_type)
         );
+
+        // Add department filtering if departments module is enabled
+        if (get_setting("module_departments")) {
+            $department_id = $this->request->getPost("department_id");
+            if ($department_id) {
+                $options["department_id"] = $department_id;
+            } else {
+                // Apply user's department access restrictions
+                $options = $this->add_department_filter_to_options($options);
+            }
+        }
 
         //only admin/ the user has permission to manage all projects, can see all projects, other team mebers can see only their own projects.
         if (!$this->can_manage_all_projects()) {

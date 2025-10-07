@@ -172,7 +172,7 @@ class Settings extends Security_Controller {
             $this->Settings_model->save_setting($setting, $value);
 
             //reload the configs
-            config('Rise')->app_settings_array[$setting] = $value;
+            config('OverlandPM')->app_settings_array[$setting] = $value;
         }
 
         //if user change credentials, flag smtp as unauthorized

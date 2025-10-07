@@ -43,38 +43,56 @@
             </div>
             <div class="form-group">
                 <div class="row">
-                    <label for="department_display" class=" col-md-2"><?php echo app_lang('department'); ?></label>
+                    <label for="department" class=" col-md-2"><?php echo app_lang('department'); ?></label>
                     <div class=" col-md-10">
                         <?php 
-                        if ($user_info->department_title) {
-                            $color = $user_info->department_color ? $user_info->department_color : "#6c757d";
-                            $is_it_dept = ($user_info->department_id == 1); // IT Department
-                            $is_admin = isset($user_info->is_admin) && $user_info->is_admin;
+                        // Check if current user can edit departments (admins only)
+                        $can_edit_department = $login_user->is_admin || get_array_value($login_user->permissions, "can_manage_departments");
+                        
+                        if ($can_edit_department) {
+                            // Show dropdown for admins
+                            $Departments_model = model('App\Models\Departments_model');
+                            $departments_dropdown = $Departments_model->get_departments_dropdown();
                             
-                            echo "<div class='form-control-static'>";
-                            echo "<span class='badge' style='background-color: $color; color: white; font-size: 14px; padding: 6px 12px;'>";
-                            echo "<i data-feather='grid' class='icon-14'></i> " . $user_info->department_title;
+                            echo form_dropdown("department_id", $departments_dropdown, $user_info->department_id, "class='form-control select2' id='department'");
                             
-                            // Add indicator for IT department admins
-                            if ($is_it_dept && $is_admin) {
-                                echo " <i data-feather='star' class='icon-12'></i>";
-                            }
-                            
-                            echo "</span>";
-                            
-                            // Add explanation text for IT department admins
-                            if ($is_it_dept && $is_admin) {
-                                echo "<br><small class='text-muted mt-2'><i data-feather='info' class='icon-12'></i> " . 
+                            // Show note for IT department
+                            if ($user_info->department_id == 1 && $user_info->is_admin) {
+                                echo "<small class='text-muted form-text'><i data-feather='info' class='icon-12'></i> " . 
                                      app_lang('it_default_department_for_admins') . "</small>";
                             }
-                            
-                            echo "</div>";
                         } else {
-                            echo "<div class='form-control-static text-muted'>";
-                            echo "<span class='badge bg-secondary'>";
-                            echo "<i data-feather='grid' class='icon-12'></i> " . app_lang('no_department');
-                            echo "</span>";
-                            echo "</div>";
+                            // Show read-only display for non-admins
+                            if ($user_info->department_title) {
+                                $color = $user_info->department_color ? $user_info->department_color : "#6c757d";
+                                $is_it_dept = ($user_info->department_id == 1); // IT Department
+                                $is_admin = isset($user_info->is_admin) && $user_info->is_admin;
+                                
+                                echo "<div class='form-control-static'>";
+                                echo "<span class='badge' style='background-color: $color; color: white; font-size: 14px; padding: 6px 12px;'>";
+                                echo "<i data-feather='grid' class='icon-14'></i> " . $user_info->department_title;
+                                
+                                // Add indicator for IT department admins
+                                if ($is_it_dept && $is_admin) {
+                                    echo " <i data-feather='star' class='icon-12'></i>";
+                                }
+                                
+                                echo "</span>";
+                                
+                                // Add explanation text for IT department admins
+                                if ($is_it_dept && $is_admin) {
+                                    echo "<br><small class='text-muted mt-2'><i data-feather='info' class='icon-12'></i> " . 
+                                         app_lang('it_default_department_for_admins') . "</small>";
+                                }
+                                
+                                echo "</div>";
+                            } else {
+                                echo "<div class='form-control-static text-muted'>";
+                                echo "<span class='badge bg-secondary'>";
+                                echo "<i data-feather='grid' class='icon-12'></i> " . app_lang('no_department');
+                                echo "</span>";
+                                echo "</div>";
+                            }
                         }
                         ?>
                     </div>

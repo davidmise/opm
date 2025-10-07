@@ -125,7 +125,7 @@ class Team_members extends Security_Controller {
         ));
 
         $view_data['role_dropdown'] = $this->_get_roles_dropdown();
-        $view_data['departments_dropdown'] = $this->Departments_model->get_departments_dropdown(true);
+        $view_data['departments_dropdown'] = get_setting("module_departments") == "1" ? $this->Departments_model->get_departments_dropdown(true) : array();
 
         $id = $this->request->getPost('id');
         $options = array(
@@ -594,7 +594,7 @@ class Team_members extends Security_Controller {
         $view_data['can_manage_team_members_job_information'] = $this->has_job_info_manage_permission();
         
         // Get departments dropdown - use regular dropdown (not JSON)
-        $view_data['departments_dropdown'] = $this->Departments_model->get_departments_dropdown(true);
+        $view_data['departments_dropdown'] = get_setting("module_departments") == "1" ? $this->Departments_model->get_departments_dropdown(true) : array();
 
         return $this->template->view("team_members/job_info", $view_data);
     }
@@ -672,6 +672,25 @@ class Team_members extends Security_Controller {
             "dob" => $this->request->getPost('dob'),
             "ssn" => $this->request->getPost('ssn')
         );
+
+        // Handle department assignment for admins
+        $can_manage_departments = $this->login_user->is_admin || get_array_value($this->login_user->permissions, "can_manage_departments");
+        if ($can_manage_departments) {
+            $department_id = $this->request->getPost('department_id');
+            if ($department_id !== null) {
+                $user_data["department_id"] = $department_id ? $department_id : null;
+                
+                // If department is changed, update user_departments table
+                $User_departments_model = model('App\Models\User_departments_model');
+                
+                // Sync user departments - remove all and add new one
+                if ($department_id) {
+                    $User_departments_model->sync_user_departments($user_id, array($department_id), $department_id);
+                } else {
+                    $User_departments_model->sync_user_departments($user_id, array(), null);
+                }
+            }
+        }
 
         $user_data = clean_data($user_data);
 

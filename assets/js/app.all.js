@@ -24691,8 +24691,8 @@ function appAjaxRequest(options) {
 }
 
 const IDBHelper = (() => {
-    const DB_NAME = 'RISE_indexedDB';
-    const STORE_NAME = 'rise_store';
+    const DB_NAME = 'OVERLAND_PM_indexedDB';
+    const STORE_NAME = 'overland_pm_store';
     const DB_VERSION = 1;
 
     function isSupported() {

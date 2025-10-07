@@ -1,4 +1,4 @@
-<div class="rise-chat-header box">
+<div class="overland-chat-header box">
     <div class="box-content chat-back" id="js-back-to-chat-tabs">
         <i data-feather="chevron-left" class="icon-16 mt-1"></i>
     </div>
@@ -31,12 +31,12 @@
     </div>
 </div>
 
-<div class="rise-chat-body clearfix">
+<div class="overland-chat-body clearfix">
     <div id="js-chat-messages-container" class="clearfix"></div>
     <div id="js-chat-reply-indicator"></div>
 </div>
 
-<div class="rise-chat-footer">
+<div class="overland-chat-footer">
     <div id="chat-reply-form-dropzone" class="post-dropzone">
         <?php echo form_open(get_uri("messages/reply/1"), array("id" => "chat-message-reply-form", "class" => "general-form", "role" => "form")); ?>
 
@@ -77,24 +77,21 @@
 <script type="text/javascript">
     $(document).ready(function() {
 
-        var textarea = document.querySelector('.rise-chat-footer textarea');
-        textarea.addEventListener('keydown', autosizeRISEChatBox);
+        var textarea = document.querySelector('.overland-chat-footer textarea');
+        textarea.addEventListener('keydown', autosizeOverlandChatBox);
 
-        function autosizeRISEChatBox() {
-            var el = this;
-            setTimeout(function() {
-                if (el.scrollHeight < 110) {
-                    $(".rise-chat-body").height(405 - el.scrollHeight);
-                    el.style.cssText = 'height:' + el.scrollHeight + 'px';
-                }
-            });
-        }
+        function autosizeOverlandChatBox() {
+            $(this).trigger('focus');
+            if (this.scrollHeight) {
+                $(this).height('auto');
+                if (this.scrollHeight > 106) {
+                    $(".overland-chat-body").height(405 - el.scrollHeight);
 
 
 
 
         loadMessages(1);
-        $('.rise-chat-header').mousedown(handle_mousedown);
+        $('.overland-chat-header').mousedown(handle_mousedown);
         $("#js-chat-message-textarea").keypress(function(e) {
             if (e.keyCode === 13 && !e.shiftKey) {
                 $("#chat-message-reply-form").submit();
@@ -212,7 +209,7 @@
         function handleDragging(e) {
             var left = dragging.offset0.left + (e.pageX - dragging.pageX0);
             var top = dragging.offset0.top + (e.pageY - dragging.pageY0);
-            $(".rise-chat-wrapper").offset({
+            $(".overland-chat-wrapper").offset({
                 top: top,
                 left: left
             });
@@ -228,7 +225,7 @@
         //scroll to bottom only if the foucs on textarea
         var $focused = $(':focus');
         if (($focused && $focused.is("textarea")) || is_mobile) {
-            $(".rise-chat-body").animate({
+            $(".overland-chat-body").animate({
                 scrollTop: 10000000
             }, 100);
         }
