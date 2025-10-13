@@ -55,7 +55,7 @@
                             $departments_dropdown = $Departments_model->get_departments_dropdown();
                             
                             echo form_dropdown("department_id", $departments_dropdown, $user_info->department_id, "class='form-control select2' id='department'");
-                            
+
                             // Show note for IT department
                             if ($user_info->department_id == 1 && $user_info->is_admin) {
                                 echo "<small class='text-muted form-text'><i data-feather='info' class='icon-12'></i> " . 

@@ -108,6 +108,20 @@
             onSuccess: function (result) {
                 appAlert.success(result.message, {duration: 10000});
                 window.location.href = "<?php echo get_uri("team_members/view/" . $user_id); ?>" + "/job_info";
+            },
+            onError: function (result) {
+                console.log('Form submission error:', result);
+                appAlert.error(result.message || '<?php echo app_lang("error_occurred"); ?>');
+                return true;
+            },
+            beforeAjaxSubmit: function (arr, $form, options) {
+                console.log('Form data being submitted:', arr);
+                var formData = {};
+                for (var i = 0; i < arr.length; i++) {
+                    formData[arr[i].name] = arr[i].value;
+                }
+                console.log('Processed form data:', formData);
+                return true;
             }
         });
         
@@ -115,6 +129,14 @@
         $("#job-info-form .select2").select2({
             placeholder: "<?php echo app_lang('select'); ?>",
             allowClear: true
+        });
+
+        // Debug: Log department dropdown options
+        console.log('Department dropdown options:', $('#team_member_department_id option'));
+        
+        // Handle department dropdown change
+        $('#team_member_department_id').on('change', function() {
+            console.log('Department changed to:', $(this).val());
         });
 
         setDatePicker("#date_of_hire");

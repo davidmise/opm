@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\Excel_import;
+use Exception;
 
 class Team_members extends Security_Controller {
 
@@ -614,13 +615,35 @@ class Team_members extends Security_Controller {
         ));
 
         $user_id = $this->request->getPost('user_id');
+        $department_id = $this->request->getPost('department_id');
+        
+        // Handle empty department_id - convert to NULL
+        if (empty($department_id) || $department_id === "" || $department_id === "0") {
+            $department_id = NULL;
+        } else {
+            // Validate department_id is numeric
+            if (!is_numeric($department_id)) {
+                echo json_encode(array("success" => false, 'message' => app_lang('invalid_department_selection')));
+                return;
+            }
+            $department_id = (int) $department_id;
+            
+            // Validate that the department exists
+            if (get_setting("module_departments") == "1" && $department_id > 0) {
+                $department_exists = $this->Departments_model->get_one($department_id);
+                if (!$department_exists->id) {
+                    echo json_encode(array("success" => false, 'message' => app_lang('department_not_found')));
+                    return;
+                }
+            }
+        }
 
         $job_data = array(
             "user_id" => $user_id,
             "salary" => unformat_currency($this->request->getPost('salary')),
             "salary_term" => $this->request->getPost('salary_term'),
             "date_of_hire" => $this->request->getPost('date_of_hire'),
-            "department_id" => $this->request->getPost('department_id')
+            "department_id" => $department_id
         );
 
         //we'll save the job title in users table
@@ -628,11 +651,41 @@ class Team_members extends Security_Controller {
             "job_title" => $this->request->getPost('job_title')
         );
 
-        $this->Users_model->ci_save($user_data, $user_id);
-        if ($this->Users_model->save_job_info($job_data)) {
-            echo json_encode(array("success" => true, 'message' => app_lang('record_updated')));
-        } else {
-            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        try {
+            // Debug: Log the data being saved
+            log_message('info', 'Saving job info - User data: ' . json_encode($user_data));
+            log_message('info', 'Saving job info - Job data: ' . json_encode($job_data));
+            
+            // Step 1: Save user data (job title)
+            $user_save_result = $this->Users_model->ci_save($user_data, $user_id);
+            log_message('info', 'User save result: ' . ($user_save_result ? 'SUCCESS' : 'FAILED'));
+            
+            // Step 2: Save job info data
+            $job_save_result = $this->Users_model->save_job_info($job_data);
+            log_message('info', 'Job info save result: ' . ($job_save_result ? 'SUCCESS' : 'FAILED'));
+            
+            // Check database errors
+            $db = \Config\Database::connect();
+            $db_error = $db->error();
+            if ($db_error['code'] !== 0) {
+                log_message('error', 'Database error during job info save: ' . json_encode($db_error));
+            }
+            
+            if ($job_save_result) {
+                echo json_encode(array("success" => true, 'message' => app_lang('record_updated')));
+            } else {
+                $error_msg = 'Job info save failed';
+                if ($db_error['code'] !== 0) {
+                    $error_msg .= '. DB Error: ' . $db_error['message'];
+                } else {
+                    $error_msg .= '. No specific database error reported';
+                }
+                echo json_encode(array("success" => false, 'message' => $error_msg));
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Team member job info save error: ' . $e->getMessage());
+            log_message('error', 'Exception trace: ' . $e->getTraceAsString());
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred') . ' (Details: ' . $e->getMessage() . ')'));
         }
     }
 
@@ -677,10 +730,11 @@ class Team_members extends Security_Controller {
         $can_manage_departments = $this->login_user->is_admin || get_array_value($this->login_user->permissions, "can_manage_departments");
         if ($can_manage_departments) {
             $department_id = $this->request->getPost('department_id');
+
             if ($department_id !== null) {
-                $user_data["department_id"] = $department_id ? $department_id : null;
+                // Do NOT store department_id in users table - use junction tables instead
                 
-                // If department is changed, update user_departments table
+                // Update user_departments table (junction table)
                 $User_departments_model = model('App\Models\User_departments_model');
                 
                 // Sync user departments - remove all and add new one
@@ -689,12 +743,22 @@ class Team_members extends Security_Controller {
                 } else {
                     $User_departments_model->sync_user_departments($user_id, array(), null);
                 }
+                
+                // Also update team_member_job_info table if it exists
+                $job_info = $this->Users_model->get_job_info($user_id);
+                if ($job_info && $job_info->id) {
+                    $job_data = array(
+                        "user_id" => $user_id,
+                        "department_id" => $department_id ? $department_id : null
+                    );
+                    $this->Users_model->save_job_info($job_data);
+                }
             }
         }
 
         $user_data = clean_data($user_data);
 
-        $user_info = $this->Users_model->get_one($user_id);
+        $user_info = $this->Users_model->get_details(array("id" => $user_id))->getRow();
         $this->_ensure_staff_user($user_info);
 
         $user_info_updated = $this->Users_model->ci_save($user_data, $user_id);

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+
 class Users_model extends Crud_model {
 
     protected $table = null;
@@ -292,21 +294,31 @@ class Users_model extends Crud_model {
 
     function get_job_info($user_id) {
         parent::use_table("team_member_job_info");
-        return parent::get_one_where(array("user_id" => $user_id));
+        $result = parent::get_one_where(array("user_id" => $user_id));
+        parent::use_table("users"); // Reset table back to users
+        return $result;
     }
 
     function save_job_info($data) {
         parent::use_table("team_member_job_info");
 
-        //check if job info already exists
-        $where = array("user_id" => $this->_get_clean_value($data, "user_id"));
-        $exists = parent::get_one_where($where);
-        if ($exists->user_id) {
-            //job info found. update the record
-            return parent::update_where($data, $where);
-        } else {
-            //insert new one
-            return parent::ci_save($data);
+        try {
+            //check if job info already exists
+            $where = array("user_id" => $this->_get_clean_value($data, "user_id"));
+            $exists = parent::get_one_where($where);
+            if ($exists->user_id) {
+                //job info found. update the record
+                $result = parent::update_where($data, $where);
+            } else {
+                //insert new one
+                $result = parent::ci_save($data);
+            }
+            parent::use_table("users"); // Reset table back to users
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'save_job_info error: ' . $e->getMessage());
+            parent::use_table("users"); // Reset table back to users even on error
+            return false;
         }
     }
 

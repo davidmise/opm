@@ -85,6 +85,7 @@ class Departments_model extends Crud_model {
      */
     function get_departments_dropdown($show_header = true) {
         $departments_table = $this->db->prefixTable('departments');
+        // die($departments_table);
         
         // Order by ID first (IT is ID 1), then by title
         $sql = "SELECT $departments_table.id, $departments_table.title

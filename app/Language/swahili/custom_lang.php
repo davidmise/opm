@@ -3005,6 +3005,7 @@ $lang["select_color"] = "Chagua Rangi";
 $lang["preview"] = "Onyesha";
 $lang["invalid_color_format"] = "Muundo wa rangi haupo sahihi. Tafadhali tumia rangi ya hex halali.";
 $lang["department_color_updated_successfully"] = "Rangi ya idara imesasishwa kwa ufanisi";
+$lang["invalid_department_selection"] = "Uchaguzi batili wa idara";
 
 // Additional department-related translations
 $lang["department_head"] = "Mkuu wa Idara";

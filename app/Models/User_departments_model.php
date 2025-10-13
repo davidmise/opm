@@ -234,6 +234,8 @@ class User_departments_model extends Crud_model {
      */
     function sync_user_departments($user_id, $department_ids, $primary_department_id = null) {
         $user_departments_table = $this->db->prefixTable('user_departments');
+
+        // die(json_encode($user_departments_table));
         
         // Start transaction
         $this->db->transStart();

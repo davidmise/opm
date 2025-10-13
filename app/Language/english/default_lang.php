@@ -3024,6 +3024,7 @@ $lang["select_color"] = "Select Color";
 $lang["preview"] = "Preview";
 $lang["invalid_color_format"] = "Invalid color format. Please use a valid hex color.";
 $lang["department_color_updated_successfully"] = "Department color updated successfully";
+$lang["invalid_department_selection"] = "Invalid department selection";
 
 $lang["view_all"] = "View all";
 $lang["no_department"] = "No Department";
