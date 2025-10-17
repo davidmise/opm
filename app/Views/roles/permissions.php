@@ -1146,6 +1146,56 @@
                     </li>
                 <?php } ?>
 
+                <?php if (get_setting("module_workflow")) { ?>
+                    <li>
+                        <span data-feather="key" class="icon-14 ml-20"></span>
+                        <h5><?php echo app_lang("set_workflow_permissions"); ?>:</h5>
+                        <div>
+                            <?php
+                            echo form_checkbox("can_view_workflow", "1", $can_view_workflow ? true : false, "id='can_view_workflow' class='form-check-input'");
+                            ?>
+                            <label for="can_view_workflow"><?php echo app_lang("can_view_workflow"); ?></label>
+                        </div>
+                        
+                        <div id="workflow_permission_details_area" class="form-group <?php echo !$can_view_workflow ? "hide" : ""; ?>">
+                            <div>
+                                <?php
+                                echo form_checkbox("can_manage_workflow", "1", $can_manage_workflow ? true : false, "id='can_manage_workflow' class='form-check-input'");
+                                ?>
+                                <label for="can_manage_workflow"><?php echo app_lang("can_manage_workflow"); ?></label>
+                            </div>
+                            
+                            <div>
+                                <?php
+                                echo form_checkbox("can_create_shipments", "1", $can_create_shipments ? true : false, "id='can_create_shipments' class='form-check-input'");
+                                ?>
+                                <label for="can_create_shipments"><?php echo app_lang("can_create_shipments"); ?></label>
+                            </div>
+                            
+                            <div>
+                                <?php
+                                echo form_checkbox("can_edit_shipments", "1", $can_edit_shipments ? true : false, "id='can_edit_shipments' class='form-check-input'");
+                                ?>
+                                <label for="can_edit_shipments"><?php echo app_lang("can_edit_shipments"); ?></label>
+                            </div>
+                            
+                            <div>
+                                <?php
+                                echo form_checkbox("can_delete_shipments", "1", $can_delete_shipments ? true : false, "id='can_delete_shipments' class='form-check-input'");
+                                ?>
+                                <label for="can_delete_shipments"><?php echo app_lang("can_delete_shipments"); ?></label>
+                            </div>
+                            
+                            <div>
+                                <?php
+                                echo form_checkbox("can_manage_documents", "1", $can_manage_documents ? true : false, "id='can_manage_documents' class='form-check-input'");
+                                ?>
+                                <label for="can_manage_documents"><?php echo app_lang("can_manage_documents"); ?></label>
+                            </div>
+                        </div>
+                    </li>
+                <?php } ?>
+
 
                 <?php
                 try {
@@ -1312,6 +1362,15 @@
         $("#can_upload_and_edit_files").change(function() {
             if ($(this).is(":checked")) {
                 $("#can_view_files").prop("checked", true).trigger("change");
+            }
+        });
+
+        // Workflow permissions show/hide
+        $("#can_view_workflow").click(function() {
+            if ($(this).is(":checked")) {
+                $("#workflow_permission_details_area").removeClass("hide");
+            } else {
+                $("#workflow_permission_details_area").addClass("hide");
             }
         });
 

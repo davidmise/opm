@@ -137,6 +137,14 @@ class Roles extends Security_Controller {
             $view_data['can_view_files'] = get_array_value($permissions, "can_view_files");
             $view_data['can_comment_on_projects'] = get_array_value($permissions, "can_comment_on_projects");
 
+            // Workflow permissions
+            $view_data['can_view_workflow'] = get_array_value($permissions, "can_view_workflow");
+            $view_data['can_manage_workflow'] = get_array_value($permissions, "can_manage_workflow");
+            $view_data['can_create_shipments'] = get_array_value($permissions, "can_create_shipments");
+            $view_data['can_edit_shipments'] = get_array_value($permissions, "can_edit_shipments");
+            $view_data['can_delete_shipments'] = get_array_value($permissions, "can_delete_shipments");
+            $view_data['can_manage_documents'] = get_array_value($permissions, "can_manage_documents");
+
             $view_data['permissions'] = $permissions;
 
             return $this->template->view("roles/permissions", $view_data);
@@ -304,6 +312,14 @@ class Roles extends Security_Controller {
         $can_view_files = $this->request->getPost('can_view_files');
         $can_comment_on_projects = $this->request->getPost('can_comment_on_projects');
 
+        // Workflow permissions
+        $can_view_workflow = $this->request->getPost('can_view_workflow');
+        $can_manage_workflow = $this->request->getPost('can_manage_workflow');
+        $can_create_shipments = $this->request->getPost('can_create_shipments');
+        $can_edit_shipments = $this->request->getPost('can_edit_shipments');
+        $can_delete_shipments = $this->request->getPost('can_delete_shipments');
+        $can_manage_documents = $this->request->getPost('can_manage_documents');
+
         $permissions = array(
             "leave" => $leave,
             "leave_specific" => $leave_specific,
@@ -366,6 +382,12 @@ class Roles extends Security_Controller {
             "can_upload_and_edit_files" => $can_upload_and_edit_files,
             "can_view_files" => $can_view_files,
             "can_comment_on_projects" => $can_comment_on_projects,
+            "can_view_workflow" => $can_view_workflow,
+            "can_manage_workflow" => $can_manage_workflow,
+            "can_create_shipments" => $can_create_shipments,
+            "can_edit_shipments" => $can_edit_shipments,
+            "can_delete_shipments" => $can_delete_shipments,
+            "can_manage_documents" => $can_manage_documents,
         );
 
         try {

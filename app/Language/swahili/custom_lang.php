@@ -1998,6 +1998,103 @@ $lang["estimate_commented"] = "Makadirio yameachwa maoni";
 $lang["estimate_creator"] = "Muundaji wa makadirio";
 $lang["notification_estimate_commented"] = "Imeacha maoni kwenye makadirio.";
 
+/* Workflow module */
+$lang["workflow"] = "Utendaji";
+$lang["workflow_management"] = "Usimamizi wa Utendaji";
+$lang["shipment"] = "Mizigo";
+$lang["shipments"] = "Mizigo";
+$lang["shipment_tracking"] = "Ufuatiliaji wa Mizigo";
+$lang["overview"] = "Muhtasari";
+$lang["recent_shipments"] = "Mizigo ya Hivi Karibuni";
+$lang["total_shipments"] = "Jumla ya Mizigo";
+$lang["active_shipments"] = "Mizigo ya Uongozaji";
+$lang["pending_shipments"] = "Mizigo ya Kusubiri";
+$lang["completed_shipments"] = "Mizigo Iliyokamilika";
+$lang["tracking_number"] = "Nambari ya Ufuatiliaji";
+$lang["destination"] = "Lengo";
+$lang["origin"] = "Asili";
+$lang["shipment_date"] = "Tarehe ya Mizigo";
+$lang["expected_delivery"] = "Ufikishaji Unatarajiwa";
+$lang["carrier"] = "Mbeba";
+$lang["weight"] = "Uzito";
+$lang["value"] = "Thamani";
+$lang["customs_cleared"] = "Forodha Imesafishwa";
+$lang["in_transit"] = "Kwenye Safari";
+$lang["delivered"] = "Imefikishwa";
+$lang["pending_clearance"] = "Kusubiri Uthibitisho";
+$lang["shipment_status"] = "Hali ya Mizigo";
+$lang["shipment_details"] = "Maelezo ya Mizigo";
+$lang["add_shipment"] = "Ongeza Mizigo";
+$lang["edit_shipment"] = "Hariri Mizigo";
+$lang["delete_shipment"] = "Futa Mizigo";
+$lang["view_shipment"] = "Tazama Mizigo";
+$lang["create_new_shipment"] = "Unda Mizigo Mpya";
+
+/* Workflow phases */
+$lang["documentation"] = "Hati";
+$lang["customs_clearance"] = "Uthibitisho wa Forodha";
+$lang["transportation"] = "Usafiri";
+$lang["final_delivery"] = "Ufikishaji wa Mwisho";
+$lang["phase"] = "Kipindi";
+$lang["current_phase"] = "Kipindi cha Sasa";
+$lang["phase_progress"] = "Maendeleo ya Kipindi";
+$lang["phase_details"] = "Maelezo ya Kipindi";
+
+/* Workflow actions */
+$lang["mark_as_completed"] = "Weka Alama kama Imekamilika";
+$lang["mark_as_pending"] = "Weka Alama kama Inasubiri";
+$lang["mark_as_active"] = "Weka Alama kama Inaendelea";
+$lang["update_tracking"] = "Sasisha Ufuatiliaji";
+$lang["send_notification"] = "Tuma Arifa";
+$lang["print_documents"] = "Chapisha Hati";
+$lang["export_data"] = "Hamisha Data";
+
+/* Workflow analytics */
+$lang["analytics"] = "Uchambuzi";
+$lang["performance_metrics"] = "Vipimo vya Utendaji";
+$lang["shipment_trends"] = "Mienendo ya Mizigo";
+$lang["delivery_rates"] = "Viwango vya Ufikishaji";
+$lang["average_transit_time"] = "Wastani wa Muda wa Safari";
+$lang["cost_analysis"] = "Uchambuzi wa Gharama";
+$lang["efficiency_report"] = "Ripoti ya Ufanisi";
+
+/* Workflow forms */
+$lang["shipment_form"] = "Fomu ya Mizigo";
+$lang["tracking_form"] = "Fomu ya Ufuatiliaji";
+$lang["customs_form"] = "Fomu ya Forodha";
+$lang["delivery_form"] = "Fomu ya Ufikishaji";
+$lang["documentation_required"] = "Hati Zinahitajika";
+$lang["customs_declaration"] = "Azimio la Forodha";
+$lang["bill_of_lading"] = "Bili ya Upakiaji";
+$lang["commercial_invoice"] = "Anuaridi ya Kibiashara";
+$lang["packing_list"] = "Orodha ya Vifurushi";
+
+/* Navigation tabs */
+$lang["tasks"] = "Kazi";
+$lang["tracking"] = "Ufuatiliaji";
+$lang["trucks"] = "Malori";
+$lang["documents"] = "Hati";
+
+/* Quick actions and bulk operations */
+$lang["quick_actions"] = "Vitendo vya Haraka";
+$lang["assign_to_department"] = "Kabidhi kwa Idara";
+$lang["create_tasks"] = "Unda Kazi";
+$lang["please_select_shipments"] = "Tafadhali chagua mizigo moja au zaidi";
+$lang["shipments_assigned_to_department"] = "Mizigo %s imekabidhiwa kwa idara kwa mafanikio";
+$lang["view_my_tasks"] = "Tazama Kazi Zangu";
+$lang["track_shipments"] = "Fuatilia Mizigo";
+$lang["manage_documents"] = "Dhibiti Hati";
+$lang["enter_task_title"] = "Weka kichwa cha kazi";
+$lang["enter_user_id_or_name"] = "Weka kitambulisho cha mtumiaji au jina";
+$lang["quick_assign_task"] = "Kabidhi Kazi Haraka";
+$lang["task_assigned_successfully"] = "Kazi imekabidhiwa kwa mafanikio";
+$lang["required_fields_missing"] = "Sehemu zinazohitajika hazipo";
+$lang["access_denied"] = "Upatikanaji umekataliwa";
+$lang["record_not_found"] = "Rekodi haijapatikana";
+$lang["view_details"] = "Tazama Maelezo";
+$lang["assign_task"] = "Kabidhi Kazi";
+$lang["delete_confirmation_message"] = "Una uhakika? Hutaweza kutengua kitendo hiki!";
+
 $lang["contacts_logged_in_today"] = "Wahusika waliingia leo";
 $lang["contacts_logged_in_last_seven_days"] = "Wahusika waliingia wiki 7 zilizopita";
 
@@ -3022,5 +3119,40 @@ $lang["back_to_departments_list"] = "Rudi kwenye Orodha ya Idara";
 $lang["view_department_details"] = "Tazama Maelezo ya Idara";
 $lang["department_theme_color"] = "Rangi ya Mada ya Idara";
 $lang["completion_rate"] = "Kiwango cha Umalizio";
+
+// Shipment details page translations (Swahili)
+$lang["assign_task"] = "Kabidhi Kazi";
+$lang["shipment_details"] = "Maelezo ya Mzigo";
+$lang["shipment_information"] = "Taarifa za Mzigo";
+$lang["status_and_actions"] = "Hali na Vitendo";
+$lang["current_phase"] = "Awamu ya Sasa";
+$lang["tracking_information"] = "Taarifa za Ufuatiliaji";
+$lang["add_tracking_update"] = "Ongeza Msasishwaji wa Ufuatiliaji";
+$lang["no_tracking_updates"] = "Hakuna masasisho ya ufuatiliaji";
+$lang["shipment_documents"] = "Nyaraka za Mzigo";
+$lang["upload_document"] = "Pakia Nyaraka";
+$lang["no_documents_found"] = "Hakuna nyaraka zilizopatikana";
+$lang["assigned_tasks"] = "Kazi Zilizokabidhi";
+$lang["no_tasks_found"] = "Hakuna kazi zilizokabidhi";
+$lang["activity_timeline"] = "Ratiba ya Shughuli";
+$lang["shipment_created"] = "Mzigo Umeundwa";
+$lang["update_shipment_status"] = "Sasisha Hali ya Mzigo";
+$lang["new_status"] = "Hali Mpya";
+$lang["clearing_intake"] = "Pokezi la Forodha";
+$lang["regulatory_processing"] = "Uchakataji wa Udhibiti";
+$lang["internal_review"] = "Ukaguzi wa Ndani";
+$lang["transport_loading"] = "Upakiaji wa Usafiri";
+$lang["active"] = "Inatumika";
+$lang["completed"] = "Imekamilika";
+$lang["cancelled"] = "Imeghairiwa";
+$lang["weight"] = "Uzito";
+$lang["cargo_type"] = "Aina ya Mizigo";
+$lang["final_destination"] = "Marudio ya Mwisho";
+$lang["estimated_arrival"] = "Muda wa Kuwasili (Makisio)";
+$lang["created_date"] = "Tarehe ya Kuundwa";
+$lang["no_data_available"] = "Hakuna data iliyopatikana";
+$lang["no_urgent_tasks"] = "Hakuna kazi za haraka";
+$lang["workflow_phases"] = "Awamu za Mchakato";
+$lang["shipment_status"] = "Hali ya Mzigo";
 
 return $lang;

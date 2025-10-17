@@ -30,7 +30,7 @@ if (!function_exists("make_department_tabs_data")) {
 
 <div class="page-content department-details-view clearfix">
     <div class="container-fluid">
-        <div class="row">
+        <div class="row"></div></div>
             <div class="col-md-12">
                 <div class="department-title-section">
                     <div class="page-title no-bg clearfix mb5 no-border">

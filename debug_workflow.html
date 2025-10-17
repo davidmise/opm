@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workflow Debug Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Workflow Endpoints Test</h2>
+    <div id="results"></div>
+    
+    <script>
+    $(document).ready(function() {
+        var results = $('#results');
+        
+        // Test 1: List shipments data
+        results.append('<h3>Testing list_shipments endpoint...</h3>');
+        $.ajax({
+            url: 'http://localhost/overland_pm/index.php/workflow/list_shipments',
+            type: 'POST',
+            success: function(response) {
+                results.append('<p><strong>Success:</strong> ' + JSON.stringify(response).substring(0, 500) + '...</p>');
+            },
+            error: function(xhr, status, error) {
+                results.append('<p><strong>Error:</strong> ' + xhr.status + ' - ' + error + '</p>');
+            }
+        });
+        
+        // Test 2: Dashboard stats
+        results.append('<h3>Testing get_dashboard_stats endpoint...</h3>');
+        $.ajax({
+            url: 'http://localhost/overland_pm/index.php/workflow/get_dashboard_stats',
+            type: 'POST',
+            success: function(response) {
+                results.append('<p><strong>Success:</strong> ' + JSON.stringify(response) + '</p>');
+            },
+            error: function(xhr, status, error) {
+                results.append('<p><strong>Error:</strong> ' + xhr.status + ' - ' + error + '</p>');
+            }
+        });
+        
+        // Test 3: Get urgent tasks
+        results.append('<h3>Testing get_urgent_tasks endpoint...</h3>');
+        $.ajax({
+            url: 'http://localhost/overland_pm/index.php/workflow/get_urgent_tasks',
+            type: 'POST',
+            success: function(response) {
+                results.append('<p><strong>Success:</strong> ' + JSON.stringify(response) + '</p>');
+            },
+            error: function(xhr, status, error) {
+                results.append('<p><strong>Error:</strong> ' + xhr.status + ' - ' + error + '</p>');
+            }
+        });
+    });
+    </script>
+</body>
+</html>

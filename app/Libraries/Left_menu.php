@@ -177,6 +177,11 @@ class Left_menu {
                 $sidebar_menu["departments"] = array("name" => "departments", "url" => "departments", "class" => "grid");
             }
 
+            // Add Clearing & Transport Workflow menu
+            if ($this->ci->login_user->is_admin || get_array_value($permissions, "can_manage_workflow")) {
+                $sidebar_menu["workflow"] = array("name" => "clearing_transport_workflow", "url" => "workflow", "class" => "truck");
+            }
+
             if (get_setting("module_ticket") == "1" && ($this->ci->login_user->is_admin || $access_ticket)) {
 
                 $ticket_badge = 0;
