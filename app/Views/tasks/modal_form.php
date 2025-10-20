@@ -530,6 +530,12 @@
                     newData: result.data,
                     dataId: result.id
                 });
+                
+                // Refresh department tasks table if present
+                if ($("#department-tasks-table").length) {
+                    $("#department-tasks-table").appTable({reload: true});
+                }
+                
                 $("#reload-kanban-button:visible").trigger("click");
 
                 $("#save_and_show_value").append(result.save_and_show_link);

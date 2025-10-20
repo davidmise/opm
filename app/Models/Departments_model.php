@@ -65,8 +65,10 @@ class Departments_model extends Crud_model {
                  WHERE department_id = $departments_table.id) AS total_members,
                 (SELECT COUNT(*) FROM " . $this->db->prefixTable('projects') . " 
                  WHERE department_id = $departments_table.id AND deleted = 0) AS total_projects,
-                (SELECT COUNT(*) FROM " . $this->db->prefixTable('tasks') . " 
-                 WHERE department_id = $departments_table.id AND deleted = 0) AS total_tasks
+                (SELECT COUNT(DISTINCT t.id) FROM " . $this->db->prefixTable('tasks') . " t
+                 LEFT JOIN " . $this->db->prefixTable('projects') . " p ON t.project_id = p.id
+                 WHERE (t.department_id = $departments_table.id OR p.department_id = $departments_table.id) 
+                 AND t.deleted = 0) AS total_tasks
                 FROM $departments_table
                 LEFT JOIN $users_table ON $users_table.id = $departments_table.created_by
                 LEFT JOIN " . $this->db->prefixTable('users') . " head_users ON head_users.id = $departments_table.head_user_id
@@ -190,9 +192,13 @@ class Departments_model extends Crud_model {
                 (SELECT COUNT(*) FROM $projects_table 
                  WHERE department_id=$department_id AND deleted=0) as total_projects,
                 (SELECT COUNT(*) FROM $tasks_table 
-                 WHERE department_id=$department_id AND deleted=0 AND status_id != 3) as active_tasks,
+                 LEFT JOIN $projects_table ON $tasks_table.project_id=$projects_table.id
+                 WHERE ($tasks_table.department_id=$department_id OR $projects_table.department_id=$department_id) 
+                 AND $tasks_table.deleted=0 AND $tasks_table.status_id != 3) as active_tasks,
                 (SELECT COUNT(*) FROM $tasks_table 
-                 WHERE department_id=$department_id AND deleted=0 AND status_id = 3) as completed_tasks";
+                 LEFT JOIN $projects_table ON $tasks_table.project_id=$projects_table.id
+                 WHERE ($tasks_table.department_id=$department_id OR $projects_table.department_id=$department_id) 
+                 AND $tasks_table.deleted=0 AND $tasks_table.status_id = 3) as completed_tasks";
         
         return $this->db->query($sql)->getRow();
     }

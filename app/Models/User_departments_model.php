@@ -274,6 +274,24 @@ class User_departments_model extends Crud_model {
     }
 
     /**
+     * Check if user is in a specific department
+     * 
+     * @param int $user_id User ID
+     * @param int $department_id Department ID
+     * @return bool True if user is in department
+     */
+    function is_user_in_department($user_id, $department_id) {
+        $user_departments_table = $this->db->prefixTable('user_departments');
+        
+        $sql = "SELECT COUNT(*) as count 
+                FROM $user_departments_table 
+                WHERE user_id=$user_id AND department_id=$department_id";
+        
+        $result = $this->db->query($sql)->getRow();
+        return ($result->count > 0);
+    }
+
+    /**
      * Get department statistics for users
      * 
      * @return array Department stats

@@ -40,6 +40,7 @@ class Tasks extends Department_Access_Controller {
             array("context" => "project", "id_key" => "project_id", "id" => null), //keep the 1st item as project since it'll be used maximum times
             array("context" => "client", "id_key" => "client_id", "id" => null),
             array("context" => "contract", "id_key" => "contract_id", "id" => null),
+            array("context" => "department", "id_key" => "department_id", "id" => null),
             array("context" => "estimate", "id_key" => "estimate_id", "id" => null),
             array("context" => "expense", "id_key" => "expense_id", "id" => null),
             array("context" => "invoice", "id_key" => "invoice_id", "id" => null),
@@ -224,6 +225,8 @@ class Tasks extends Department_Access_Controller {
             return true;
         } else if ($context == "ticket" && $this->_can_edit_tickets($context_id)) {
             return true;
+        } else if ($context == "department" && ($this->login_user->is_admin || get_array_value($permissions, "can_manage_all_projects"))) {
+            return true;
         }
     }
 
@@ -249,6 +252,14 @@ class Tasks extends Department_Access_Controller {
             $this->project_member_memory[$project_id] = $is_member;
         }
 
+        return $is_member;
+    }
+
+    private function _is_user_a_department_member($department_id) {
+        // Check if the current user is a member of the specified department
+        $User_departments_model = model('App\Models\User_departments_model');
+        $is_member = $User_departments_model->is_user_in_department($this->login_user->id, $department_id);
+        
         return $is_member;
     }
 
@@ -338,6 +349,8 @@ class Tasks extends Department_Access_Controller {
             return true;
         } else if ($task_info->ticket_id && $this->_can_edit_tickets($task_info->ticket_id)) {
             return true;
+        } else if ($task_info->department_id && ($this->login_user->is_admin || get_array_value($permissions, "can_manage_all_projects"))) {
+            return true;
         }
     }
 
@@ -417,6 +430,8 @@ class Tasks extends Department_Access_Controller {
             return true;
         } else if ($context == "ticket" && $this->_can_edit_tickets($context_id)) {
             return true;
+        } else if ($context == "department" && ($this->login_user->is_admin || get_array_value($permissions, "can_manage_all_projects"))) {
+            return true;
         }
     }
 
@@ -437,6 +452,26 @@ class Tasks extends Department_Access_Controller {
         } else if ($project_id && $this->_user_has_project_task_delete_permission() && $this->_is_user_a_project_member($project_id)) {
             return true; // in a project, user must be a project member with task creation permission to create tasks
         }
+    }
+
+    private function _can_delete_department_tasks($department_id) {
+        //check if the user has permission to delete tasks of this department
+
+        if ($this->login_user->user_type != "staff") {
+            return false; //clients can't delete department tasks
+        }
+
+        // Admins can delete all department tasks
+        if ($this->login_user->is_admin) {
+            return true;
+        }
+
+        // Check if user has general task delete permission and is a member of this department
+        if ($this->_user_has_project_task_delete_permission() && $this->_is_user_a_department_member($department_id)) {
+            return true;
+        }
+
+        return false;
     }
 
     private function can_delete_tasks($_task = null) {
@@ -475,6 +510,8 @@ class Tasks extends Department_Access_Controller {
             return true;
         } else if ($task_info->ticket_id && $this->_can_edit_tickets($task_info->ticket_id)) {
             return true;
+        } else if ($task_info->department_id && $this->_can_delete_department_tasks($task_info->department_id)) {
+            return true;
         }
     }
 
@@ -509,7 +546,7 @@ class Tasks extends Department_Access_Controller {
         foreach ($context_id_pairs as $pair) {
             $context = $pair["context"];
 
-            $always_enabled_module = array("general", "project", "client");
+            $always_enabled_module = array("general", "project", "client", "department");
             if (!(in_array($context, $always_enabled_module) || $this->_is_active_module("module_" . $context))) {
                 continue;
             }
@@ -715,6 +752,15 @@ class Tasks extends Department_Access_Controller {
             }
 
             $project_members = $this->Project_members_model->get_project_members_id_and_text_dropdown($context_id, $user_ids, $show_client_contacts, true);
+        } else if ($context == "department" && $context_id) {
+            // Get department members dropdown
+            $User_departments_model = model("App\Models\User_departments_model");
+            $department_members = $User_departments_model->get_department_users_with_details($context_id)->getResult();
+            
+            $project_members = array();
+            foreach ($department_members as $member) {
+                $project_members[] = array("id" => $member->user_id, "text" => $member->first_name . " " . $member->last_name);
+            }
         } else if ($context == "project") {
             $project_members = array();
         } else {
@@ -913,6 +959,15 @@ class Tasks extends Department_Access_Controller {
             }
         }
 
+        $departments_dropdown = array(array("id" => "", "text" => "-"));
+        if ($context === "department" && !$return_empty_context) {
+            //get departments dropdown
+            $departments = $this->Departments_model->get_all_where(array("deleted" => 0))->getResult();
+            foreach ($departments as $department) {
+                $departments_dropdown[] = array("id" => $department->id, "text" => $department->title);
+            }
+        }
+
         return array(
             "milestones_dropdown" => $milestones_dropdown,
             "assign_to_dropdown" => $assign_to_dropdown,
@@ -931,7 +986,8 @@ class Tasks extends Department_Access_Controller {
             "proposals_dropdown" => $proposals_dropdown,
             "subscriptions_dropdown" => $subscriptions_dropdown,
             "expenses_dropdown" => $expenses_dropdown,
-            "tickets_dropdown" => $tickets_dropdown
+            "tickets_dropdown" => $tickets_dropdown,
+            "departments_dropdown" => $departments_dropdown
         );
     }
 
@@ -1006,6 +1062,7 @@ class Tasks extends Department_Access_Controller {
         $subscription_id = $this->request->getPost('subscription_id');
         $expense_id = $this->request->getPost('expense_id');
         $ticket_id = $this->request->getPost('ticket_id');
+        $department_id = $this->request->getPost('department_id');
 
         $context_data = $this->get_context_and_id();
         $context = $context_data["context"] ? $context_data["context"] : "project";
@@ -1083,6 +1140,7 @@ class Tasks extends Department_Access_Controller {
             "proposal_id" => $proposal_id ? $proposal_id : 0,
             "expense_id" => $expense_id ? $expense_id : 0,
             "subscription_id" => $subscription_id ? $subscription_id : 0,
+            "department_id" => $department_id ? $department_id : 0,
             "priority_id" => $priority_id ? $priority_id : 0,
             "labels" => $labels,
             "start_date" => $start_date,

@@ -227,6 +227,12 @@ class Tasks_model extends Crud_model {
             $where .= " AND $tasks_table.expense_id=$expense_id";
         }
 
+        $department_id = $this->_get_clean_value($options, "department_id");
+        if ($department_id) {
+            // Filter tasks by department: either directly assigned to department OR through their associated projects
+            $where .= " AND ($tasks_table.department_id=$department_id OR $projects_table.department_id=$department_id)";
+        }
+
         $priority_id = $this->_get_clean_value($options, "priority_id");
         if ($priority_id) {
             $where .= " AND $tasks_table.priority_id=$priority_id";

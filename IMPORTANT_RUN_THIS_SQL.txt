@@ -1,0 +1,57 @@
+========================================
+CRITICAL: DATABASE UPDATE REQUIRED
+========================================
+
+The department tasks feature requires database changes.
+Please run the SQL script below in your database:
+
+DATABASE: overland_pm_workflow
+
+OPTION 1: Run from Command Line (Windows PowerShell)
+-----------------------------------------------------
+Copy and paste this command in PowerShell:
+
+Get-Content "C:\laragon\www\overland_pm\updates\add_department_context_to_tasks.sql" | & "C:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysql.exe" -u root overland_pm_workflow
+
+
+OPTION 2: Run from phpMyAdmin or MySQL Workbench
+-------------------------------------------------
+1. Open phpMyAdmin (http://localhost/phpmyadmin)
+2. Select database: overland_pm_workflow
+3. Click on SQL tab
+4. Copy and paste the SQL below:
+
+-- Add department_id column to tasks table
+ALTER TABLE `opm_tasks` 
+ADD COLUMN `department_id` INT NOT NULL DEFAULT '0' AFTER `client_id`,
+ADD KEY `department_id` (`department_id`);
+
+-- Add 'department' to the context enum in tasks table
+ALTER TABLE `opm_tasks` 
+MODIFY COLUMN `context` ENUM(
+    'project',
+    'client',
+    'lead',
+    'invoice',
+    'estimate',
+    'order',
+    'contract',
+    'proposal',
+    'subscription',
+    'ticket',
+    'expense',
+    'department',
+    'general'
+) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'general';
+
+5. Click "Go" to execute
+
+========================================
+After running the SQL, you can:
+========================================
+✅ Create tasks directly assigned to departments
+✅ View department tasks in the Tasks tab
+✅ Assign tasks to department members
+✅ Filter tasks by department
+
+The tasks you tried to create will work after running this SQL!

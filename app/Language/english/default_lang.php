@@ -438,6 +438,7 @@ $lang["file_preview_is_not_available"] = "File preview is not available.";
 $lang["add_task"] = "Add task";
 $lang["edit_task"] = "Edit task";
 $lang["delete_task"] = "Delete task";
+$lang["please_select_tasks_to_delete"] = "Please select tasks to delete.";
 $lang["task"] = "Task";
 $lang["tasks"] = "Tasks";
 $lang["my_tasks"] = "My Tasks";
