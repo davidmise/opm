@@ -31,11 +31,26 @@ class Departments extends Security_Controller {
     }
 
     /**
-     * Display departments list page
+     * Display departments dashboard (main entry point)
+     * 
+     * @return string Rendered dashboard view
+     */
+    function index() {
+        // Get global statistics
+        $view_data['statistics'] = $this->Departments_model->get_dashboard_statistics();
+        
+        // Get all departments with stats
+        $view_data['departments'] = $this->Departments_model->get_all_departments_with_stats();
+        
+        return $this->template->rander("departments/dashboard_index", $view_data);
+    }
+
+    /**
+     * Display departments list page (classic table view)
      * 
      * @return string Rendered view
      */
-    function index() {
+    function list_view() {
         return $this->template->rander("departments/index");
     }
 
