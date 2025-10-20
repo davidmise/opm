@@ -439,6 +439,16 @@ $lang["add_task"] = "Add task";
 $lang["edit_task"] = "Edit task";
 $lang["delete_task"] = "Delete task";
 $lang["please_select_tasks_to_delete"] = "Please select tasks to delete.";
+
+// Departments dashboard additions
+$lang["dashboard"] = "Dashboard";
+$lang["download"] = "Download";
+$lang["members"] = "Members";
+$lang["inactive"] = "Inactive";
+$lang["actions"] = "Actions";
+$lang["you_have_full_access"] = "You have full access to manage departments.";
+$lang["limited_access_departments"] = "You have limited access to departments based on your membership and permissions.";
+$lang["accessible_items"] = "Accessible";
 $lang["task"] = "Task";
 $lang["tasks"] = "Tasks";
 $lang["my_tasks"] = "My Tasks";
