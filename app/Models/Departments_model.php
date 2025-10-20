@@ -204,6 +204,74 @@ class Departments_model extends Crud_model {
     }
 
     /**
+     * Get global dashboard statistics across all departments
+     * 
+     * @return object Dashboard statistics
+     */
+    function get_dashboard_statistics() {
+        $departments_table = $this->db->prefixTable('departments');
+        $user_departments_table = $this->db->prefixTable('user_departments');
+        $projects_table = $this->db->prefixTable('projects');
+        $tasks_table = $this->db->prefixTable('tasks');
+        
+        $sql = "SELECT 
+                (SELECT COUNT(*) FROM $departments_table WHERE deleted=0) as total_departments,
+                (SELECT COUNT(*) FROM $departments_table WHERE deleted=0 AND is_active=1) as active_departments,
+                (SELECT COUNT(DISTINCT user_id) FROM $user_departments_table 
+                 INNER JOIN $departments_table ON $user_departments_table.department_id=$departments_table.id 
+                 WHERE $departments_table.deleted=0) as total_members,
+                (SELECT COUNT(*) FROM $projects_table WHERE department_id IS NOT NULL AND deleted=0) as total_projects,
+                (SELECT COUNT(*) FROM $projects_table WHERE department_id IS NOT NULL AND deleted=0 AND status='open') as active_projects,
+                (SELECT COUNT(DISTINCT t.id) FROM $tasks_table t
+                 LEFT JOIN $projects_table p ON t.project_id=p.id
+                 WHERE (t.department_id IS NOT NULL OR p.department_id IS NOT NULL) AND t.deleted=0) as total_tasks,
+                (SELECT COUNT(*) FROM $departments_table WHERE deleted=0 AND head_user_id IS NULL) as departments_without_head,
+                (SELECT COUNT(*) FROM $departments_table d WHERE deleted=0 
+                 AND (SELECT COUNT(*) FROM $user_departments_table WHERE department_id=d.id) = 0) as departments_without_members";
+        
+        return $this->db->query($sql)->getRow();
+    }
+
+    /**
+     * Get all departments with enhanced statistics for dashboard
+     * 
+     * @return array Array of department objects with statistics
+     */
+    function get_all_departments_with_stats() {
+        $departments_table = $this->db->prefixTable('departments');
+        $users_table = $this->db->prefixTable('users');
+        $user_departments_table = $this->db->prefixTable('user_departments');
+        $projects_table = $this->db->prefixTable('projects');
+        $tasks_table = $this->db->prefixTable('tasks');
+        
+        $sql = "SELECT $departments_table.*,
+                CONCAT($users_table.first_name, ' ', $users_table.last_name) AS created_by_user,
+                CONCAT(head_users.first_name, ' ', head_users.last_name) AS head_user_name,
+                head_users.image AS head_user_image,
+                (SELECT COUNT(DISTINCT user_id) FROM $user_departments_table 
+                 WHERE department_id=$departments_table.id) AS total_members,
+                (SELECT COUNT(*) FROM $projects_table 
+                 WHERE department_id=$departments_table.id AND deleted=0) AS total_projects,
+                (SELECT COUNT(*) FROM $projects_table 
+                 WHERE department_id=$departments_table.id AND deleted=0 AND status='open') AS active_projects,
+                (SELECT COUNT(DISTINCT t.id) FROM $tasks_table t
+                 LEFT JOIN $projects_table p ON t.project_id=p.id
+                 WHERE (t.department_id=$departments_table.id OR p.department_id=$departments_table.id) 
+                 AND t.deleted=0) AS total_tasks,
+                (SELECT COUNT(DISTINCT t.id) FROM $tasks_table t
+                 LEFT JOIN $projects_table p ON t.project_id=p.id
+                 WHERE (t.department_id=$departments_table.id OR p.department_id=$departments_table.id) 
+                 AND t.deleted=0 AND t.status_id=3) AS completed_tasks
+                FROM $departments_table
+                LEFT JOIN $users_table ON $users_table.id=$departments_table.created_by
+                LEFT JOIN $users_table head_users ON head_users.id=$departments_table.head_user_id
+                WHERE $departments_table.deleted=0
+                ORDER BY $departments_table.title ASC";
+        
+        return $this->db->query($sql)->getResult();
+    }
+
+    /**
      * Get users assigned to a department
      * 
      * @param int $department_id Department ID
