@@ -1,5 +1,5 @@
 <!-- Modal -->
-<div class="modal fade" id="ajaxModal" role="dialog" aria-labelledby="ajaxModal" data-bs-backdrop="static" data-bs-keyboard="true" aria-hidden="true" data-bs-focus="false">
+<div class="modal fade" id="ajaxModal" role="dialog" aria-labelledby="ajaxModalTitle" data-bs-backdrop="static" data-bs-keyboard="true" data-bs-focus="false" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">

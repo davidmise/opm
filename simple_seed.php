@@ -7,7 +7,7 @@
 $host = 'localhost';
 $username = 'root';
 $password = '';
-$database = 'overland_pm';
+$database = 'overland_pm_workflow';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$database", $username, $password);

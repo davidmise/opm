@@ -16,7 +16,7 @@ SELECT
     TABLE_ROWS,
     CREATE_TIME
 FROM information_schema.TABLES 
-WHERE TABLE_SCHEMA = 'overland_pm' 
+WHERE TABLE_SCHEMA = 'overland_pm_workflow' 
 AND TABLE_NAME = 'opm_team_member_job_info';
 
 -- Show current data in the correct table

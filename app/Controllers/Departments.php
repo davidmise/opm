@@ -312,6 +312,18 @@ class Departments extends Security_Controller {
         $department_id = $this->request->getPost('department_id');
         $is_primary = $this->request->getPost('is_primary') ? true : false;
 
+        // Validate that the user is a staff member (not a client)
+        $Users_model = model('App\Models\Users_model');
+        $user = $Users_model->get_one($user_id);
+        
+        if (!$user || $user->user_type !== 'staff') {
+            echo json_encode(array(
+                "success" => false,
+                "message" => app_lang('only_team_members_can_be_added_to_departments')
+            ));
+            return;
+        }
+
         // Load the User_departments_model
         $User_departments_model = model('App\Models\User_departments_model');
         
@@ -382,9 +394,11 @@ class Departments extends Security_Controller {
         $result = $User_departments_model->set_primary_department($user_id, $department_id);
         
         if ($result) {
+            // Return both success message and updated row data for team members table
             echo json_encode(array(
                 "success" => true,
-                "message" => app_lang('primary_department_updated_successfully')
+                "message" => app_lang('primary_department_updated_successfully'),
+                "refresh_tables" => true // Signal to refresh all tables showing this user
             ));
         } else {
             echo json_encode(array(
@@ -584,7 +598,23 @@ class Departments extends Security_Controller {
 
         $actions = "";
         if ($this->login_user->is_admin || get_array_value($this->login_user->permissions, "can_manage_departments")) {
-            $actions = modal_anchor(get_uri("team_members/view/" . $data->user_id), "<i class='ti ti-eye'></i>", array("class" => "btn btn-outline-primary btn-sm", "title" => app_lang('view_member')));
+            // Build Set as Primary action
+            $primaryAction = '';
+            if (!$data->is_primary) {
+                $primaryAction = '<li><a class="dropdown-item set-as-primary" href="#" data-user-id="' . $data->user_id . '" data-department-id="' . $data->department_id . '" data-user-name="' . htmlspecialchars($data->first_name . " " . $data->last_name, ENT_QUOTES) . '" title="' . app_lang('set_as_primary') . '"><i data-feather="star" class="icon-16"></i></a></li>';
+            }
+            
+            $actions = '<div class="dropdown">
+                <button class="btn btn-outline-light btn-sm dropdown-toggle caret-option" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i data-feather="more-vertical" class="icon-16"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>' . modal_anchor(get_uri("team_members/view/" . $data->user_id), '<i data-feather="eye" class="icon-16"></i>', array("class" => "dropdown-item", "title" => app_lang('view_member'))) . '</li>
+                    ' . $primaryAction . '
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger remove-user-from-department" href="#" data-user-id="' . $data->user_id . '" data-department-id="' . $data->department_id . '" data-user-name="' . htmlspecialchars($data->first_name . " " . $data->last_name, ENT_QUOTES) . '" title="' . app_lang('remove') . '"><i data-feather="user-x" class="icon-16"></i></a></li>
+                </ul>
+            </div>';
         }
 
         return array(

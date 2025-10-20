@@ -6,6 +6,7 @@ $lang["example"] = "Example";
 $lang["workflow"] = "Workflow";
 $lang["shipments"] = "Shipments";
 $lang["overview"] = "Overview";
+$lang["primary"] = "Primary";
 $lang["tracking"] = "Tracking";
 $lang["trucks"] = "Trucks";
 $lang["documents"] = "Documents";
@@ -88,5 +89,13 @@ $lang["record_not_found"] = "Record not found";
 $lang["view_details"] = "View Details";
 $lang["assign_task"] = "Assign Task";
 $lang["delete_confirmation_message"] = "Are you sure? You won't be able to undo this action!";
+
+// Department members
+$lang["only_team_members_can_be_added_to_departments"] = "Only team members can be added to departments";
+$lang["remove_member_from_department_confirmation"] = "Are you sure you want to remove {member} from this department?";
+$lang["user_removed_from_department_successfully"] = "User removed from department successfully";
+$lang["set_as_primary_confirmation"] = "Set {member} as primary member of this department?";
+$lang["primary_department_updated_successfully"] = "Primary department updated successfully";
+$lang["remove"] = "Remove";
 
 return $lang;

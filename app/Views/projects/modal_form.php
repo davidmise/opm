@@ -219,37 +219,37 @@
         window.projectForm = $("#project-form").appForm({
             closeModalOnSuccess: false,
             onSuccess: function(result) {
-                if (typeof RELOAD_PROJECT_VIEW_AFTER_UPDATE !== "undefined" && RELOAD_PROJECT_VIEW_AFTER_UPDATE) {
-                    location.reload();
-
-                    window.projectForm.closeModal();
-                } else if (typeof RELOAD_VIEW_AFTER_UPDATE !== "undefined" && RELOAD_VIEW_AFTER_UPDATE) {
-                    RELOAD_VIEW_AFTER_UPDATE = false;
-                    window.location = "<?php echo site_url('projects/view'); ?>/" + result.id;
-
-                    window.projectForm.closeModal();
-                } else if (window.showAddNewModal) {
-                    var $addProjectMemberLink = $("#link-of-add-project-member-modal").find("a");
-
-                    $addProjectMemberLink.attr("data-action-url", "<?php echo get_uri("projects/project_member_modal_form"); ?>");
-                    $addProjectMemberLink.attr("data-title", "<?php echo app_lang("add_new_project_member"); ?>");
-                    $addProjectMemberLink.attr("data-post-project_id", result.id);
-                    $addProjectMemberLink.attr("data-post-view_type", "from_project_modal");
-
-                    $addProjectMemberLink.trigger("click");
-
-                    $("#project-table").appTable({
-                        newData: result.data,
-                        dataId: result.id
-                    });
-                } else {
-                    $("#project-table").appTable({
-                        newData: result.data,
-                        dataId: result.id
-                    });
-
-                    window.projectForm.closeModal();
-                }
+                    if (typeof RELOAD_PROJECT_VIEW_AFTER_UPDATE !== "undefined" && RELOAD_PROJECT_VIEW_AFTER_UPDATE) {
+                        location.reload();
+                        window.projectForm.closeModal();
+                    } else if (typeof RELOAD_VIEW_AFTER_UPDATE !== "undefined" && RELOAD_VIEW_AFTER_UPDATE) {
+                        RELOAD_VIEW_AFTER_UPDATE = false;
+                        window.location = "<?php echo site_url('projects/view'); ?>/" + result.id;
+                        window.projectForm.closeModal();
+                    } else if (window.showAddNewModal) {
+                        var $addProjectMemberLink = $("#link-of-add-project-member-modal").find("a");
+                        $addProjectMemberLink.attr("data-action-url", "<?php echo get_uri("projects/project_member_modal_form"); ?>");
+                        $addProjectMemberLink.attr("data-title", "<?php echo app_lang("add_new_project_member"); ?>");
+                        $addProjectMemberLink.attr("data-post-project_id", result.id);
+                        $addProjectMemberLink.attr("data-post-view_type", "from_project_modal");
+                        $addProjectMemberLink.trigger("click");
+                        $("#project-table").appTable({
+                            newData: result.data,
+                            dataId: result.id
+                        });
+                        if ($("#department-projects-table").length) {
+                            $("#department-projects-table").appTable({reload: true});
+                        }
+                    } else {
+                        $("#project-table").appTable({
+                            newData: result.data,
+                            dataId: result.id
+                        });
+                        if ($("#department-projects-table").length) {
+                            $("#department-projects-table").appTable({reload: true});
+                        }
+                        window.projectForm.closeModal();
+                    }
             }
         });
 

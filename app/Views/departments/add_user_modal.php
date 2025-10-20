@@ -52,7 +52,8 @@
             onSuccess: function (result) {
                 if (result.success) {
                     appAlert.success(result.message, {duration: 10000});
-                    location.reload();
+                    $("#department-team-table").appTable({reload: true});
+                    $("#add-user-form").closest('.modal').modal('hide');
                 } else {
                     appAlert.error(result.message);
                 }
@@ -60,6 +61,5 @@
         });
         
         $("#user_id").select2();
-        setDatePicker("#date_of_hire");
     });
 </script>

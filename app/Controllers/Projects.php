@@ -231,10 +231,12 @@ class Projects extends Department_Access_Controller {
         $this->validate_submitted_data(array(
             "id" => "numeric",
             "client_id" => "numeric",
+            "department_id" => "numeric",
         ));
 
         $project_id = $this->request->getPost('id');
         $client_id = $this->request->getPost('client_id');
+        $department_id = $this->request->getPost('department_id');
 
         if ($project_id) {
             if (!$this->can_edit_projects($project_id)) {
@@ -251,6 +253,11 @@ class Projects extends Department_Access_Controller {
         $view_data['model_info'] = $this->Projects_model->get_one($project_id);
         if ($client_id) {
             $view_data['model_info']->client_id = $client_id;
+        }
+        
+        // Pre-populate department if passed from department view
+        if ($department_id && !$project_id) {
+            $view_data['model_info']->department_id = $department_id;
         }
 
         //check if it's from estimate, order or proposal

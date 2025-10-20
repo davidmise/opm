@@ -157,6 +157,7 @@ $lang["edit_department"] = "Hariri idara";
 $lang["delete_department"] = "Futa idara";
 $lang["department"] = "Idara";
 $lang["departments"] = "Idara";
+$lang["primary"] = "Mkuu";
 $lang["department_has_dependencies"] = "Huu idara hauwezi kufutwa kwa sababu ina wanachama wa timu au miradi iliyopeanwa.";
 $lang["select_a_department"] = "Chagua idara";
 $lang["statistics"] = "Takwimu";
@@ -3154,5 +3155,13 @@ $lang["no_data_available"] = "Hakuna data iliyopatikana";
 $lang["no_urgent_tasks"] = "Hakuna kazi za haraka";
 $lang["workflow_phases"] = "Awamu za Mchakato";
 $lang["shipment_status"] = "Hali ya Mzigo";
+
+// Department members
+$lang["only_team_members_can_be_added_to_departments"] = "Wanachama wa timu tu ndio wanaoweza kuongezwa kwenye idara";
+$lang["remove_member_from_department_confirmation"] = "Una uhakika unataka kuondoa {member} kutoka kwenye idara hii?";
+$lang["user_removed_from_department_successfully"] = "Mtumiaji ameondolewa kwenye idara kwa mafanikio";
+$lang["set_as_primary_confirmation"] = "Weka {member} kuwa mwanachama mkuu wa idara hii?";
+$lang["primary_department_updated_successfully"] = "Idara kuu imesasishwa kwa mafanikio";
+$lang["remove"] = "Ondoa";
 
 return $lang;

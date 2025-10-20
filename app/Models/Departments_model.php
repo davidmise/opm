@@ -214,11 +214,12 @@ class Departments_model extends Crud_model {
             $where .= " AND $user_departments_table.is_primary=1";
         }
         
+        // Only return staff users as department members (exclude client contacts)
         $sql = "SELECT $users_table.*, $user_departments_table.is_primary
                 FROM $users_table
                 INNER JOIN $user_departments_table ON $user_departments_table.user_id = $users_table.id
                 WHERE $user_departments_table.department_id=$department_id 
-                AND $users_table.deleted=0 $where
+                AND $users_table.deleted=0 AND $users_table.user_type='staff' $where
                 ORDER BY $user_departments_table.is_primary DESC, $users_table.first_name ASC";
         
         return $this->db->query($sql);

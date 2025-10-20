@@ -1,5 +1,5 @@
 <?php
-$pdo = new PDO('mysql:host=localhost;dbname=overland_pm', 'root', '');
+$pdo = new PDO('mysql:host=localhost;dbname=overland_pm_workflow', 'root', '');
 
 echo "Checking opm_clients table structure:\n";
 $result = $pdo->query('DESCRIBE opm_clients');

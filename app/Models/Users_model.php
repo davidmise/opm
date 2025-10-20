@@ -222,14 +222,22 @@ class Users_model extends Crud_model {
         $join_custom_fieds = get_array_value($custom_field_query_info, "join_string");
         $custom_fields_where = get_array_value($custom_field_query_info, "where_string");
 
+        $user_departments_table = $this->db->prefixTable('user_departments');
+        $departments_table = $this->db->prefixTable('departments');
+
         //prepare full query string
         $sql = "SELECT SQL_CALC_FOUND_ROWS $users_table.*, $roles_table.title AS role_title,
             $team_member_job_info_table.date_of_hire, $team_member_job_info_table.salary, $team_member_job_info_table.salary_term, 
-            $team_member_job_info_table.department_id, 
-            departments.title AS department_title, departments.color AS department_color $select_custom_fieds
+            primary_dept.department_id, 
+            primary_dept.department_title, primary_dept.department_color $select_custom_fieds
         FROM $users_table
         LEFT JOIN $team_member_job_info_table ON $team_member_job_info_table.user_id=$users_table.id
-        LEFT JOIN " . $this->db->prefixTable('departments') . " departments ON departments.id=$team_member_job_info_table.department_id AND departments.deleted=0
+        LEFT JOIN (
+            SELECT ud.user_id, ud.department_id, d.title AS department_title, d.color AS department_color
+            FROM $user_departments_table ud
+            INNER JOIN $departments_table d ON d.id = ud.department_id AND d.deleted=0
+            WHERE ud.is_primary=1
+        ) primary_dept ON primary_dept.user_id=$users_table.id
         LEFT JOIN $clients_table ON $clients_table.id=$users_table.client_id
         LEFT JOIN $roles_table ON $roles_table.id=$users_table.role_id
         $join_custom_fieds    

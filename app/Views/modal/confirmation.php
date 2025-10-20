@@ -1,5 +1,5 @@
 <!-- Modal -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModal" aria-hidden="true">
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalTitle">
     <div class="modal-dialog" style="max-width: 400px;">
         <div class="modal-content">
             <div class="modal-header">

@@ -3,7 +3,7 @@
  * Create workflow-linked tasks
  */
 
-$pdo = new PDO('mysql:host=localhost;dbname=overland_pm', 'root', '');
+$pdo = new PDO('mysql:host=localhost;dbname=overland_pm_workflow', 'root', '');
 
 // Get shipments and users
 $shipments = $pdo->query("SELECT id, shipment_number, cargo_type, client_id FROM opm_workflow_shipments ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);

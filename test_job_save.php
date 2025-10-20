@@ -1,6 +1,6 @@
 <?php
 // Test job info save operation
-$connection = mysqli_connect('localhost', 'root', '', 'overland_pm');
+$connection = mysqli_connect('localhost', 'root', '', 'overland_pm_workflow');
 
 if (!$connection) {
     die("Connection failed: " . mysqli_connect_error());

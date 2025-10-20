@@ -1,6 +1,6 @@
 <?php
 // Simple database check without CodeIgniter
-$connection = mysqli_connect('localhost', 'root', '', 'overland_pm');
+$connection = mysqli_connect('localhost', 'root', '', 'overland_pm_workflow');
 
 if (!$connection) {
     die("Connection failed: " . mysqli_connect_error());

@@ -224,6 +224,13 @@ class Team_members extends Security_Controller {
                 "date_of_hire" => $this->request->getPost('date_of_hire')
             );
             $this->Users_model->save_job_info($job_data);
+            
+            // Add user to department (multi-department system)
+            if (get_setting("module_departments") == "1" && $department_id) {
+                $User_departments_model = model('App\Models\User_departments_model');
+                // Add user to department and set as primary (first department is automatically primary)
+                $User_departments_model->add_user_to_department($user_id, $department_id, true);
+            }
 
             save_custom_fields("team_members", $user_id, $this->login_user->is_admin, $this->login_user->user_type);
 

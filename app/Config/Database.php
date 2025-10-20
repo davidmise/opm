@@ -35,7 +35,7 @@ class Database extends Config
 		'hostname' => 'localhost',
 		'username' => 'root',
 		'password' => '',
-		'database' => 'overland_pm',
+		'database' => 'overland_pm_workflow',
 		'DBDriver' => 'MySQLi',
 		'DBPrefix' => 'opm_',
 		'pConnect' => false,

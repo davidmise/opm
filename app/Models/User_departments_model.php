@@ -80,6 +80,7 @@ class User_departments_model extends Crud_model {
             $where .= " AND $users_table.status='active'";
         }
         
+        // Only include staff users in departments (exclude client contacts)
         $sql = "SELECT $user_departments_table.*, 
                 $users_table.first_name, $users_table.last_name, 
                 $users_table.email, $users_table.image, $users_table.is_admin,
@@ -88,7 +89,7 @@ class User_departments_model extends Crud_model {
                 INNER JOIN $users_table ON $users_table.id = $user_departments_table.user_id
                 LEFT JOIN $roles_table ON $roles_table.id = $users_table.role_id
                 WHERE $user_departments_table.department_id=$department_id 
-                AND $users_table.deleted=0 $where
+                AND $users_table.deleted=0 AND $users_table.user_type='staff' $where
                 ORDER BY $user_departments_table.is_primary DESC, $users_table.first_name ASC";
         
         return $this->db->query($sql);
@@ -147,6 +148,15 @@ class User_departments_model extends Crud_model {
                 $this->set_primary_department($user_id, $department_id);
             }
             return $existing->id;
+        }
+        
+        // Check if user has any existing departments
+        $sql = "SELECT COUNT(*) as dept_count FROM $user_departments_table WHERE user_id=$user_id";
+        $dept_count = $this->db->query($sql)->getRow()->dept_count;
+        
+        // If this is the user's first department, make it primary automatically
+        if ($dept_count == 0) {
+            $is_primary = true;
         }
         
         // If this is primary, remove primary flag from other departments

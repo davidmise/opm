@@ -25,11 +25,15 @@
                     <th><?php echo app_lang('id'); ?></th>
                     <th><?php echo app_lang('title'); ?></th>
                     <th><?php echo app_lang('client'); ?></th>
-                    <th><?php echo app_lang('project_members'); ?></th>
+                    <th class="hide"><?php echo app_lang('department'); ?></th>
+                    <th class="hide"><?php echo app_lang('price'); ?></th>
+                    <th class="hide"><?php echo app_lang('start_date'); ?></th>
                     <th><?php echo app_lang('start_date'); ?></th>
+                    <th class="hide"><?php echo app_lang('deadline'); ?></th>
                     <th><?php echo app_lang('deadline'); ?></th>
+                    <th><?php echo app_lang('progress'); ?></th>
                     <th><?php echo app_lang('status'); ?></th>
-                    <th><?php echo app_lang('actions'); ?></th>
+                    <th><i data-feather="menu" class="icon-16"></i></th>
                 </tr>
             </thead>
         </table>
@@ -40,22 +44,33 @@
 $(document).ready(function () {
     $("#department-projects-table").appTable({
         source: '<?php echo_uri("projects/list_data") ?>',
-        filterDropdown: [
-            {name: "department_id", class: "w200", options: <?php echo json_encode(array($department_info->id => $department_info->title)); ?>}
-        ],
+        filterParams: {department_id: "<?php echo $department_info->id; ?>"},
         columns: [
             {title: '<?php echo app_lang("id") ?>', "class": "text-center w50"},
             {title: '<?php echo app_lang("title") ?>'},
             {title: '<?php echo app_lang("client") ?>'},
-            {title: '<?php echo app_lang("project_members") ?>', "class": "text-center w150"},
-            {title: '<?php echo app_lang("start_date") ?>', "class": "text-center", "iDataSort": 4},
-            {title: '<?php echo app_lang("deadline") ?>', "class": "text-center", "iDataSort": 5},
-            {title: '<?php echo app_lang("status") ?>', "class": "text-center"},
-            {title: '<?php echo app_lang("actions") ?>', "class": "text-center option w150"}
+            {title: '<?php echo app_lang("department") ?>', visible: false, searchable: false},
+            {title: '<?php echo app_lang("price") ?>', visible: false, searchable: false},
+            {title: '<?php echo app_lang("start_date") ?>', visible: false, searchable: false},
+            {title: '<?php echo app_lang("start_date") ?>', "class": "text-center w100", "iDataSort": 5},
+            {title: '<?php echo app_lang("deadline") ?>', visible: false, searchable: false},
+            {title: '<?php echo app_lang("deadline") ?>', "class": "text-center w100", "iDataSort": 7},
+            {title: '<?php echo app_lang("progress") ?>', "class": "text-center w100"},
+            {title: '<?php echo app_lang("status") ?>', "class": "text-center w100"},
+            {title: '<i data-feather="menu" class="icon-16"></i>', "class": "text-center option w100"}
         ],
-        printColumns: [0, 1, 2, 4, 5, 6],
-        xlsColumns: [0, 1, 2, 4, 5, 6],
-        summation: [{column: 3, dataType: 'number'}]
+        columnDefs: [
+            {targets: [3, 4], visible: false}
+        ],
+        printColumns: [0, 1, 2, 6, 8, 9, 10],
+        xlsColumns: [0, 1, 2, 6, 8, 9, 10]
     });
+    
+    // Initialize feather icons
+    setTimeout(function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    }, 100);
 });
 </script>
