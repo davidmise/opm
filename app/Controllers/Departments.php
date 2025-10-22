@@ -807,23 +807,11 @@ class Departments extends Security_Controller {
                 }
             }
             
-            $view_data['department_info'] = $department_info;
+            // Store this department as the active one in session
+            $this->session->set('active_department_id', $id);
             
-            // Get enhanced department details with user info
-            $detailed_info = $this->Departments_model->get_details(array("id" => $id))->getRow();
-            if ($detailed_info) {
-                $view_data['department_info'] = $detailed_info;
-            }
-            
-            // Get department statistics
-            $view_data['statistics'] = $this->Departments_model->get_statistics($id);
-            
-            // Get recent activities (if available)
-            if (method_exists($this->Departments_model, 'get_recent_activities')) {
-                $view_data['recent_activities'] = $this->Departments_model->get_recent_activities($id, 10);
-            }
-            
-            return $this->template->rander("departments/view", $view_data);
+            // Redirect to the new my_department dashboard
+            app_redirect("my_department");
         } else {
             show_404();
         }
