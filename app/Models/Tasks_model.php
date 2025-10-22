@@ -227,10 +227,17 @@ class Tasks_model extends Crud_model {
             $where .= " AND $tasks_table.expense_id=$expense_id";
         }
 
+        // Department filtering: single id or multiple ids
         $department_id = $this->_get_clean_value($options, "department_id");
         if ($department_id) {
             // Filter tasks by department: either directly assigned to department OR through their associated projects
             $where .= " AND ($tasks_table.department_id=$department_id OR $projects_table.department_id=$department_id)";
+        }
+
+        $department_ids = $this->_get_clean_value($options, "department_ids");
+        if ($department_ids && is_array($department_ids) && count($department_ids)) {
+            $ids_string = implode(',', array_map('intval', $department_ids));
+            $where .= " AND (($tasks_table.department_id IN ($ids_string)) OR ($projects_table.department_id IN ($ids_string)))";
         }
 
         $priority_id = $this->_get_clean_value($options, "priority_id");

@@ -3198,4 +3198,30 @@ $lang["no_urgent_tasks"] = "No urgent tasks";
 $lang["workflow_phases"] = "Workflow Phases";
 $lang["shipment_status"] = "Shipment Status";
 
+// My Department feature translations
+$lang["my_department"] = "My Department";
+$lang["department_dashboard"] = "Department Dashboard";
+$lang["no_department_assigned"] = "No Department Assigned";
+$lang["no_department_assigned_message"] = "You have not been assigned to any department yet. Please contact your administrator to get assigned to a department.";
+$lang["admin_can_assign_departments"] = "As an administrator, you can manage departments and assign users to them.";
+$lang["contact_admin_for_department_assignment"] = "Please contact your administrator to get assigned to a department.";
+$lang["go_to_dashboard"] = "Go to Dashboard";
+$lang["available_departments"] = "Available Departments";
+$lang["manage_departments_from_admin_panel"] = "You can manage all departments from the admin panel.";
+$lang["view_all_departments"] = "View All Departments";
+$lang["switch_department"] = "Switch Department";
+$lang["department_switched_successfully"] = "Department switched successfully";
+$lang["recent_activities"] = "Recent Activities";
+$lang["upcoming_deadlines"] = "Upcoming Deadlines";
+$lang["no_recent_activities"] = "No recent activities found";
+$lang["no_upcoming_deadlines"] = "No upcoming deadlines";
+$lang["no_announcements"] = "No announcements available";
+$lang["team_performance"] = "Team Performance";
+$lang["no_team_data"] = "No team performance data available";
+$lang["success_rate"] = "Success Rate";
+$lang["this_month"] = "This Month";
+$lang["active_members"] = "Active Members";
+$lang["days_remaining"] = "days remaining";
+$lang["view_details"] = "View Details";
+
 return $lang;

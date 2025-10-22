@@ -109,6 +109,10 @@ $lang["can_assign_tasks_to_departments"] = "Assign Tasks to Departments";
 $lang["can_view_department_analytics"] = "View Department Analytics";
 $lang["can_export_department_data"] = "Export Department Data";
 
+// Task filters
+$lang["department_tasks"] = "Department Tasks";
+$lang["project_tasks"] = "Project Tasks";
+
 // Messages
 $lang["settings_saved_successfully"] = "Settings saved successfully";
 $lang["permissions_saved_successfully"] = "Permissions saved successfully";
@@ -330,5 +334,11 @@ $lang["error_occurred"] = "An error occurred";
 $lang["please_select_announcements"] = "Please select one or more announcements";
 $lang["announcements_selected"] = "announcements selected";
 $lang["announcement_settings_coming_soon"] = "Announcement settings coming soon";
+
+// Department management
+$lang["cannot_remove_last_user_from_department"] = "Cannot remove the last user from department";
+$lang["cannot_remove_yourself_from_department"] = "You cannot remove yourself from your current department";
+$lang["remove_user_from_department"] = "Remove from Department";
+$lang["remove_user_confirmation_title"] = "Remove from Department?";
 
 return $lang;

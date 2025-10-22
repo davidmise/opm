@@ -360,6 +360,18 @@ class Team_members extends Security_Controller {
             "custom_field_filter" => $this->prepare_custom_field_filter_values("team_members", $this->login_user->is_admin, $this->login_user->user_type)
         );
 
+        // Department scoping: non-admin staff should only see members from accessible departments
+        if ($this->login_user->user_type === "staff" && !$this->login_user->is_admin) {
+            // try to use Departments_model helper to get accessible departments
+            $accessible_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+            if (!empty($accessible_departments)) {
+                $options["department_ids"] = $accessible_departments;
+            } else {
+                // Force empty result if no access
+                $options["department_ids"] = array(0);
+            }
+        }
+
         $list_data = $this->Users_model->get_details($options)->getResult();
         $result = array();
         foreach ($list_data as $data) {

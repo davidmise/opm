@@ -34,44 +34,20 @@
 </div>
 
 <style>
-/* Tooltip styles for dropdown icons */
-.dropdown-menu .dropdown-item {
-    position: relative;
-}
-
-.dropdown-menu .dropdown-item[title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 10px;
-    padding: 5px 10px;
-    background-color: #333;
-    color: #fff;
-    border-radius: 4px;
-    white-space: nowrap;
-    font-size: 12px;
-    z-index: 1000;
-    pointer-events: none;
-}
-
-.dropdown-menu .dropdown-item[title]:hover::before {
-    content: '';
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 5px;
-    border: 5px solid transparent;
-    border-right-color: #333;
-    z-index: 1000;
-    pointer-events: none;
+/* Basic team table styling */
+#department-team-table .d-flex {
+    align-items: center;
+    justify-content: center;
 }
 </style>
 
 <script type="text/javascript">
 $(document).ready(function () {
+    // Destroy any existing DataTable instance first
+    if ($.fn.DataTable.isDataTable('#department-team-table')) {
+        $('#department-team-table').DataTable().destroy();
+    }
+    
     $("#department-team-table").appTable({
         source: '<?php echo_uri("departments/department_team_list_data/" . $department_info->id) ?>',
         columns: [
@@ -91,6 +67,8 @@ $(document).ready(function () {
                 var departmentId = $(this).data('department-id');
                 var userName = $(this).data('user-name');
                 
+                console.log('Set as primary clicked:', {userId: userId, departmentId: departmentId, userName: userName});
+                
                 if (confirm('<?php echo app_lang("set_as_primary_confirmation"); ?>'.replace('{member}', userName))) {
                     $.ajax({
                         url: '<?php echo_uri("departments/set_primary_department") ?>',
@@ -101,6 +79,7 @@ $(document).ready(function () {
                             department_id: departmentId
                         },
                         success: function(result) {
+                            console.log('Set primary success:', result);
                             if (result.success) {
                                 appAlert.success(result.message, {duration: 10000});
                                 // Reload department team table
@@ -112,6 +91,10 @@ $(document).ready(function () {
                             } else {
                                 appAlert.error(result.message);
                             }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Set primary error:', {xhr: xhr, status: status, error: error});
+                            appAlert.error('Error: ' + error);
                         }
                     });
                 }
@@ -150,9 +133,11 @@ $(document).ready(function () {
                 }
             });
             
-            // Initialize feather icons for dropdown
+            // Initialize feather icons after table loads
             if (typeof feather !== 'undefined') {
-                feather.replace();
+                setTimeout(function() {
+                    feather.replace();
+                }, 100);
             }
         }
     });

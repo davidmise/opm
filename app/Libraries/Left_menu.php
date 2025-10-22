@@ -26,6 +26,18 @@ class Left_menu {
             $permission_manager = new Permission_manager($this->ci);
             $sidebar_menu = array("dashboard" => $dashboard_menu);
 
+            // Add My Department menu for staff with departments
+            if (get_setting("module_departments") == "1" && !$this->ci->login_user->is_admin) {
+                // Check if user has departments - use Departments_model which has the correct method
+                $Departments_model = model('App\Models\Departments_model');
+                $user_departments_result = $Departments_model->get_user_departments($this->ci->login_user->id);
+                $user_departments = $user_departments_result->getResult();
+                
+                if (!empty($user_departments)) {
+                    $sidebar_menu["my_department"] = array("name" => "my_department", "url" => "my_department", "class" => "grid");
+                }
+            }
+
             $permissions = $this->ci->login_user->permissions;
 
             $access_expense = get_array_value($permissions, "expense");

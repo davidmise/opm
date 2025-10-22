@@ -20,7 +20,18 @@ class Departments extends Security_Controller {
     function __construct() {
         parent::__construct();
         $this->check_module_availability("module_departments");
-        $this->access_only_admin_or_manage_departments_permission();
+
+        // Allow read-only endpoints for department members; restrict management endpoints
+        $router = function_exists('service') ? service('router') : null;
+        $method = $router ? $router->methodName() : '';
+        $public_methods = array(
+            'view', 'dashboard', 'team', 'projects', 'tasks', 'overview',
+            'department_team_list_data', 'get_dashboard_data'
+        );
+
+        if (!in_array($method, $public_methods)) {
+            $this->access_only_admin_or_manage_departments_permission();
+        }
         
         // Only load custom models if needed
         // Settings_model, Users_model, Projects_model are already loaded by parent
@@ -887,41 +898,80 @@ class Departments extends Security_Controller {
      */
     function add_user_to_department() {
         $this->validate_submitted_data(array(
-            "user_id" => "required|numeric",
-            "department_id" => "required|numeric",
-            "is_primary" => "numeric"
+            "department_id" => "required|numeric"
         ));
 
-        $user_id = $this->request->getPost('user_id');
+        $user_ids = $this->request->getPost('user_ids');
         $department_id = $this->request->getPost('department_id');
-        $is_primary = $this->request->getPost('is_primary') ? true : false;
 
-        // Validate that the user is a staff member (not a client)
-        $Users_model = model('App\Models\Users_model');
-        $user = $Users_model->get_one($user_id);
-        
-        if (!$user || $user->user_type !== 'staff') {
+        // Ensure user_ids is an array
+        if (!is_array($user_ids) || empty($user_ids)) {
             echo json_encode(array(
                 "success" => false,
-                "message" => app_lang('only_team_members_can_be_added_to_departments')
+                "message" => app_lang('please_select_at_least_one_team_member')
             ));
             return;
         }
 
-        // Load the User_departments_model
+        // Validate that all users are staff members (not clients)
+        $Users_model = model('App\Models\Users_model');
         $User_departments_model = model('App\Models\User_departments_model');
         
-        $result = $User_departments_model->add_user_to_department($user_id, $department_id, $is_primary);
-        
-        if ($result) {
+        $added_count = 0;
+        $already_exists_count = 0;
+        $error_count = 0;
+
+        foreach ($user_ids as $user_id) {
+            // Validate user ID is numeric
+            if (!is_numeric($user_id)) {
+                $error_count++;
+                continue;
+            }
+
+            $user = $Users_model->get_one($user_id);
+            
+            if (!$user || $user->user_type !== 'staff') {
+                $error_count++;
+                continue;
+            }
+
+            // Check if user is already in this department
+            if ($User_departments_model->is_user_in_department($user_id, $department_id)) {
+                $already_exists_count++;
+                continue;
+            }
+
+            // Add user to department (not as primary by default)
+            $result = $User_departments_model->add_user_to_department($user_id, $department_id, false);
+            
+            if ($result) {
+                $added_count++;
+            } else {
+                $error_count++;
+            }
+        }
+
+        // Build response message
+        $messages = array();
+        if ($added_count > 0) {
+            $messages[] = $added_count . " " . app_lang('team_member' . ($added_count > 1 ? 's' : '')) . " " . app_lang('added_successfully');
+        }
+        if ($already_exists_count > 0) {
+            $messages[] = $already_exists_count . " " . app_lang('already_in_department');
+        }
+        if ($error_count > 0) {
+            $messages[] = $error_count . " " . app_lang('failed_to_add');
+        }
+
+        if ($added_count > 0) {
             echo json_encode(array(
                 "success" => true,
-                "message" => app_lang('user_added_to_department_successfully')
+                "message" => implode(". ", $messages)
             ));
         } else {
             echo json_encode(array(
                 "success" => false,
-                "message" => app_lang('error_occurred')
+                "message" => $messages ? implode(". ", $messages) : app_lang('error_occurred')
             ));
         }
     }
@@ -1171,34 +1221,39 @@ class Departments extends Security_Controller {
      * @return array Row data
      */
     private function _make_department_team_row($data) {
-        $member_link = get_team_member_profile_link($data->user_id, $data->first_name . " " . $data->last_name);
+        // Create member display with avatar and name
+        $avatar = "<span class='avatar avatar-xs'>";
+        $avatar .= "<img alt='" . $data->first_name . " " . $data->last_name . "' src='" . get_avatar($data->image) . "'>";
+        $avatar .= "</span>";
+        
+        $member_name = $data->first_name . " " . $data->last_name;
+        $member_link = "<div class='d-flex'>";
+        $member_link .= $avatar;
+        $member_link .= "<div class='ms-2'>";
+        $member_link .= get_team_member_profile_link($data->user_id, $member_name, array("class" => ""));
+        $member_link .= "</div>";
+        $member_link .= "</div>";
         
         $primary_badge = "";
         if ($data->is_primary) {
-            $primary_badge = "<span class='badge bg-success'><i class='ti ti-star'></i> " . app_lang("primary") . "</span>";
+            $primary_badge = "<span class='badge bg-primary'>" . app_lang("primary") . "</span>";
         } else {
             $primary_badge = "<span class='text-muted'>-</span>";
         }
 
         $actions = "";
         if ($this->login_user->is_admin || get_array_value($this->login_user->permissions, "can_manage_departments")) {
-            // Build Set as Primary action
-            $primaryAction = '';
+            $actions = '<div class="d-flex gap-1 justify-content-center">';
+            
+            // Set as Primary action (only if not already primary)
             if (!$data->is_primary) {
-                $primaryAction = '<li><a class="dropdown-item set-as-primary" href="#" data-user-id="' . $data->user_id . '" data-department-id="' . $data->department_id . '" data-user-name="' . htmlspecialchars($data->first_name . " " . $data->last_name, ENT_QUOTES) . '" title="' . app_lang('set_as_primary') . '"><i data-feather="star" class="icon-16"></i></a></li>';
+                $actions .= '<button type="button" class="btn btn-outline-secondary btn-sm rounded-circle set-as-primary" data-user-id="' . $data->user_id . '" data-department-id="' . $data->department_id . '" data-user-name="' . htmlspecialchars($data->first_name . " " . $data->last_name, ENT_QUOTES) . '" title="' . app_lang('set_as_primary') . '"><i data-feather="star" class="icon-16"></i></button>';
             }
             
-            $actions = '<div class="dropdown">
-                <button class="btn btn-outline-light btn-sm dropdown-toggle caret-option" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i data-feather="more-vertical" class="icon-16"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>' . modal_anchor(get_uri("team_members/view/" . $data->user_id), '<i data-feather="eye" class="icon-16"></i>', array("class" => "dropdown-item", "title" => app_lang('view_member'))) . '</li>
-                    ' . $primaryAction . '
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger remove-user-from-department" href="#" data-user-id="' . $data->user_id . '" data-department-id="' . $data->department_id . '" data-user-name="' . htmlspecialchars($data->first_name . " " . $data->last_name, ENT_QUOTES) . '" title="' . app_lang('remove') . '"><i data-feather="user-x" class="icon-16"></i></a></li>
-                </ul>
-            </div>';
+            // Remove from department action (always show)
+            $actions .= '<button type="button" class="btn btn-outline-secondary btn-sm rounded-circle remove-user-from-department" data-user-id="' . $data->user_id . '" data-department-id="' . $data->department_id . '" data-user-name="' . htmlspecialchars($data->first_name . " " . $data->last_name, ENT_QUOTES) . '" title="' . app_lang('remove_member_from_department') . '"><i data-feather="user-x" class="icon-16"></i></button>';
+            
+            $actions .= '</div>';
         }
 
         return array(
@@ -1225,6 +1280,14 @@ class Departments extends Security_Controller {
             if (!$department_info->id) {
                 show_404();
             }
+
+            // Enforce access: non-admins must belong to this department
+            if (!$this->login_user->is_admin) {
+                $accessible_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+                if (!in_array($department_id, $accessible_departments)) {
+                    app_redirect("forbidden");
+                }
+            }
             
             $view_data['department_info'] = $department_info;
             
@@ -1248,6 +1311,14 @@ class Departments extends Security_Controller {
             
             if (!$department_info->id) {
                 show_404();
+            }
+
+            // Enforce access: non-admins must belong to this department
+            if (!$this->login_user->is_admin) {
+                $accessible_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+                if (!in_array($department_id, $accessible_departments)) {
+                    app_redirect("forbidden");
+                }
             }
             
             $view_data['department_info'] = $department_info;

@@ -17,6 +17,9 @@ class Security_Controller extends App_Controller {
 
     protected $permission_manager;
 
+    // Declared to satisfy static analysis; actual instance may be assigned in child controllers
+    protected $Project_settings_model;
+
     public function __construct($redirect = true) {
         parent::__construct();
 
@@ -683,6 +686,21 @@ class Security_Controller extends App_Controller {
         if ($this->login_user->user_type == "staff") {
             if (!$this->can_manage_all_projects()) {
                 $project_options["user_id"] = $this->login_user->id; //normal user's should be able to see only the projects where they are added as a team mmeber.
+
+                // Department scope: if departments module enabled, limit to accessible departments
+                if (get_setting("module_departments")) {
+                    try {
+                        $accessible_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+                        if (!empty($accessible_departments)) {
+                            $project_options["department_ids"] = $accessible_departments;
+                        } else {
+                            // ensure no projects appear
+                            $project_options["department_ids"] = array(0);
+                        }
+                    } catch (\Throwable $e) {
+                        // ignore scoping on error to avoid breaking dropdowns
+                    }
+                }
             }
         } else {
             $project_options["client_id"] = $this->login_user->client_id; //get client's projects

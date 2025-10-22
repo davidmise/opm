@@ -225,6 +225,16 @@ class Users_model extends Crud_model {
         $user_departments_table = $this->db->prefixTable('user_departments');
         $departments_table = $this->db->prefixTable('departments');
 
+        // Department filtering (single or multiple)
+        $department_id = $this->_get_clean_value($options, "department_id");
+        $department_ids = $this->_get_clean_value($options, "department_ids");
+        if ($department_id) {
+            $where .= " AND $users_table.id IN (SELECT user_id FROM $user_departments_table WHERE department_id=" . intval($department_id) . ")";
+        } else if ($department_ids && is_array($department_ids) && count($department_ids)) {
+            $ids_string = implode(',', array_map('intval', $department_ids));
+            $where .= " AND $users_table.id IN (SELECT user_id FROM $user_departments_table WHERE department_id IN ($ids_string))";
+        }
+
         //prepare full query string
         $sql = "SELECT SQL_CALC_FOUND_ROWS $users_table.*, $roles_table.title AS role_title,
             $team_member_job_info_table.date_of_hire, $team_member_job_info_table.salary, $team_member_job_info_table.salary_term, 

@@ -68,6 +68,13 @@
                     }
                     ?>
 
+                    <?php 
+                    // Show department widget for staff members with departments
+                    if ($login_user->user_type == "staff" && get_setting("module_departments") == "1" && !in_array("my_department", $hidden_topbar_menus)) {
+                        echo view("my_department/topbar_widget");
+                    }
+                    ?>
+
                     <?php if (!in_array("language", $hidden_topbar_menus) && (($login_user->user_type == "staff" && !get_setting("disable_language_selector_for_team_members")) || ($login_user->user_type == "client" && !get_setting("disable_language_selector_for_clients")))) { ?>
 
                         <li id="topbar-language-dropdown" class="nav-item dropdown hidden-xs">

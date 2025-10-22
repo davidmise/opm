@@ -664,7 +664,10 @@ class Tasks extends Department_Access_Controller {
             $selected_context_id = $context_id_key ? $model_info->{$context_id_key} : "";
         }
 
+        log_message('debug', "modal_form: About to call _get_task_related_dropdowns with context='{$selected_context}', context_id='{$selected_context_id}'");
         $dropdowns = $this->_get_task_related_dropdowns($selected_context, $selected_context_id, ($selected_context_id ? true : false));
+        $collaborators_count = isset($dropdowns['collaborators_dropdown']) ? count($dropdowns['collaborators_dropdown']) : 0;
+        log_message('debug', "modal_form: Received dropdowns with {$collaborators_count} collaborators");
         $view_data = array_merge($view_data, $dropdowns);
 
         if ($id) {
@@ -752,14 +755,38 @@ class Tasks extends Department_Access_Controller {
             }
 
             $project_members = $this->Project_members_model->get_project_members_id_and_text_dropdown($context_id, $user_ids, $show_client_contacts, true);
-        } else if ($context == "department" && $context_id) {
+        } else if ($context == "department") {
             // Get department members dropdown
-            $User_departments_model = model("App\Models\User_departments_model");
-            $department_members = $User_departments_model->get_department_users_with_details($context_id)->getResult();
-            
-            $project_members = array();
-            foreach ($department_members as $member) {
-                $project_members[] = array("id" => $member->user_id, "text" => $member->first_name . " " . $member->last_name);
+            if ($context_id) {
+                log_message('debug', 'Loading department members for department_id: ' . $context_id);
+                $User_departments_model = model("App\Models\User_departments_model");
+                $department_members = $User_departments_model->get_department_users_with_details($context_id)->getResult();
+                
+                log_message('debug', 'Found ' . count($department_members) . ' department members');
+                
+                $project_members = array();
+                if ($department_members && count($department_members) > 0) {
+                    foreach ($department_members as $member) {
+                        $project_members[] = array("id" => $member->user_id, "text" => $member->first_name . " " . $member->last_name);
+                    }
+                    log_message('debug', 'Added ' . count($project_members) . ' department members to dropdown');
+                } else {
+                    // No department members found, fall back to all staff
+                    log_message('debug', 'No department members found, falling back to all staff');
+                    $options = array("status" => "active", "user_type" => "staff");
+                    if (get_array_value($this->login_user->permissions, "hide_team_members_list_from_dropdowns") == "1") {
+                        $options["id"] = $this->login_user->id;
+                    }
+                    $project_members = $this->Users_model->get_id_and_text_dropdown(array("first_name", "last_name"), $options);
+                }
+            } else {
+                // No department ID specified, show all staff
+                log_message('debug', 'No department_id, showing all staff');
+                $options = array("status" => "active", "user_type" => "staff");
+                if (get_array_value($this->login_user->permissions, "hide_team_members_list_from_dropdowns") == "1") {
+                    $options["id"] = $this->login_user->id;
+                }
+                $project_members = $this->Users_model->get_id_and_text_dropdown(array("first_name", "last_name"), $options);
             }
         } else if ($context == "project") {
             $project_members = array();
@@ -1389,6 +1416,20 @@ class Tasks extends Department_Access_Controller {
             "label_id" => $this->request->getPost('label_id'),
             "custom_field_filter" => $this->prepare_custom_field_filter_values("tasks", $this->login_user->is_admin, $this->login_user->user_type)
         );
+
+        // Apply department scoping for non-admin users
+        if (!$this->login_user->is_admin && !get_array_value($this->login_user->permissions, "can_manage_all_projects")) {
+            // Get user's departments and filter tasks to those departments
+            $Departments_model = model('App\Models\Departments_model');
+            $user_departments = $Departments_model->get_user_departments($this->login_user->id);
+            if ($user_departments && $user_departments->getNumRows() > 0) {
+                $department_ids = array();
+                foreach ($user_departments->getResult() as $dept) {
+                    $department_ids[] = $dept->id;
+                }
+                $options["department_ids"] = $department_ids;
+            }
+        }
 
         //add the context data like $options["client_id"] = 2;
         $context_id_pairs = $this->get_context_id_pairs();
