@@ -17,6 +17,7 @@ class My_department extends Department_Access_Controller {
     public $Task_status_model;
     public $Milestones_model;
     public $Labels_model;
+    public $Announcements_model;
 
     public function __construct() {
         parent::__construct();
@@ -26,6 +27,7 @@ class My_department extends Department_Access_Controller {
         $this->Task_status_model = model('App\Models\Task_status_model');
         $this->Milestones_model = model('App\Models\Milestones_model');  
         $this->Labels_model = model('App\Models\Labels_model');
+        $this->Announcements_model = model('App\Models\Announcements_model');
         
         // Redirect clients to dashboard - this is staff-only feature
         if ($this->login_user->user_type === "client") {
@@ -47,7 +49,7 @@ class My_department extends Department_Access_Controller {
                 'has_department' => false,
                 'message' => app_lang('no_department_assigned')
             );
-            return $this->template->render("my_department/no_department", $view_data);
+            return $this->template->rander("my_department/no_department", $view_data);
         }
 
         // Get primary department for default view
@@ -64,19 +66,41 @@ class My_department extends Department_Access_Controller {
         }
 
         // Gather comprehensive department statistics
-        $stats = $this->_get_department_dashboard_stats($primary_department_id);
+        $stats = array();
+        $recent_activities = array();
+        $upcoming_deadlines = array();
+        $announcements = array();
+        $team_metrics = array();
         
-        // Get recent activities
-        $recent_activities = $this->_get_recent_department_activities($primary_department_id, 10);
+        try {
+            $stats = $this->_get_department_dashboard_stats($primary_department_id);
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading department stats: ' . $e->getMessage());
+        }
         
-        // Get upcoming deadlines
-        $upcoming_deadlines = $this->_get_upcoming_deadlines($primary_department_id, 5);
+        try {
+            $recent_activities = $this->_get_recent_department_activities($primary_department_id, 10);
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading recent activities: ' . $e->getMessage());
+        }
         
-        // Get department announcements
-        $announcements = $this->_get_department_announcements($primary_department_id, 3);
+        try {
+            $upcoming_deadlines = $this->_get_upcoming_deadlines($primary_department_id, 5);
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading upcoming deadlines: ' . $e->getMessage());
+        }
         
-        // Get team performance metrics
-        $team_metrics = $this->_get_team_performance_metrics($primary_department_id);
+        try {
+            $announcements = $this->_get_department_announcements($primary_department_id, 3);
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading announcements: ' . $e->getMessage());
+        }
+        
+        try {
+            $team_metrics = $this->_get_team_performance_metrics($primary_department_id);
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading team metrics: ' . $e->getMessage());
+        }
 
         // Get dropdown data for tables with error handling
         $projects_dropdown = '[]';
@@ -176,7 +200,7 @@ class My_department extends Department_Access_Controller {
             'can_create_tasks' => ($this->login_user->user_type == "staff" || $this->login_user->is_admin)
         );
 
-        return $this->template->render("my_department/index", $view_data);
+        return $this->template->rander("my_department/index", $view_data);
     }
 
     /**
@@ -256,119 +280,138 @@ class My_department extends Department_Access_Controller {
      */
     protected function _get_recent_department_activities($department_id, $limit = 10) {
         // This would typically come from an activity log table
-        // For now, return sample data
-        return array(
-            array(
-                'title' => 'New project "Website Redesign" created',
-                'user' => 'John Doe',
-                'time' => '2 hours ago',
-                'icon' => 'plus-circle',
-                'color' => 'success'
-            ),
-            array(
-                'title' => 'Task "Database Migration" completed',
-                'user' => 'Jane Smith', 
-                'time' => '4 hours ago',
-                'icon' => 'check-circle',
-                'color' => 'primary'
-            ),
-            array(
-                'title' => 'New team member added to department',
-                'user' => 'Admin',
-                'time' => '1 day ago', 
-                'icon' => 'user-plus',
-                'color' => 'info'
-            )
-        );
+        // For now, return empty array - to be implemented with actual activity tracking
+        return array();
     }
 
     /**
      * Get upcoming deadlines for department
      */
     protected function _get_upcoming_deadlines($department_id, $limit = 5) {
-        $options = array(
-            "department_ids" => array($department_id),
-            "deadline_between" => array(date('Y-m-d'), date('Y-m-d', strtotime('+30 days'))),
-            "status_ids" => "1,2", // Not completed
-            "limit" => $limit
-        );
-
-        $tasks_result = $this->Tasks_model->get_details($options);
-        // get_details returns an array when limit is set, otherwise a query result
-        $tasks = is_array($tasks_result) ? $tasks_result['data'] : $tasks_result->getResult();
-        
-        $deadlines = array();
-        foreach ($tasks as $task) {
-            $days_remaining = floor((strtotime($task->deadline) - time()) / (60 * 60 * 24));
-            $urgency = 'success';
-            if ($days_remaining <= 1) $urgency = 'danger';
-            elseif ($days_remaining <= 3) $urgency = 'warning';
-            elseif ($days_remaining <= 7) $urgency = 'info';
-
-            $deadlines[] = array(
-                'id' => $task->id,
-                'title' => $task->title,
-                'deadline' => $task->deadline,
-                'project' => $task->project_title ?: 'General',
-                'assigned_to' => $task->assigned_to_user,
-                'days_remaining' => $days_remaining,
-                'urgency' => $urgency
+        try {
+            $options = array(
+                "department_ids" => array($department_id),
+                "deadline_between" => array(date('Y-m-d'), date('Y-m-d', strtotime('+30 days'))),
+                "status_ids" => "1,2" // Not completed
             );
-        }
 
-        return $deadlines;
+            $tasks_result = $this->Tasks_model->get_details($options);
+            
+            // Handle both array (when limit is used) and query result object
+            if (is_array($tasks_result)) {
+                $tasks = isset($tasks_result['data']) ? $tasks_result['data'] : $tasks_result;
+            } else {
+                $tasks = $tasks_result->getResult();
+            }
+            
+            // Limit results manually if needed
+            if ($limit && count($tasks) > $limit) {
+                $tasks = array_slice($tasks, 0, $limit);
+            }
+            
+            $deadlines = array();
+            if ($tasks) {
+                foreach ($tasks as $task) {
+                    if (!$task->deadline) continue; // Skip tasks without deadlines
+                    
+                    $days_remaining = floor((strtotime($task->deadline) - time()) / (60 * 60 * 24));
+                    $urgency = 'success';
+                    if ($days_remaining <= 1) $urgency = 'danger';
+                    elseif ($days_remaining <= 3) $urgency = 'warning';
+                    elseif ($days_remaining <= 7) $urgency = 'info';
+
+                    $deadlines[] = array(
+                        'id' => $task->id,
+                        'title' => $task->title,
+                        'deadline' => $task->deadline,
+                        'project' => isset($task->project_title) && $task->project_title ? $task->project_title : 'General',
+                        'assigned_to' => isset($task->assigned_to_user) ? $task->assigned_to_user : '',
+                        'days_remaining' => $days_remaining,
+                        'urgency' => $urgency
+                    );
+                }
+            }
+
+            return $deadlines;
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading upcoming deadlines: ' . $e->getMessage());
+            return array();
+        }
     }
 
     /**
      * Get department announcements 
      */
     protected function _get_department_announcements($department_id, $limit = 3) {
-        $options = array(
-            "share_with_filter" => "dept:$department_id",
-            "end_date >=" => date('Y-m-d'),
-            "limit" => $limit
-        );
+        try {
+            $options = array(
+                "share_with_filter" => "dept:$department_id",
+                "end_date >=" => date('Y-m-d'),
+                "limit" => $limit
+            );
 
-        return $this->Announcements_model->get_details($options)->getResult();
+            return $this->Announcements_model->get_details($options)->getResult();
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading announcements: ' . $e->getMessage());
+            return array(); // Return empty array on error
+        }
     }
 
     /**
      * Get team performance metrics
      */
     protected function _get_team_performance_metrics($department_id) {
-        // Get team members with their task completion stats
-        $team_options = array("department_id" => $department_id, "user_type" => "staff");
-        $team_members = $this->Users_model->get_details($team_options)->getResult();
+        try {
+            // Get team members with their task completion stats
+            $team_options = array("department_id" => $department_id, "user_type" => "staff");
+            $team_members_result = $this->Users_model->get_details($team_options);
+            
+            // Handle both array and query result object
+            if (is_array($team_members_result)) {
+                $team_members = isset($team_members_result['data']) ? $team_members_result['data'] : $team_members_result;
+            } else {
+                $team_members = $team_members_result->getResult();
+            }
 
-        $team_performance = array();
-        foreach ($team_members as $member) {
-            $completed_tasks = $this->Tasks_model->get_details(array(
-                "assigned_to" => $member->id,
-                "status_ids" => "3", // Completed
-                "created_date >=" => date('Y-m-d', strtotime('-30 days'))
-            ))->resultID->num_rows;
+            $team_performance = array();
+            foreach ($team_members as $member) {
+                // Count only tasks that belong to this department (matching Tasks tab filter)
+                $completed_tasks = $this->Tasks_model->get_details(array(
+                    "assigned_to" => $member->id,
+                    "department_ids" => array($department_id), // Filter by department
+                    "status_ids" => "3", // Completed
+                    "created_date >=" => date('Y-m-d', strtotime('-30 days'))
+                ))->resultID->num_rows;
 
-            $total_tasks = $this->Tasks_model->get_details(array(
-                "assigned_to" => $member->id,
-                "created_date >=" => date('Y-m-d', strtotime('-30 days'))
-            ))->resultID->num_rows;
+                $total_tasks = $this->Tasks_model->get_details(array(
+                    "assigned_to" => $member->id,
+                    "department_ids" => array($department_id), // Filter by department
+                    "created_date >=" => date('Y-m-d', strtotime('-30 days'))
+                ))->resultID->num_rows;
 
-            $completion_rate = $total_tasks > 0 ? round(($completed_tasks / $total_tasks) * 100, 1) : 0;
+                $completion_rate = $total_tasks > 0 ? round(($completed_tasks / $total_tasks) * 100, 1) : 0;
 
-            $team_performance[] = array(
-                'name' => $member->first_name . ' ' . $member->last_name,
-                'completed_tasks' => $completed_tasks,
-                'total_tasks' => $total_tasks,
-                'completion_rate' => $completion_rate
-            );
+                // Only include team members who have tasks in this department
+                if ($total_tasks > 0) {
+                    $team_performance[] = array(
+                        'name' => $member->first_name . ' ' . $member->last_name,
+                        'completed_tasks' => $completed_tasks,
+                        'total_tasks' => $total_tasks,
+                        'completion_rate' => $completion_rate
+                    );
+                }
+            }
+
+            // Sort by completion rate descending
+            usort($team_performance, function($a, $b) { 
+                return $b['completion_rate'] <=> $a['completion_rate']; 
+            });
+
+            return array_slice($team_performance, 0, 5); // Top 5 performers
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading team performance metrics: ' . $e->getMessage());
+            return array(); // Return empty array on error
         }
-
-        // Sort by completion rate descending
-        usort($team_performance, function($a, $b) { 
-            return $b['completion_rate'] <=> $a['completion_rate']; 
-        });
-
-        return array_slice($team_performance, 0, 5); // Top 5 performers
     }
 
     /**

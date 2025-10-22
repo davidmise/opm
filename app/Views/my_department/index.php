@@ -605,13 +605,20 @@ $(document).ready(function () {
     // Load the determined section
     showSection(targetSection);
     
-    // Initialize tables when sections are shown
-    initializeTables();
+    // Initialize tables only for the active section
+    // Tables will be initialized lazily when tabs are clicked
+    var initializedTables = {};
+    
+    // Initialize table for the initially visible section
+    initializeTableForSection(targetSection);
     
     // Store section persistence on button clicks
     $('.department-nav-btn').on('click', function() {
         var sectionName = $(this).attr('id').replace('-btn', '');
         localStorage.setItem(currentTabKey, sectionName);
+        
+        // Initialize table for this section if not already done
+        initializeTableForSection(sectionName);
         
         // Update URL hash without triggering scroll
         if (sectionName && sectionName !== 'overview') {
@@ -620,6 +627,27 @@ $(document).ready(function () {
             history.replaceState(null, null, window.location.pathname);
         }
     });
+    
+    // Helper function to initialize tables based on section
+    function initializeTableForSection(sectionName) {
+        if (initializedTables[sectionName]) {
+            return; // Already initialized
+        }
+        
+        switch(sectionName) {
+            case 'projects':
+                loadDepartmentProjects();
+                break;
+            case 'tasks':
+                loadDepartmentTasks();
+                break;
+            case 'team':
+                loadDepartmentTeam();
+                break;
+        }
+        
+        initializedTables[sectionName] = true;
+    }
     
     // Handle browser back/forward navigation
     $(window).on('popstate', function(e) {
@@ -677,17 +705,6 @@ function safeFeatherReplace() {
     if (typeof feather !== 'undefined' && feather.replace) {
         feather.replace();
     }
-}
-
-function initializeTables() {
-    // Initialize projects table
-    loadDepartmentProjects();
-    
-    // Initialize tasks table
-    loadDepartmentTasks();
-    
-    // Initialize team table
-    loadDepartmentTeam();
 }
 
 function loadDepartmentProjects() {

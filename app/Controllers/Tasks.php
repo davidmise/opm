@@ -430,8 +430,16 @@ class Tasks extends Department_Access_Controller {
             return true;
         } else if ($context == "ticket" && $this->_can_edit_tickets($context_id)) {
             return true;
-        } else if ($context == "department" && ($this->login_user->is_admin || get_array_value($permissions, "can_manage_all_projects"))) {
-            return true;
+        } else if ($context == "department") {
+            // Allow viewing department tasks if user is admin, has can_manage_all_projects, or is a member of the department
+            if ($this->login_user->is_admin || get_array_value($permissions, "can_manage_all_projects")) {
+                return true;
+            }
+            
+            // Check if user is a member of this department
+            if ($context_id && $this->has_department_access($context_id)) {
+                return true;
+            }
         }
     }
 
