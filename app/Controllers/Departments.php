@@ -26,15 +26,15 @@ class Departments extends Security_Controller {
         $method = $router ? $router->methodName() : '';
         $public_methods = array(
             'view', 'dashboard', 'team', 'projects', 'tasks', 'overview',
-            'department_team_list_data', 'get_dashboard_data'
+            'announcements', 'department_team_list_data', 'get_dashboard_data'
         );
 
         if (!in_array($method, $public_methods)) {
             $this->access_only_admin_or_manage_departments_permission();
         }
         
-        // Only load custom models if needed
-        // Settings_model, Users_model, Projects_model are already loaded by parent
+        // Initialize models
+        $this->Announcements_model = model("App\Models\Announcements_model");
     }
 
     /**
@@ -273,7 +273,10 @@ class Departments extends Security_Controller {
     /**
      * Tab content loader for department announcements (used by ajax-tab in index)
      */
-    function announcements() {
+    function announcements($department_id = 0) {
+        // Validate department_id parameter
+        $department_id = (int) $department_id;
+        
         // Comprehensive announcements with department integration
         $view_data = array();
         
@@ -281,8 +284,59 @@ class Departments extends Security_Controller {
         $departments = $this->Departments_model->get_details()->getResult();
         $view_data['departments'] = $departments;
         
-        // Get announcements with department relationships
-        $announcements = $this->Announcements_model->get_details()->getResult();
+        // For admin: Show ALL announcements (no filtering)
+        // For staff: Show only announcements they have access to
+        if ($this->login_user->is_admin) {
+            // Admin: Get all announcements without user context filtering
+            $announcements = $this->Announcements_model->get_details()->getResult();
+        } else {
+            // Staff: Apply user context filtering
+            $announcement_options = array();
+            $announcement_options['user_type'] = 'staff';
+            $announcement_options['user_id'] = $this->login_user->id;
+            
+            if ($department_id > 0) {
+                $announcement_options['department_id'] = $department_id;
+            }
+            
+            $announcements = $this->Announcements_model->get_details($announcement_options)->getResult();
+            
+            // Additional filtering for non-admin users when showing all announcements
+            if (!$department_id) {
+                $user_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+                $filtered_announcements = array();
+                
+                foreach ($announcements as $announcement) {
+                    $should_show = false;
+                    
+                    // Always show global announcements
+                    if (empty($announcement->share_with) || $announcement->share_with == 'all_members') {
+                        $should_show = true;
+                    }
+                    // Check if announcement is targeted to user's departments
+                    else if (!empty($announcement->share_with)) {
+                        foreach ($user_departments as $user_dept_id) {
+                            if (strpos($announcement->share_with, 'dept:' . $user_dept_id) !== false) {
+                                $should_show = true;
+                                break;
+                            }
+                        }
+                        
+                        // Also check if targeted directly to user
+                        if (strpos($announcement->share_with, 'member:' . $this->login_user->id) !== false) {
+                            $should_show = true;
+                        }
+                    }
+                    
+                    if ($should_show) {
+                        $filtered_announcements[] = $announcement;
+                    }
+                }
+                
+                $announcements = $filtered_announcements;
+            }
+        }
+        
         $view_data['announcements'] = $announcements;
         
         // Announcement statistics with safe fallbacks
@@ -317,32 +371,194 @@ class Departments extends Security_Controller {
             'urgent' => app_lang('urgent')
         );
         
-        // Sample announcement templates for demo
-        $view_data['announcement_templates'] = array(
-            (object)array(
-                'id' => 1, 
-                'title' => 'New Policy Announcement',
-                'content' => 'Template for announcing new company policies',
-                'category' => 'policy',
-                'priority' => 'normal'
-            ),
-            (object)array(
-                'id' => 2,
-                'title' => 'Emergency Notice',
-                'content' => 'Template for urgent emergency communications',
-                'category' => 'urgent', 
-                'priority' => 'urgent'
-            ),
-            (object)array(
-                'id' => 3,
-                'title' => 'Training Schedule',
-                'content' => 'Template for announcing training sessions',
-                'category' => 'training',
-                'priority' => 'normal'
-            )
-        );
+        // Get announcement templates from database (empty for now)
+        $view_data['announcement_templates'] = array();
+        
+        // Pass the selected department ID to the view
+        $view_data['selected_department_id'] = $department_id;
         
         return $this->template->view("departments/announcements", $view_data);
+    }
+
+    /**
+     * Get filtered announcements via AJAX
+     */
+    function get_filtered_announcements() {
+        try {
+            $department_filter = $this->request->getPost('department_id');
+            $category_filter = $this->request->getPost('category');
+            $priority_filter = $this->request->getPost('priority');
+            
+            if (!$department_filter) {
+                $department_filter = '';
+            }
+            $department_id = (int) $department_filter;
+            
+            // For admin: Get all announcements
+            // For staff: Apply filtering
+            if ($this->login_user->is_admin) {
+                $announcements = $this->Announcements_model->get_details()->getResult();
+            } else {
+                // Prepare options for announcement filtering
+                $announcement_options = array(
+                    'user_type' => 'staff',
+                    'user_id' => $this->login_user->id
+                );
+                
+                // Handle different filter types
+                if ($department_filter === 'global') {
+                    // Show only global announcements (no department targeting)
+                } else if ($department_id > 0) {
+                    // Validate department exists and user has access
+                    $department_info = $this->Departments_model->get_one($department_id);
+                    if ($department_info && $department_info->id) {
+                        // Check if user has access to this department
+                        $accessible_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+                        if (!in_array($department_id, $accessible_departments)) {
+                            echo json_encode(array("success" => false, "message" => app_lang('access_denied')));
+                            return;
+                        }
+                        
+                        $announcement_options['department_id'] = $department_id;
+                    }
+                }
+                
+                $announcements = $this->Announcements_model->get_details($announcement_options)->getResult();
+            }
+            
+            // Apply filtering for global announcements filter
+            if ($department_filter === 'global') {
+                $announcements = array_filter($announcements, function($announcement) {
+                    return empty($announcement->share_with) || $announcement->share_with == 'all_members';
+                });
+            }
+            // Additional filtering for non-admin users when showing all announcements
+            else if (!$department_id && !$this->login_user->is_admin) {
+                $user_departments = $this->Departments_model->get_user_accessible_departments($this->login_user->id);
+                $filtered_announcements = array();
+                
+                foreach ($announcements as $announcement) {
+                    $should_show = false;
+                    
+                    // Always show global announcements
+                    if (empty($announcement->share_with) || $announcement->share_with == 'all_members') {
+                        $should_show = true;
+                    }
+                    // Check if announcement is targeted to user's departments
+                    else if (!empty($announcement->share_with)) {
+                        foreach ($user_departments as $user_dept_id) {
+                            if (strpos($announcement->share_with, 'dept:' . $user_dept_id) !== false) {
+                                $should_show = true;
+                                break;
+                            }
+                        }
+                        
+                        // Also check if targeted directly to user
+                        if (strpos($announcement->share_with, 'member:' . $this->login_user->id) !== false) {
+                            $should_show = true;
+                        }
+                    }
+                    
+                    if ($should_show) {
+                        $filtered_announcements[] = $announcement;
+                    }
+                }
+                
+                $announcements = $filtered_announcements;
+            }
+            
+            // Apply category filter
+            if (!empty($category_filter)) {
+                $announcements = array_filter($announcements, function($announcement) use ($category_filter) {
+                    $cat = isset($announcement->category) ? $announcement->category : 'general';
+                    return $cat === $category_filter;
+                });
+            }
+            
+            // Apply priority filter
+            if (!empty($priority_filter)) {
+                $announcements = array_filter($announcements, function($announcement) use ($priority_filter) {
+                    $pri = isset($announcement->priority) ? $announcement->priority : 'normal';
+                    return $pri === $priority_filter;
+                });
+            }
+            
+            // Pre-cache language strings to avoid issues with app_lang() in JSON
+            $lang_strings = array(
+                'all_departments' => app_lang('all_departments'),
+                'department_specific' => app_lang('department_specific'),
+                'active' => app_lang('active'),
+                'expired' => app_lang('expired'),
+                'view' => app_lang('view'),
+                'edit' => app_lang('edit'),
+                'duplicate' => app_lang('duplicate'),
+                'delete' => app_lang('delete'),
+                'no_announcements_found' => app_lang('no_announcements_found')
+            );
+            
+            // Build HTML for announcements table rows with proper dynamic values
+            $html = '';
+            if (!empty($announcements)) {
+                foreach ($announcements as $announcement) {
+                    // Get badge classes based on actual category and priority
+                    $category = isset($announcement->category) ? $announcement->category : 'general';
+                    $category_badge_class = 'bg-info';
+                    if ($category == 'urgent') $category_badge_class = 'bg-danger';
+                    elseif ($category == 'policy') $category_badge_class = 'bg-warning';
+                    elseif ($category == 'event') $category_badge_class = 'bg-secondary';
+                    
+                    $priority = isset($announcement->priority) ? $announcement->priority : 'normal';
+                    $priority_badge_class = 'bg-info';
+                    if ($priority == 'high') $priority_badge_class = 'bg-warning';
+                    elseif ($priority == 'urgent') $priority_badge_class = 'bg-danger';
+                    elseif ($priority == 'low') $priority_badge_class = 'bg-secondary';
+                    
+                    $html .= '<tr>';
+                    $html .= '<td><input type="checkbox" class="announcement-checkbox" value="' . $announcement->id . '"></td>';
+                    $html .= '<td>';
+                    $html .= '<strong>' . htmlspecialchars($announcement->title) . '</strong>';
+                    $description = (strlen($announcement->description) > 60) ? substr($announcement->description, 0, 60) . '...' : $announcement->description;
+                    $html .= '<br><small class="text-muted">' . htmlspecialchars($description) . '</small>';
+                    $html .= '</td>';
+                    $html .= '<td><span class="badge ' . $category_badge_class . '">' . ucfirst($category) . '</span></td>';
+                    $html .= '<td><span class="badge ' . $priority_badge_class . '">' . ucfirst($priority) . '</span></td>';
+                    $html .= '<td>';
+                    if (empty($announcement->share_with) || $announcement->share_with == 'all_members') {
+                        $html .= '<span class="badge bg-light text-dark">' . $lang_strings['all_departments'] . '</span>';
+                    } else {
+                        $html .= '<span class="badge bg-primary">' . $lang_strings['department_specific'] . '</span>';
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    if (isset($announcement->end_date) && $announcement->end_date >= date('Y-m-d')) {
+                        $html .= '<span class="badge bg-success">' . $lang_strings['active'] . '</span>';
+                    } else {
+                        $html .= '<span class="badge bg-secondary">' . $lang_strings['expired'] . '</span>';
+                    }
+                    $html .= '</td>';
+                    $html .= '<td><small>' . (isset($announcement->start_date) ? format_to_datetime($announcement->start_date) : '') . '</small></td>';
+                    $html .= '<td class="text-center">';
+                    $html .= '<div class="btn-group btn-group-sm">';
+                    $html .= '<button class="btn btn-outline-primary announcement-view-btn" title="' . $lang_strings['view'] . '" data-id="' . $announcement->id . '"><i data-feather="eye" class="icon-14"></i></button>';
+                    $html .= '<button class="btn btn-outline-secondary announcement-edit-btn" title="' . $lang_strings['edit'] . '" data-id="' . $announcement->id . '"><i data-feather="edit-2" class="icon-14"></i></button>';
+                    $html .= '<button class="btn btn-outline-success announcement-duplicate-btn" title="' . $lang_strings['duplicate'] . '" data-id="' . $announcement->id . '"><i data-feather="copy" class="icon-14"></i></button>';
+                    $html .= '<button class="btn btn-outline-danger announcement-delete-btn" title="' . $lang_strings['delete'] . '" data-id="' . $announcement->id . '"><i data-feather="trash-2" class="icon-14"></i></button>';
+                    $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            } else {
+                $html = '<tr><td colspan="8" class="text-center py-4">';
+                $html .= '<i data-feather="megaphone" class="icon-48 text-muted"></i>';
+                $html .= '<p class="text-muted mt-2">' . $lang_strings['no_announcements_found'] . '</p>';
+                $html .= '</td></tr>';
+            }
+            
+            echo json_encode(array("success" => true, "html" => $html, "count" => count($announcements)));
+        } catch(\Exception $e) {
+            log_message('error', 'Announcements filter error: ' . $e->getMessage());
+            echo json_encode(array("success" => false, "message" => 'Error filtering announcements: ' . $e->getMessage()));
+        }
     }
 
     /**
@@ -437,8 +653,44 @@ class Departments extends Security_Controller {
             "created_date" => date('Y-m-d H:i:s')
         );
 
-        // Save announcement (this would normally save to database)
-        // In real implementation: $announcement_id = $this->Announcements_model->ci_save($announcement_data);
+        // Prepare data for Announcements model
+        $save_data = array(
+            "title" => $announcement_data['title'],
+            "description" => $announcement_data['content'],
+            "category" => $announcement_data['category'],
+            "priority" => $announcement_data['priority'],
+            "start_date" => $announcement_data['start_date'],
+            "end_date" => !empty($announcement_data['end_date']) ? $announcement_data['end_date'] : null,
+            "created_by" => $announcement_data['created_by']
+        );
+        
+        // Handle target departments - convert to share_with format
+        $target_departments = $this->request->getPost('target_departments');
+        $department_id = $this->request->getPost('department_id'); // From department-specific modal
+        
+        // Debug logging
+        log_message('debug', 'Announcement save - target_departments: ' . json_encode($target_departments));
+        log_message('debug', 'Announcement save - department_id: ' . $department_id);
+        
+        // Prioritize target_departments array, fallback to single department_id
+        if (!empty($target_departments) && is_array($target_departments)) {
+            $share_with_parts = array();
+            foreach ($target_departments as $dept_id) {
+                $share_with_parts[] = "dept:" . $dept_id;
+            }
+            $save_data['share_with'] = implode(',', $share_with_parts);
+            log_message('debug', 'Using target_departments array, share_with: ' . $save_data['share_with']);
+        } else if (!empty($department_id) && is_numeric($department_id)) {
+            // Department-specific announcement from modal
+            $save_data['share_with'] = "dept:" . $department_id;
+            log_message('debug', 'Using single department_id, share_with: ' . $save_data['share_with']);
+        } else {
+            $save_data['share_with'] = 'all_members'; // Global announcement
+            log_message('debug', 'No department specified, using all_members');
+        }
+
+        // Save announcement to database
+        $announcement_id = $this->Announcements_model->ci_save($save_data);
 
         $message = ($announcement_data['status'] == 'draft') ? 
                    app_lang('announcement_saved_as_draft') : 
@@ -480,6 +732,96 @@ class Departments extends Security_Controller {
         // This would export announcements to CSV/Excel
         // For demo purposes, just redirect back
         app_redirect("departments");
+    }
+
+    /**
+     * Get announcement data for editing
+     */
+    function get_announcement_data() {
+        $announcement_id = $this->request->getPost('id');
+        if (!$announcement_id) {
+            echo json_encode(array("success" => false, "message" => app_lang('invalid_request')));
+            return;
+        }
+
+        try {
+            $announcement = $this->Announcements_model->get_one($announcement_id);
+            if ($announcement) {
+                echo json_encode(array("success" => true, "data" => $announcement));
+            } else {
+                echo json_encode(array("success" => false, "message" => app_lang('announcement_not_found')));
+            }
+        } catch (\Exception $e) {
+            echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Duplicate announcement
+     */
+    function duplicate_announcement() {
+        $announcement_id = $this->request->getPost('id');
+        if (!$announcement_id) {
+            echo json_encode(array("success" => false, "message" => app_lang('invalid_request')));
+            return;
+        }
+
+        try {
+            $original_announcement = $this->Announcements_model->get_one($announcement_id);
+            if (!$original_announcement) {
+                echo json_encode(array("success" => false, "message" => app_lang('announcement_not_found')));
+                return;
+            }
+
+            // Create duplicate with new title
+            $duplicate_data = (array) $original_announcement;
+            unset($duplicate_data['id']); // Remove ID to create new record
+            $duplicate_data['title'] = $original_announcement->title . ' (Copy)';
+            $duplicate_data['created_by'] = $this->login_user->id;
+            $duplicate_data['created_date'] = get_current_utc_time();
+
+            $new_announcement_id = $this->Announcements_model->ci_save($duplicate_data);
+            
+            if ($new_announcement_id) {
+                echo json_encode(array("success" => true, "message" => app_lang('announcement_duplicated_successfully')));
+            } else {
+                echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error duplicating announcement: ' . $e->getMessage());
+            echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Delete announcement
+     */
+    function delete_announcement() {
+        $announcement_id = $this->request->getPost('id');
+        if (!$announcement_id) {
+            echo json_encode(array("success" => false, "message" => app_lang('invalid_request')));
+            return;
+        }
+
+        try {
+            $announcement = $this->Announcements_model->get_one($announcement_id);
+            if (!$announcement) {
+                echo json_encode(array("success" => false, "message" => app_lang('announcement_not_found')));
+                return;
+            }
+
+            // Soft delete (mark as deleted)
+            $result = $this->Announcements_model->ci_save(array("deleted" => 1), $announcement_id);
+            
+            if ($result) {
+                echo json_encode(array("success" => true, "message" => app_lang('announcement_deleted_successfully')));
+            } else {
+                echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error deleting announcement: ' . $e->getMessage());
+            echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+        }
     }
 
     /**

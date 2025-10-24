@@ -344,13 +344,32 @@ class My_department extends Department_Access_Controller {
      */
     protected function _get_department_announcements($department_id, $limit = 3) {
         try {
+            // Use proper announcement filtering with user context
             $options = array(
-                "share_with_filter" => "dept:$department_id",
-                "end_date >=" => date('Y-m-d'),
-                "limit" => $limit
+                "user_type" => "staff",
+                "user_id" => $this->login_user->id,
+                "department_id" => $department_id
             );
 
-            return $this->Announcements_model->get_details($options)->getResult();
+            $announcements = $this->Announcements_model->get_details($options)->getResult();
+            
+            // Filter for current/active announcements only
+            $current_date = date('Y-m-d');
+            $filtered_announcements = array();
+            
+            foreach ($announcements as $announcement) {
+                // Only show announcements that are currently active
+                if (!isset($announcement->end_date) || $announcement->end_date >= $current_date) {
+                    $filtered_announcements[] = $announcement;
+                }
+            }
+            
+            // Limit results
+            if ($limit && count($filtered_announcements) > $limit) {
+                $filtered_announcements = array_slice($filtered_announcements, 0, $limit);
+            }
+            
+            return $filtered_announcements;
         } catch (\Exception $e) {
             log_message('error', 'Error loading announcements: ' . $e->getMessage());
             return array(); // Return empty array on error

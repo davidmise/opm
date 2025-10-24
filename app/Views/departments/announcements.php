@@ -1,6 +1,66 @@
 <!-- COMPREHENSIVE DEPARTMENT ANNOUNCEMENTS TAB -->
+<style>
+    /* Fix Select2 multi-select styling */
+    .select2-container--default .select2-selection--multiple {
+        min-height: 38px;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+        padding: 3px 8px;
+        margin-top: 5px;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #fff;
+        margin-right: 5px;
+    }
+    .select2-container--default .select2-selection--multiple .select2-search__field {
+        margin-top: 5px;
+    }
+    
+    /* Department announcement items styling */
+    .announcement-item {
+        transition: all 0.3s ease;
+        padding: 12px;
+        border-radius: 6px;
+    }
+    .announcement-item:hover {
+        background-color: #f8f9fa;
+    }
+    .announcement-item h6 {
+        color: #2c3e50;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    .announcement-item .badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    
+    /* Collapse transition */
+    .collapse {
+        transition: height 0.35s ease;
+    }
+    
+    /* Department modal header - black background */
+    #department-announcement-modal .modal-header {
+        background-color: #1a1a1a !important;
+        border-bottom: 2px solid #333;
+    }
+    
+    /* Color tag styling */
+    .color-tag {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        vertical-align: middle;
+    }
+</style>
+
 <div class="row">
-    <div class="col-12">
+    <div class="col-12"
         
         <!-- Announcements Management Header -->
         <div class="card mb-4">
@@ -122,10 +182,10 @@
                             </div>
                             <div class="col-md-3">
                                 <select class="form-control form-control-sm" id="filter-department">
-                                    <option value=""><?php echo app_lang('filter_by_department'); ?></option>
-                                    <option value="global"><?php echo app_lang('global_announcements'); ?></option>
+                                    <option value="" <?php echo (!isset($selected_department_id) || $selected_department_id == 0) ? 'selected' : ''; ?>><?php echo app_lang('all_departments'); ?></option>
+                                    <option value="global"><?php echo app_lang('global_announcements_only'); ?></option>
                                     <?php foreach($departments as $dept): ?>
-                                        <option value="<?php echo $dept->id; ?>"><?php echo $dept->title; ?></option>
+                                        <option value="<?php echo $dept->id; ?>" <?php echo (isset($selected_department_id) && $selected_department_id == $dept->id) ? 'selected' : ''; ?>><?php echo $dept->title; ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -151,94 +211,81 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Sample data for demo -->
-                                    <tr>
-                                        <td><input type="checkbox" class="announcement-checkbox" value="1"></td>
-                                        <td>
-                                            <strong>New Department Policy Update</strong>
-                                            <br><small class="text-muted">Updates to remote work policies</small>
-                                        </td>
-                                        <td><span class="badge bg-info"><?php echo app_lang('policy'); ?></span></td>
-                                        <td><span class="badge bg-warning"><?php echo app_lang('high'); ?></span></td>
-                                        <td>
-                                            <span class="badge bg-primary">HR Department</span>
-                                            <span class="badge bg-secondary">IT Department</span>
-                                        </td>
-                                        <td><span class="badge bg-success"><?php echo app_lang('active'); ?></span></td>
-                                        <td><small><?php echo date('Y-m-d H:i'); ?></small></td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-primary" title="<?php echo app_lang('view'); ?>">
-                                                    <i data-feather="eye" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-secondary" title="<?php echo app_lang('edit'); ?>">
-                                                    <i data-feather="edit-2" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-success" title="<?php echo app_lang('duplicate'); ?>">
-                                                    <i data-feather="copy" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-danger" title="<?php echo app_lang('delete'); ?>">
-                                                    <i data-feather="trash-2" class="icon-14"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox" class="announcement-checkbox" value="2"></td>
-                                        <td>
-                                            <strong>System Maintenance Schedule</strong>
-                                            <br><small class="text-muted">Planned downtime this weekend</small>
-                                        </td>
-                                        <td><span class="badge bg-warning"><?php echo app_lang('maintenance'); ?></span></td>
-                                        <td><span class="badge bg-danger"><?php echo app_lang('urgent'); ?></span></td>
-                                        <td><span class="badge bg-light text-dark"><?php echo app_lang('all_departments'); ?></span></td>
-                                        <td><span class="badge bg-success"><?php echo app_lang('active'); ?></span></td>
-                                        <td><small><?php echo date('Y-m-d H:i', strtotime('-1 day')); ?></small></td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-primary" title="<?php echo app_lang('view'); ?>">
-                                                    <i data-feather="eye" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-secondary" title="<?php echo app_lang('edit'); ?>">
-                                                    <i data-feather="edit-2" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-success" title="<?php echo app_lang('duplicate'); ?>">
-                                                    <i data-feather="copy" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-danger" title="<?php echo app_lang('delete'); ?>">
-                                                    <i data-feather="trash-2" class="icon-14"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox" class="announcement-checkbox" value="3"></td>
-                                        <td>
-                                            <strong>Team Building Event</strong>
-                                            <br><small class="text-muted">Annual company picnic announcement</small>
-                                        </td>
-                                        <td><span class="badge bg-success"><?php echo app_lang('event'); ?></span></td>
-                                        <td><span class="badge bg-info"><?php echo app_lang('normal'); ?></span></td>
-                                        <td><span class="badge bg-primary">Sales Department</span></td>
-                                        <td><span class="badge bg-success"><?php echo app_lang('active'); ?></span></td>
-                                        <td><small><?php echo date('Y-m-d H:i', strtotime('-3 days')); ?></small></td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-primary" title="<?php echo app_lang('view'); ?>">
-                                                    <i data-feather="eye" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-secondary" title="<?php echo app_lang('edit'); ?>">
-                                                    <i data-feather="edit-2" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-success" title="<?php echo app_lang('duplicate'); ?>">
-                                                    <i data-feather="copy" class="icon-14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-danger" title="<?php echo app_lang('delete'); ?>">
-                                                    <i data-feather="trash-2" class="icon-14"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <?php if (!empty($announcements)): ?>
+                                        <?php foreach ($announcements as $announcement): ?>
+                                            <tr>
+                                                <td><input type="checkbox" class="announcement-checkbox" value="<?php echo $announcement->id; ?>"></td>
+                                                <td>
+                                                    <strong><?php echo $announcement->title; ?></strong>
+                                                    <br><small class="text-muted"><?php echo (strlen($announcement->description) > 60) ? substr($announcement->description, 0, 60) . '...' : $announcement->description; ?></small>
+                                                </td>
+                                                <td>
+                                                    <?php 
+                                                    // Display announcement category if available
+                                                    $category = isset($announcement->category) ? $announcement->category : 'general';
+                                                    $category_badge_class = 'bg-info';
+                                                    if ($category == 'urgent') $category_badge_class = 'bg-danger';
+                                                    elseif ($category == 'policy') $category_badge_class = 'bg-warning';
+                                                    elseif ($category == 'event') $category_badge_class = 'bg-secondary';
+                                                    ?>
+                                                    <span class="badge <?php echo $category_badge_class; ?>"><?php echo ucfirst($category); ?></span>
+                                                </td>
+                                                <td>
+                                                    <?php 
+                                                    // Display announcement priority if available
+                                                    $priority = isset($announcement->priority) ? $announcement->priority : 'normal';
+                                                    $priority_badge_class = 'bg-info';
+                                                    if ($priority == 'high') $priority_badge_class = 'bg-warning';
+                                                    elseif ($priority == 'urgent') $priority_badge_class = 'bg-danger';
+                                                    elseif ($priority == 'low') $priority_badge_class = 'bg-secondary';
+                                                    ?>
+                                                    <span class="badge <?php echo $priority_badge_class; ?>"><?php echo ucfirst($priority); ?></span>
+                                                </td>
+                                                <td>
+                                                    <?php if (empty($announcement->share_with) || $announcement->share_with == 'all_members'): ?>
+                                                        <span class="badge bg-light text-dark"><?php echo app_lang('all_departments'); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-primary"><?php echo app_lang('department_specific'); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php 
+                                                    // If no end_date, announcement never expires (always active)
+                                                    $is_active = empty($announcement->end_date) || $announcement->end_date >= date('Y-m-d');
+                                                    ?>
+                                                    <?php if ($is_active): ?>
+                                                        <span class="badge bg-success"><?php echo app_lang('active'); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-secondary"><?php echo app_lang('expired'); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><small><?php echo isset($announcement->start_date) ? format_to_datetime($announcement->start_date) : ''; ?></small></td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary announcement-view-btn" title="<?php echo app_lang('view'); ?>" data-id="<?php echo $announcement->id; ?>">
+                                                            <i data-feather="eye" class="icon-14"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary announcement-edit-btn" title="<?php echo app_lang('edit'); ?>" data-id="<?php echo $announcement->id; ?>">
+                                                            <i data-feather="edit-2" class="icon-14"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-success announcement-duplicate-btn" title="<?php echo app_lang('duplicate'); ?>" data-id="<?php echo $announcement->id; ?>">
+                                                            <i data-feather="copy" class="icon-14"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger announcement-delete-btn" title="<?php echo app_lang('delete'); ?>" data-id="<?php echo $announcement->id; ?>">
+                                                            <i data-feather="trash-2" class="icon-14"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4">
+                                                <i data-feather="megaphone" class="icon-48 text-muted"></i>
+                                                <p class="text-muted mt-2"><?php echo app_lang('no_announcements_found'); ?></p>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -252,39 +299,103 @@
                         <!-- Department-wise Announcements -->
                         <div class="row">
                             <?php foreach($departments as $dept): ?>
+                                <?php 
+                                // Get announcements for this specific department
+                                $dept_announcements = array_filter($announcements, function($a) use ($dept) {
+                                    return !empty($a->share_with) && strpos($a->share_with, 'dept:' . $dept->id) !== false;
+                                });
+                                $dept_announcements = array_values($dept_announcements); // Re-index array
+                                $announcement_count = count($dept_announcements);
+                                ?>
                             <div class="col-lg-6 col-md-12 mb-3">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h6 class="mb-0">
-                                            <div class="color-tag me-2" style="background-color: <?php echo $dept->color ?: '#6c757d'; ?>;"></div>
+                                            <div class="color-tag me-2" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: <?php echo $dept->color ?: '#6c757d'; ?>;"></div>
                                             <?php echo $dept->title; ?>
                                         </h6>
-                                        <span class="badge bg-secondary"><?php echo rand(1, 5); ?> <?php echo app_lang('announcements'); ?></span>
+                                        <span class="badge bg-secondary"><?php echo $announcement_count; ?> <?php echo app_lang('announcements'); ?></span>
                                     </div>
                                     <div class="card-body">
-                                        <div class="list-group list-group-flush">
-                                            <div class="list-group-item d-flex justify-content-between align-items-start p-2">
-                                                <div>
-                                                    <strong>Department Meeting</strong>
-                                                    <br><small class="text-muted">Weekly sync meeting scheduled</small>
+                                        <?php if (!empty($dept_announcements)): ?>
+                                            <!-- Show first announcement -->
+                                            <div class="dept-announcements-list" id="dept-announcements-<?php echo $dept->id; ?>">
+                                                <div class="announcement-item border-bottom pb-2 mb-2">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1"><?php echo $dept_announcements[0]->title; ?></h6>
+                                                            <p class="text-muted small mb-1">
+                                                                <?php echo (strlen($dept_announcements[0]->description) > 80) ? substr(strip_tags($dept_announcements[0]->description), 0, 80) . '...' : strip_tags($dept_announcements[0]->description); ?>
+                                                            </p>
+                                                            <div class="d-flex gap-2 flex-wrap">
+                                                                <span class="badge bg-<?php echo ($dept_announcements[0]->priority == 'urgent' || $dept_announcements[0]->priority == 'high') ? 'danger' : 'info'; ?>">
+                                                                    <?php echo ucfirst($dept_announcements[0]->priority ?: 'normal'); ?>
+                                                                </span>
+                                                                <span class="badge bg-secondary">
+                                                                    <?php echo ucfirst($dept_announcements[0]->category ?: 'general'); ?>
+                                                                </span>
+                                                                <small class="text-muted">
+                                                                    <i data-feather="clock" class="icon-12"></i>
+                                                                    <?php echo format_to_relative_time($dept_announcements[0]->created_at); ?>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <span class="badge bg-info">Normal</span>
-                                            </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-start p-2">
-                                                <div>
-                                                    <strong>Budget Review</strong>
-                                                    <br><small class="text-muted">Q4 budget planning session</small>
+                                                
+                                                <!-- Hidden additional announcements (collapsed by default) -->
+                                                <div class="collapse" id="collapse-dept-<?php echo $dept->id; ?>">
+                                                    <?php for($i = 1; $i < $announcement_count; $i++): ?>
+                                                        <div class="announcement-item border-bottom pb-2 mb-2">
+                                                            <div class="d-flex justify-content-between align-items-start">
+                                                                <div class="flex-grow-1">
+                                                                    <h6 class="mb-1"><?php echo $dept_announcements[$i]->title; ?></h6>
+                                                                    <p class="text-muted small mb-1">
+                                                                        <?php echo (strlen($dept_announcements[$i]->description) > 80) ? substr(strip_tags($dept_announcements[$i]->description), 0, 80) . '...' : strip_tags($dept_announcements[$i]->description); ?>
+                                                                    </p>
+                                                                    <div class="d-flex gap-2 flex-wrap">
+                                                                        <span class="badge bg-<?php echo ($dept_announcements[$i]->priority == 'urgent' || $dept_announcements[$i]->priority == 'high') ? 'danger' : 'info'; ?>">
+                                                                            <?php echo ucfirst($dept_announcements[$i]->priority ?: 'normal'); ?>
+                                                                        </span>
+                                                                        <span class="badge bg-secondary">
+                                                                            <?php echo ucfirst($dept_announcements[$i]->category ?: 'general'); ?>
+                                                                        </span>
+                                                                        <small class="text-muted">
+                                                                            <i data-feather="clock" class="icon-12"></i>
+                                                                            <?php echo format_to_relative_time($dept_announcements[$i]->created_at); ?>
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endfor; ?>
                                                 </div>
-                                                <span class="badge bg-warning">High</span>
                                             </div>
-                                        </div>
-                                        <div class="mt-2">
-                                            <button class="btn btn-sm btn-outline-primary">
+                                        <?php else: ?>
+                                            <div class="text-center py-4">
+                                                <i data-feather="megaphone" class="icon-32 text-muted mb-2"></i>
+                                                <p class="text-muted"><?php echo app_lang('no_announcements_for_department'); ?></p>
+                                            </div>
+                                        <?php endif; ?>
+                                        
+                                        <div class="mt-3 d-flex gap-2">
+                                            <button class="btn btn-sm btn-primary" 
+                                                    data-dept-id="<?php echo $dept->id; ?>" 
+                                                    data-dept-name="<?php echo htmlspecialchars($dept->title, ENT_QUOTES); ?>"
+                                                    onclick="openDepartmentAnnouncementModal(this.getAttribute('data-dept-id'), this.getAttribute('data-dept-name'))">
                                                 <i data-feather="plus" class="icon-14"></i> <?php echo app_lang('add_announcement'); ?>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary">
-                                                <i data-feather="eye" class="icon-14"></i> <?php echo app_lang('view_all'); ?>
-                                            </button>
+                                            <?php if ($announcement_count > 1): ?>
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" 
+                                                        data-bs-toggle="collapse" 
+                                                        data-bs-target="#collapse-dept-<?php echo $dept->id; ?>" 
+                                                        aria-expanded="false" 
+                                                        onclick="toggleViewAll(this, <?php echo $dept->id; ?>)">
+                                                    <i data-feather="chevron-down" class="icon-14"></i>
+                                                    <span class="toggle-text"><?php echo app_lang('view_all_announcements'); ?></span>
+                                                    <span class="badge bg-secondary ms-1"><?php echo $announcement_count - 1; ?></span>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -345,32 +456,36 @@
                             <div class="col-md-3">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h4 class="text-primary">85%</h4>
+                                        <h4 class="text-primary">-</h4>
                                         <small><?php echo app_lang('read_rate'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h4 class="text-success">92%</h4>
+                                        <h4 class="text-success">-</h4>
                                         <small><?php echo app_lang('delivery_rate'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h4 class="text-info">15</h4>
-                                        <small><?php echo app_lang('avg_response_time'); ?> (<?php echo app_lang('minutes'); ?>)</small>
+                                        <h4 class="text-info">-</h4>
+                                        <small><?php echo app_lang('avg_response_time'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h4 class="text-warning">73%</h4>
+                                        <h4 class="text-warning">-</h4>
                                         <small><?php echo app_lang('engagement_rate'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
                                     </div>
                                 </div>
                             </div>
@@ -395,25 +510,25 @@
                                         </thead>
                                         <tbody>
                                             <?php foreach($departments as $dept): ?>
+                                                <?php 
+                                                // Get announcements count for this department
+                                                $dept_announcements_count = count(array_filter($announcements, function($a) use ($dept) {
+                                                    return !empty($a->share_with) && strpos($a->share_with, 'dept:' . $dept->id) !== false;
+                                                }));
+                                                ?>
                                             <tr>
                                                 <td>
                                                     <div class="color-tag me-2" style="background-color: <?php echo $dept->color ?: '#6c757d'; ?>;"></div>
                                                     <?php echo $dept->title; ?>
                                                 </td>
-                                                <td><?php echo rand(5, 25); ?></td>
+                                                <td><?php echo $dept_announcements_count; ?></td>
                                                 <td>
-                                                    <div class="progress" style="height: 6px;">
-                                                        <div class="progress-bar" style="width: <?php echo rand(70, 95); ?>%"></div>
-                                                    </div>
-                                                    <small><?php echo rand(70, 95); ?>%</small>
+                                                    <small class="text-muted"><?php echo app_lang('not_available'); ?></small>
                                                 </td>
                                                 <td>
-                                                    <div class="progress" style="height: 6px;">
-                                                        <div class="progress-bar bg-success" style="width: <?php echo rand(60, 90); ?>%"></div>
-                                                    </div>
-                                                    <small><?php echo rand(60, 90); ?>%</small>
+                                                    <small class="text-muted"><?php echo app_lang('not_available'); ?></small>
                                                 </td>
-                                                <td><?php echo rand(10, 30); ?> <?php echo app_lang('minutes'); ?></td>
+                                                <td><small class="text-muted"><?php echo app_lang('not_available'); ?></small></td>
                                             </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -473,12 +588,12 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="announcement_departments"><?php echo app_lang('target_departments'); ?></label>
-                            <select name="target_departments[]" id="announcement_departments" class="form-control select2" multiple>
-                                <option value=""><?php echo app_lang('all_departments'); ?></option>
+                            <select name="target_departments[]" id="announcement_departments" class="form-control select2" multiple data-placeholder="<?php echo app_lang('all_departments'); ?>">
                                 <?php foreach($departments as $dept): ?>
                                     <option value="<?php echo $dept->id; ?>"><?php echo $dept->title; ?></option>
                                 <?php endforeach; ?>
                             </select>
+                            <small class="form-text text-muted"><?php echo app_lang('leave_empty_for_all_departments'); ?></small>
                         </div>
                     </div>
                 </div>
@@ -527,7 +642,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo app_lang('cancel'); ?></button>
                 <button type="button" class="btn btn-outline-primary" onclick="saveAsDraft()"><?php echo app_lang('save_as_draft'); ?></button>
-                <button type="submit" form="announcement-form" class="btn btn-primary"><?php echo app_lang('publish_announcement'); ?></button>
+                <button type="button" class="btn btn-primary" id="publish-announcement-btn"><?php echo app_lang('publish_announcement'); ?></button>
             </div>
         </div>
     </div>
@@ -591,8 +706,222 @@
     </div>
 </div>
 
+<!-- Department-Specific Announcement Modal -->
+<div class="modal fade" id="department-announcement-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i data-feather="megaphone" class="icon-16"></i>
+                    <span id="dept-modal-title"><?php echo app_lang('add_announcement_for'); ?></span>
+                    <strong id="dept-modal-name"></strong>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <?php echo form_open(base_url("index.php/departments/save_announcement"), array("id" => "department-announcement-form")); ?>
+                <input type="hidden" name="department_id" id="dept_announcement_dept_id" value="">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="dept_announcement_title"><?php echo app_lang('title'); ?> *</label>
+                            <input type="text" name="title" id="dept_announcement_title" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="dept_announcement_priority"><?php echo app_lang('priority'); ?></label>
+                            <select name="priority" id="dept_announcement_priority" class="form-control">
+                                <?php foreach($priority_levels as $key => $priority): ?>
+                                    <option value="<?php echo $key; ?>"><?php echo $priority; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dept_announcement_category"><?php echo app_lang('category'); ?></label>
+                    <select name="category" id="dept_announcement_category" class="form-control">
+                        <?php foreach($announcement_categories as $key => $category): ?>
+                            <option value="<?php echo $key; ?>"><?php echo $category; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dept_announcement_content"><?php echo app_lang('content'); ?> *</label>
+                    <textarea name="content" id="dept_announcement_content" class="form-control" rows="6" required></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="dept_start_date"><?php echo app_lang('start_date'); ?></label>
+                            <input type="datetime-local" name="start_date" id="dept_start_date" class="form-control" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="dept_end_date"><?php echo app_lang('end_date'); ?></label>
+                            <input type="datetime-local" name="end_date" id="dept_end_date" class="form-control">
+                            <small class="form-text text-muted"><?php echo app_lang('leave_empty_for_never_expire'); ?></small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i data-feather="info" class="icon-16"></i>
+                    <?php echo app_lang('this_announcement_will_be_targeted_to'); ?> <strong id="dept-target-name"></strong>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="send_email" id="dept_send_email" value="1" checked>
+                            <label class="form-check-label" for="dept_send_email">
+                                <?php echo app_lang('send_email_notification'); ?>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="send_push" id="dept_send_push" value="1">
+                            <label class="form-check-label" for="dept_send_push">
+                                <?php echo app_lang('send_push_notification'); ?>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <?php echo form_close(); ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo app_lang('cancel'); ?></button>
+                <button type="button" class="btn btn-primary" id="publish-dept-announcement-btn">
+                    <i data-feather="send" class="icon-16"></i>
+                    <?php echo app_lang('publish_announcement'); ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
+    console.log('=== Announcements page loaded ===');
+    console.log('jQuery version:', $.fn.jquery);
+    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+    
+    // Diagnostic: Log announcement count on page load
+    var announcementCount = $('#announcements-table tbody tr').length;
+    console.log('Page loaded with ' + announcementCount + ' announcements');
+    
+    // Check if department modal exists
+    console.log('Department modal exists:', $('#department-announcement-modal').length > 0);
+    console.log('Department form exists:', $('#department-announcement-form').length > 0);
+    console.log('Publish button exists:', $('#publish-dept-announcement-btn').length > 0);
+    
+    // Department announcement submission handler - Professional implementation
+    $(document).on('click', '#publish-dept-announcement-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('=== Department Announcement Submit Started ===');
+        
+        var form = $('#department-announcement-form')[0];
+        var $form = $('#department-announcement-form');
+        
+        // Validate form
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return false;
+        }
+        
+        // Get department ID
+        var deptId = $('#dept_announcement_dept_id').val();
+        console.log('Target Department ID:', deptId);
+        
+        if (!deptId) {
+            alert('Error: No department selected');
+            return false;
+        }
+        
+        // Prepare form data manually to ensure clean department targeting
+        var formData = {
+            title: $('#dept_announcement_title').val(),
+            priority: $('#dept_announcement_priority').val(),
+            category: $('#dept_announcement_category').val(),
+            content: $('#dept_announcement_content').val(),
+            start_date: $('#dept_start_date').val(),
+            end_date: $('#dept_end_date').val(),
+            send_email: $('#dept_send_email').is(':checked') ? 1 : 0,
+            send_push: $('#dept_send_push').is(':checked') ? 1 : 0,
+            'target_departments[]': deptId, // Send as array parameter
+            department_id: deptId // Also send individual ID for fallback
+        };
+        
+        console.log('Form data being sent:', formData);
+        
+        // Submit via AJAX
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            dataType: 'json',
+            data: formData,
+            beforeSend: function() {
+                $('#publish-dept-announcement-btn')
+                    .prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm me-2"></span>Publishing...');
+            },
+            success: function(response) {
+                console.log('Success response:', response);
+                if (response && response.success) {
+                    // Close modal
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('department-announcement-modal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Show success message
+                    if (typeof appAlert !== 'undefined') {
+                        appAlert.success(response.message || 'Announcement published successfully');
+                    } else {
+                        alert(response.message || 'Announcement published successfully');
+                    }
+                    
+                    // Reload page to show new announcement
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    handleError(response.message || 'Failed to publish announcement');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', {xhr: xhr, status: status, error: error});
+                handleError('Network error: ' + error);
+            },
+            complete: function() {
+                // Reset button
+                $('#publish-dept-announcement-btn')
+                    .prop('disabled', false)
+                    .html('<i data-feather="send" class="icon-16"></i> Publish Announcement');
+            }
+        });
+        
+        function handleError(message) {
+            if (typeof appAlert !== 'undefined') {
+                appAlert.error(message);
+            } else {
+                alert('Error: ' + message);
+            }
+        }
+        
+        return false;
+    });
+    
     // Initialize DataTables
     $('#announcements-table').DataTable({
         "pageLength": 10,
@@ -603,32 +932,52 @@ $(document).ready(function() {
         ]
     });
 
-    // Initialize Select2
-    $('.select2').select2({
-        dropdownParent: $('#announcement-modal')
+    // Initialize Select2 with proper configuration for multi-select
+    $('#announcement_departments').select2({
+        dropdownParent: $('#announcement-modal'),
+        placeholder: '<?php echo app_lang('all_departments'); ?>',
+        allowClear: true,
+        width: '100%'
     });
 
-    // Form submissions
+    // Form submissions - Handle announcement form
     $('#announcement-form').on('submit', function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Submitting announcement form...');
+        console.log('Form data:', $(this).serialize());
+        
+        var formData = $(this).serialize();
         
         $.ajax({
             url: $(this).attr('action'),
             type: 'POST',
-            data: $(this).serialize(),
+            dataType: 'json',
+            data: formData,
             success: function(response) {
-                if(response.success) {
+                console.log('Announcement save response:', response);
+                if(response && response.success) {
+                    console.log('Success! Closing modal and reloading page...');
                     $('#announcement-modal').modal('hide');
                     appAlert.success(response.message || '<?php echo app_lang('announcement_created_successfully'); ?>');
-                    location.reload();
+                    // Reload current page to stay on the same tab
+                    setTimeout(function() {
+                        console.log('Reloading page now...');
+                        location.reload();
+                    }, 800);
                 } else {
+                    console.log('Save failed - response.success is false');
                     appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
                 }
             },
-            error: function() {
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Announcement save error:', {status: jqXHR.status, error: errorThrown, response: jqXHR.responseText});
                 appAlert.error('<?php echo app_lang('error_occurred'); ?>');
             }
         });
+        
+        return false;
     });
 
     $('#template-form').on('submit', function(e) {
@@ -657,11 +1006,20 @@ $(document).ready(function() {
     $('#select-all-announcements').on('change', function() {
         $('.announcement-checkbox').prop('checked', $(this).prop('checked'));
     });
+    
+    // Publish announcement button click handler
+    $('#publish-announcement-btn').on('click', function(e) {
+        e.preventDefault();
+        console.log('Publish button clicked');
+        $('#announcement-form').submit();
+    });
 
-    // Filter functionality
+    // Filter functionality - all filters trigger AJAX reload
     $('#filter-category, #filter-priority, #filter-department').on('change', function() {
-        var table = $('#announcements-table').DataTable();
-        table.draw();
+        var category = $('#filter-category').val();
+        var priority = $('#filter-priority').val();
+        var department = $('#filter-department').val();
+        loadAnnouncementsByFilters(department, category, priority);
     });
 
     $('#filter-search').on('keyup', function() {
@@ -673,7 +1031,94 @@ $(document).ready(function() {
     if (window.feather && typeof feather.replace === 'function') {
         feather.replace();
     }
+
 });
+
+// Function to open department-specific announcement modal
+function openDepartmentAnnouncementModal(deptId, deptName) {
+    console.log('=== openDepartmentAnnouncementModal called ===');
+    console.log('Opening department modal for:', deptId, deptName);
+    
+    // Check if form exists
+    var form = $('#department-announcement-form');
+    console.log('Form found:', form.length);
+    console.log('Form action:', form.attr('action'));
+    
+    // Reset form
+    $('#department-announcement-form')[0].reset();
+    
+    // Set department info
+    $('#dept_announcement_dept_id').val(deptId);
+    $('#dept-modal-name').text(deptName);
+    $('#dept-target-name').text(deptName);
+    
+    console.log('Department ID set to:', $('#dept_announcement_dept_id').val());
+    
+    // Set default start date
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var day = String(now.getDate()).padStart(2, '0');
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var dateTimeValue = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    $('#dept_start_date').val(dateTimeValue);
+    
+    console.log('Showing modal...');
+    
+    // Show modal
+    var modal = new bootstrap.Modal(document.getElementById('department-announcement-modal'));
+    modal.show();
+    
+    console.log('Modal shown');
+    
+    // Reinitialize feather icons
+    setTimeout(function() {
+        if (window.feather && typeof feather.replace === 'function') {
+            feather.replace();
+        }
+        console.log('Feather icons reinitialized');
+    }, 200);
+}
+
+// Function to toggle view all/collapse for department announcements
+function toggleViewAll(button, deptId) {
+    var $button = $(button);
+    var $icon = $button.find('i[data-feather]');
+    var $text = $button.find('.toggle-text');
+    var isExpanded = $button.attr('aria-expanded') === 'true';
+    
+    // Toggle button text and icon after collapse animation
+    setTimeout(function() {
+        if (!isExpanded) {
+            // Was collapsed, now expanding
+            $text.text('<?php echo app_lang("collapse_announcements"); ?>');
+            $icon.attr('data-feather', 'chevron-up');
+        } else {
+            // Was expanded, now collapsing
+            $text.text('<?php echo app_lang("view_all_announcements"); ?>');
+            $icon.attr('data-feather', 'chevron-down');
+        }
+        
+        // Reinitialize feather icons
+        if (window.feather && typeof feather.replace === 'function') {
+            feather.replace();
+        }
+    }, 350);
+}
+
+// Test function - call from console: testDepartmentSubmit()
+function testDepartmentSubmit() {
+    console.log('=== Manual Test Submit ===');
+    console.log('Button element:', $('#publish-dept-announcement-btn')[0]);
+    console.log('Form element:', $('#department-announcement-form')[0]);
+    console.log('Department ID value:', $('#dept_announcement_dept_id').val());
+    console.log('Form action URL:', $('#department-announcement-form').attr('action'));
+    
+    // Try to manually trigger submit
+    console.log('Attempting manual submit...');
+    $('#department-announcement-form').trigger('submit');
+}
 
 function saveAsDraft() {
     var formData = $('#announcement-form').serialize() + '&status=draft';
@@ -715,6 +1160,142 @@ function exportAnnouncements() {
 function announcementSettings() {
     appAlert.info('<?php echo app_lang('announcement_settings_coming_soon'); ?>');
 }
+
+function loadAnnouncementsByFilters(department_id, category, priority) {
+    $.ajax({
+        url: '<?php echo base_url("index.php/departments/get_filtered_announcements"); ?>',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            department_id: department_id || 0,
+            category: category || '',
+            priority: priority || ''
+        },
+        beforeSend: function() {
+            $('#announcements-table tbody').html('<tr><td colspan="8" class="text-center"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> <?php echo app_lang('loading'); ?>...</td></tr>');
+        },
+        success: function(response) {
+            console.log('Filter response:', response);
+            if(response && response.success) {
+                $('#announcements-table tbody').html(response.html);
+                // Re-initialize feather icons for the new content
+                if (window.feather && typeof feather.replace === 'function') {
+                    feather.replace();
+                }
+            } else {
+                var errorMsg = (response && response.message) ? response.message : '<?php echo app_lang('error_occurred'); ?>';
+                appAlert.error(errorMsg);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('Filter AJAX Error:', {status: jqXHR.status, textStatus: textStatus, error: errorThrown, response: jqXHR.responseText});
+            var errorMsg = '<?php echo app_lang('error_occurred'); ?>';
+            if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                errorMsg = jqXHR.responseJSON.message;
+            } else if (jqXHR.status === 500) {
+                errorMsg = 'Server error (500) - Check browser console and application logs';
+            } else if (textStatus === 'parsererror') {
+                errorMsg = 'Invalid response format - Check application logs for PHP errors';
+            }
+            appAlert.error(errorMsg);
+            $('#announcements-table tbody').html('<tr><td colspan="8" class="text-center text-danger"><?php echo app_lang('error_loading_announcements'); ?></td></tr>');
+        }
+    });
+}
+
+function loadAnnouncementsByDepartment(department_id) {
+    loadAnnouncementsByFilters(department_id, '', '');
+}
+
+// Announcement action button handlers
+$(document).on('click', '.announcement-view-btn', function(e) {
+    e.preventDefault();
+    var announcement_id = $(this).data('id');
+    // View announcement - show modal or navigate to detail page
+    console.log('View announcement: ' + announcement_id);
+    appAlert.info('<?php echo app_lang('view_announcement_feature_coming_soon'); ?>');
+});
+
+$(document).on('click', '.announcement-edit-btn', function(e) {
+    e.preventDefault();
+    var announcement_id = $(this).data('id');
+    // Edit announcement - open modal with form
+    $.ajax({
+        url: '<?php echo base_url("index.php/departments/get_announcement_data"); ?>',
+        type: 'POST',
+        data: { id: announcement_id },
+        success: function(response) {
+            if(response.success && response.data) {
+                var data = response.data;
+                // Populate form fields
+                $('#announcement-title').val(data.title || '');
+                $('#announcement-content').val(data.description || '');
+                $('#announcement-priority').val(data.priority || 'normal');
+                $('#announcement-category').val(data.category || 'general');
+                $('#announcement-start-date').val(data.start_date || '');
+                $('#announcement-end-date').val(data.end_date || '');
+                
+                // Set announcement ID for update
+                $('#announcement-form').data('id', announcement_id);
+                
+                // Open modal
+                var modal = new bootstrap.Modal(document.getElementById('announcement-modal'));
+                modal.show();
+            } else {
+                appAlert.error(response.message || '<?php echo app_lang('error_loading_announcement'); ?>');
+            }
+        },
+        error: function() {
+            appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+        }
+    });
+});
+
+$(document).on('click', '.announcement-duplicate-btn', function(e) {
+    e.preventDefault();
+    var announcement_id = $(this).data('id');
+    // Duplicate announcement
+    $.ajax({
+        url: '<?php echo base_url("index.php/departments/duplicate_announcement"); ?>',
+        type: 'POST',
+        data: { id: announcement_id },
+        success: function(response) {
+            if(response.success) {
+                appAlert.success(response.message || '<?php echo app_lang('announcement_duplicated_successfully'); ?>');
+                location.reload();
+            } else {
+                appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
+            }
+        },
+        error: function() {
+            appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+        }
+    });
+});
+
+$(document).on('click', '.announcement-delete-btn', function(e) {
+    e.preventDefault();
+    var announcement_id = $(this).data('id');
+    // Delete announcement with confirmation
+    if(confirm('<?php echo app_lang('confirm_delete_announcement'); ?>')){
+        $.ajax({
+            url: '<?php echo base_url("index.php/departments/delete_announcement"); ?>',
+            type: 'POST',
+            data: { id: announcement_id },
+            success: function(response) {
+                if(response.success) {
+                    appAlert.success(response.message || '<?php echo app_lang('announcement_deleted_successfully'); ?>');
+                    location.reload();
+                } else {
+                    appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
+                }
+            },
+            error: function() {
+                appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+            }
+        });
+    }
+});
 </script>
 
 <style>

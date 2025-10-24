@@ -222,7 +222,7 @@
                             <?php foreach ($department_announcements as $announcement): ?>
                                 <div class="announcement-item border-start ps-3 mb-3" style="border-color: <?php echo $department_info->color; ?> !important; border-width: 3px !important;">
                                     <h6 class="mb-1"><?php echo $announcement->title; ?></h6>
-                                    <p class="text-muted mb-2"><?php echo character_limiter($announcement->description, 120); ?></p>
+                                    <p class="text-muted mb-2"><?php echo (strlen($announcement->description) > 120) ? substr($announcement->description, 0, 120) . '...' : $announcement->description; ?></p>
                                     <small class="text-muted">
                                         <?php echo isset($announcement->created_by_user) ? $announcement->created_by_user : 'Admin'; ?> • 
                                         <?php echo isset($announcement->start_date) ? format_to_date($announcement->start_date, false) : date('Y-m-d'); ?>
