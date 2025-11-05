@@ -184,6 +184,24 @@ class Workflow extends Department_Access_Controller
         return $this->template->view("workflow/tracking/list", $view_data);
     }
 
+    function handovers_list() {
+        $this->access_only_allowed_workflow_members();
+        $view_data['permissions'] = $this->_get_workflow_permissions();
+        return $this->template->view("workflow/handovers/pending_list", $view_data);
+    }
+
+    function approvals_list() {
+        $this->access_only_allowed_workflow_members();
+        $view_data['permissions'] = $this->_get_workflow_permissions();
+        return $this->template->view("workflow/approvals/pending_list", $view_data);
+    }
+
+    function costs_list() {
+        $this->access_only_allowed_workflow_members();
+        $view_data['permissions'] = $this->_get_workflow_permissions();
+        return $this->template->view("workflow/costs/list", $view_data);
+    }
+
     function analytics() {
         $view_data['permissions'] = $this->_get_workflow_permissions();
         $view_data['analytics_data'] = $this->_get_analytics_data();
@@ -1734,4 +1752,985 @@ class Workflow extends Department_Access_Controller
         
         return $result;
     }
+
+    // ========== ESCALATION METHODS (PHASE 2) ==========
+
+    /**
+     * Create escalation for task or shipment
+     */
+    function escalate_task() {
+        $this->access_only_allowed_workflow_members();
+        
+        $this->validate_submitted_data(array(
+            "escalation_type" => "required",
+            "reference_id" => "required",
+            "escalation_reason" => "required",
+            "escalated_to" => "required"
+        ));
+
+        $escalation_model = new \App\Models\Workflow_escalations_model();
+        
+        $data = array(
+            "escalation_type" => $this->request->getPost('escalation_type'), // 'task' or 'shipment'
+            "reference_id" => $this->request->getPost('reference_id'),
+            "shipment_id" => $this->request->getPost('shipment_id'),
+            "task_id" => $this->request->getPost('task_id'),
+            "escalation_reason" => $this->request->getPost('escalation_reason'),
+            "escalated_by" => $this->login_user->id,
+            "escalated_to" => $this->request->getPost('escalated_to'),
+            "escalation_level" => $this->request->getPost('escalation_level') ?: 'supervisor',
+            "priority" => $this->request->getPost('priority') ?: 'medium',
+            "escalation_status" => 'pending'
+        );
+
+        $escalation_id = $escalation_model->create_escalation($data);
+
+        if ($escalation_id) {
+            // TODO: Send notification to escalated_to user
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('escalation_created_successfully'),
+                "id" => $escalation_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Escalate entire shipment
+     */
+    function escalate_shipment() {
+        $this->access_only_allowed_workflow_members();
+        
+        $this->validate_submitted_data(array(
+            "shipment_id" => "required",
+            "escalation_reason" => "required",
+            "escalated_to" => "required"
+        ));
+
+        $escalation_model = new \App\Models\Workflow_escalations_model();
+        
+        $data = array(
+            "escalation_type" => 'shipment',
+            "reference_id" => $this->request->getPost('shipment_id'),
+            "shipment_id" => $this->request->getPost('shipment_id'),
+            "escalation_reason" => $this->request->getPost('escalation_reason'),
+            "escalated_by" => $this->login_user->id,
+            "escalated_to" => $this->request->getPost('escalated_to'),
+            "escalation_level" => $this->request->getPost('escalation_level') ?: 'supervisor',
+            "priority" => $this->request->getPost('priority') ?: 'high'
+        );
+
+        $escalation_id = $escalation_model->create_escalation($data);
+
+        if ($escalation_id) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('shipment_escalated_successfully'),
+                "id" => $escalation_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Update escalation status (acknowledge/resolve)
+     */
+    function update_escalation_status() {
+        $this->access_only_allowed_workflow_members();
+        
+        $escalation_id = $this->request->getPost('escalation_id');
+        $new_status = $this->request->getPost('status'); // acknowledged, resolved
+        $resolution_notes = $this->request->getPost('resolution_notes');
+
+        if (!$escalation_id || !$new_status) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $escalation_model = new \App\Models\Workflow_escalations_model();
+        $result = $escalation_model->update_status($escalation_id, $new_status, $resolution_notes);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('escalation_status_updated')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Re-escalate to higher level
+     */
+    function re_escalate() {
+        $this->access_only_allowed_workflow_members();
+        
+        $escalation_id = $this->request->getPost('escalation_id');
+        $reason = $this->request->getPost('reason');
+        $escalated_to = $this->request->getPost('escalated_to');
+
+        if (!$escalation_id || !$reason || !$escalated_to) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $escalation_model = new \App\Models\Workflow_escalations_model();
+        $result = $escalation_model->re_escalate($escalation_id, $escalated_to, $reason);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('escalation_re_escalated_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Get my pending escalations
+     */
+    function my_escalations() {
+        $this->access_only_allowed_workflow_members();
+        
+        $escalation_model = new \App\Models\Workflow_escalations_model();
+        $escalations = $escalation_model->get_my_pending_escalations($this->login_user->id);
+
+        $view_data['escalations'] = $escalations;
+        $view_data['user_id'] = $this->login_user->id;
+        
+        return $this->template->view("workflow/escalations/my_escalations", $view_data);
+    }
+
+    /**
+     * Get escalation statistics
+     */
+    function escalation_stats() {
+        $this->access_only_allowed_workflow_members();
+        
+        $escalation_model = new \App\Models\Workflow_escalations_model();
+        $stats = $escalation_model->get_statistics();
+
+        echo json_encode(array("success" => true, "data" => $stats));
+    }
+
+    /**
+     * Escalation list view
+     */
+    function escalations_list() {
+        $this->access_only_allowed_workflow_members();
+        
+        $view_data['permissions'] = $this->_get_workflow_permissions();
+        return $this->template->view("workflow/escalations/list", $view_data);
+    }
+
+    /**
+     * Escalation modal form
+     */
+    function escalation_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $view_data['model_info'] = new \stdClass();
+        $view_data['shipment_id'] = $this->request->getPost('shipment_id');
+        $view_data['task_id'] = $this->request->getPost('task_id');
+        $view_data['users_dropdown'] = $this->_get_team_members_dropdown_for_modal();
+        $view_data['escalation_levels'] = array(
+            'supervisor' => app_lang('supervisor'),
+            'general_manager' => app_lang('general_manager'),
+            'management' => app_lang('management')
+        );
+
+        return $this->template->view("workflow/escalations/modal_form", $view_data);
+    }
+
+    // ========== HANDOVER METHODS (PHASE 2) ==========
+
+    /**
+     * Initiate department handover
+     */
+    function initiate_handover() {
+        $this->access_only_allowed_workflow_members();
+        
+        $this->validate_submitted_data(array(
+            "shipment_id" => "required",
+            "from_department" => "required",
+            "to_department" => "required",
+            "from_phase" => "required",
+            "to_phase" => "required"
+        ));
+
+        $handover_model = new \App\Models\Workflow_handovers_model();
+        
+        $data = array(
+            "shipment_id" => $this->request->getPost('shipment_id'),
+            "from_department" => $this->request->getPost('from_department'),
+            "to_department" => $this->request->getPost('to_department'),
+            "from_phase" => $this->request->getPost('from_phase'),
+            "to_phase" => $this->request->getPost('to_phase'),
+            "initiated_by" => $this->login_user->id,
+            "handover_notes" => $this->request->getPost('handover_notes')
+        );
+
+        $handover_id = $handover_model->initiate_handover($data);
+
+        if ($handover_id) {
+            // Shipment phase is now locked until handover is approved
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('handover_initiated_successfully'),
+                "id" => $handover_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Approve handover
+     */
+    function approve_handover() {
+        $this->access_only_allowed_workflow_members();
+        
+        $handover_id = $this->request->getPost('handover_id');
+        $approval_notes = $this->request->getPost('approval_notes');
+
+        if (!$handover_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $handover_model = new \App\Models\Workflow_handovers_model();
+        $result = $handover_model->approve_handover($handover_id, $this->login_user->id, $approval_notes);
+
+        if ($result) {
+            // Phase transitioned, shipment unlocked
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('handover_approved_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Reject handover
+     */
+    function reject_handover() {
+        $this->access_only_allowed_workflow_members();
+        
+        $handover_id = $this->request->getPost('handover_id');
+        $rejection_reason = $this->request->getPost('rejection_reason');
+
+        if (!$handover_id || !$rejection_reason) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $handover_model = new \App\Models\Workflow_handovers_model();
+        $result = $handover_model->reject_handover($handover_id, $this->login_user->id, $rejection_reason);
+
+        if ($result) {
+            // Shipment unlocked, remains in current phase
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('handover_rejected_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Update handover checklist
+     */
+    function update_handover_checklist() {
+        $this->access_only_allowed_workflow_members();
+        
+        $handover_id = $this->request->getPost('handover_id');
+        $checklist_item_id = $this->request->getPost('checklist_item_id');
+        $is_completed = $this->request->getPost('is_completed') === 'true';
+
+        if (!$handover_id || !$checklist_item_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $handover_model = new \App\Models\Workflow_handovers_model();
+        $result = $handover_model->update_checklist_item($handover_id, $checklist_item_id, $is_completed, $this->login_user->id);
+
+        if ($result) {
+            echo json_encode(array("success" => true, "message" => app_lang('checklist_updated')));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Get pending handovers
+     */
+    function pending_handovers() {
+        $this->access_only_allowed_workflow_members();
+        
+        $department_id = $this->request->getPost('department_id');
+        
+        $handover_model = new \App\Models\Workflow_handovers_model();
+        $handovers = $handover_model->get_pending_handovers_for_department($department_id);
+
+        $view_data['handovers'] = $handovers;
+        $view_data['department_id'] = $department_id;
+        
+        return $this->template->view("workflow/handovers/pending_list", $view_data);
+    }
+
+    /**
+     * Handover history for shipment
+     */
+    function handover_history() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        
+        $handover_model = new \App\Models\Workflow_handovers_model();
+        $history = $handover_model->get_handover_history($shipment_id);
+
+        echo json_encode(array("success" => true, "data" => $history));
+    }
+
+    /**
+     * Handover modal form
+     */
+    function handover_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $view_data['model_info'] = new \stdClass();
+        $view_data['shipment_id'] = $this->request->getPost('shipment_id');
+        $view_data['departments_dropdown'] = $this->_get_departments_dropdown_for_select();
+        $view_data['phases'] = array(
+            'clearing_intake' => app_lang('clearing_intake'),
+            'regulatory_processing' => app_lang('regulatory_processing'),
+            'internal_review' => app_lang('internal_review'),
+            'transport_loading' => app_lang('transport_loading'),
+            'tracking' => app_lang('tracking')
+        );
+
+        return $this->template->view("workflow/handovers/modal_form", $view_data);
+    }
+
+    // ========== APPROVAL METHODS (PHASE 2) ==========
+
+    /**
+     * Request approval
+     */
+    function request_approval() {
+        $this->access_only_allowed_workflow_members();
+        
+        $this->validate_submitted_data(array(
+            "approval_type" => "required",
+            "reference_id" => "required"
+        ));
+
+        $approval_model = new \App\Models\Workflow_approvals_model();
+        
+        $data = array(
+            "approval_type" => $this->request->getPost('approval_type'),
+            "reference_id" => $this->request->getPost('reference_id'),
+            "shipment_id" => $this->request->getPost('shipment_id'),
+            "task_id" => $this->request->getPost('task_id'),
+            "document_id" => $this->request->getPost('document_id'),
+            "requested_by" => $this->login_user->id,
+            "request_notes" => $this->request->getPost('request_notes')
+        );
+
+        $approval_id = $approval_model->request_approval($data);
+
+        if ($approval_id) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('approval_requested_successfully'),
+                "id" => $approval_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Approve request
+     */
+    function approve_request() {
+        $this->access_only_allowed_workflow_members();
+        
+        $approval_id = $this->request->getPost('approval_id');
+        $approval_notes = $this->request->getPost('approval_notes');
+
+        if (!$approval_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $approval_model = new \App\Models\Workflow_approvals_model();
+        $result = $approval_model->approve($approval_id, $this->login_user->id, $approval_notes);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('approval_processed_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Reject approval request
+     */
+    function reject_request() {
+        $this->access_only_allowed_workflow_members();
+        
+        $approval_id = $this->request->getPost('approval_id');
+        $rejection_reason = $this->request->getPost('rejection_reason');
+
+        if (!$approval_id || !$rejection_reason) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $approval_model = new \App\Models\Workflow_approvals_model();
+        $result = $approval_model->reject($approval_id, $this->login_user->id, $rejection_reason);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('approval_rejected_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Get my pending approvals
+     */
+    function my_pending_approvals() {
+        $this->access_only_allowed_workflow_members();
+        
+        $approval_model = new \App\Models\Workflow_approvals_model();
+        $approvals = $approval_model->get_my_pending_approvals($this->login_user->id);
+
+        $view_data['approvals'] = $approvals;
+        $view_data['user_id'] = $this->login_user->id;
+        
+        return $this->template->view("workflow/approvals/pending_list", $view_data);
+    }
+
+    /**
+     * Get approval statistics
+     */
+    function approval_stats() {
+        $this->access_only_allowed_workflow_members();
+        
+        $approval_model = new \App\Models\Workflow_approvals_model();
+        $stats = $approval_model->get_statistics();
+
+        echo json_encode(array("success" => true, "data" => $stats));
+    }
+
+    /**
+     * Approval modal form
+     */
+    function approval_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $view_data['model_info'] = new \stdClass();
+        $view_data['shipment_id'] = $this->request->getPost('shipment_id');
+        $view_data['task_id'] = $this->request->getPost('task_id');
+        $view_data['document_id'] = $this->request->getPost('document_id');
+        $view_data['approval_types'] = array(
+            'phase_transition' => app_lang('phase_transition'),
+            'document_approval' => app_lang('document_approval'),
+            'cost_approval' => app_lang('cost_approval'),
+            'task_completion' => app_lang('task_completion'),
+            'handover_approval' => app_lang('handover_approval'),
+            'shipment_closure' => app_lang('shipment_closure'),
+            'exception_approval' => app_lang('exception_approval'),
+            'document_release' => app_lang('document_release')
+        );
+
+        return $this->template->view("workflow/approvals/modal_form", $view_data);
+    }
+
+    // ========== COST TRACKING METHODS (PHASE 2) ==========
+
+    /**
+     * Add shipment cost
+     */
+    function add_shipment_cost() {
+        $this->access_only_allowed_workflow_members();
+        
+        $this->validate_submitted_data(array(
+            "shipment_id" => "required",
+            "cost_type" => "required",
+            "amount" => "required"
+        ));
+
+        $cost_model = new \App\Models\Shipment_costs_model();
+        
+        $data = array(
+            "shipment_id" => $this->request->getPost('shipment_id'),
+            "cost_type" => $this->request->getPost('cost_type'),
+            "cost_description" => $this->request->getPost('cost_description'),
+            "amount" => $this->request->getPost('amount'),
+            "currency" => $this->request->getPost('currency') ?: 'USD',
+            "added_by" => $this->login_user->id
+        );
+
+        $cost_id = $cost_model->add_cost($data);
+
+        if ($cost_id) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('cost_added_successfully'),
+                "id" => $cost_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Update payment status
+     */
+    function update_payment_status() {
+        $this->access_only_allowed_workflow_members();
+        
+        $cost_id = $this->request->getPost('cost_id');
+        $status = $this->request->getPost('status'); // paid, verified
+        $payment_reference = $this->request->getPost('payment_reference');
+
+        if (!$cost_id || !$status) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $cost_model = new \App\Models\Shipment_costs_model();
+        
+        if ($status === 'paid') {
+            $result = $cost_model->mark_as_paid($cost_id, $payment_reference);
+        } elseif ($status === 'verified') {
+            $verification_notes = $this->request->getPost('verification_notes');
+            $result = $cost_model->verify_payment($cost_id, $this->login_user->id, $verification_notes);
+        } else {
+            $result = false;
+        }
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('payment_status_updated')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Verify payment
+     */
+    function verify_payment() {
+        $this->access_only_allowed_workflow_members();
+        
+        $cost_id = $this->request->getPost('cost_id');
+        $verification_notes = $this->request->getPost('verification_notes');
+
+        if (!$cost_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $cost_model = new \App\Models\Shipment_costs_model();
+        $result = $cost_model->verify_payment($cost_id, $this->login_user->id, $verification_notes);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('payment_verified_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Get shipment costs summary
+     */
+    function shipment_costs_summary() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        
+        if (!$shipment_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $cost_model = new \App\Models\Shipment_costs_model();
+        $summary = $cost_model->get_shipment_summary($shipment_id);
+
+        echo json_encode(array("success" => true, "data" => $summary));
+    }
+
+    /**
+     * Check if shipment is cleared for transport (Task 10 gate)
+     */
+    function check_transport_clearance() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        
+        if (!$shipment_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $cost_model = new \App\Models\Shipment_costs_model();
+        $is_cleared = $cost_model->is_cleared_for_transport($shipment_id);
+
+        echo json_encode(array(
+            "success" => true, 
+            "is_cleared" => $is_cleared,
+            "message" => $is_cleared ? app_lang('transport_cleared') : app_lang('transport_not_cleared')
+        ));
+    }
+
+    /**
+     * Cost modal form
+     */
+    function cost_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $view_data['model_info'] = new \stdClass();
+        $view_data['shipment_id'] = $this->request->getPost('shipment_id');
+        $view_data['cost_types'] = array(
+            'customs_fees' => app_lang('customs_fees'),
+            'port_charges' => app_lang('port_charges'),
+            'transport_costs' => app_lang('transport_costs'),
+            'storage_fees' => app_lang('storage_fees'),
+            'handling_charges' => app_lang('handling_charges'),
+            'documentation_fees' => app_lang('documentation_fees'),
+            'other' => app_lang('other')
+        );
+        $view_data['currencies'] = array('USD' => 'USD', 'TZS' => 'TZS', 'EUR' => 'EUR');
+
+        return $this->template->view("workflow/costs/modal_form", $view_data);
+    }
+
+    // ========== DOCUMENT METHODS (PHASE 2) ==========
+
+    /**
+     * Upload document
+     */
+    function upload_document() {
+        $this->access_only_allowed_workflow_members();
+        
+        if (!$this->can_manage_documents()) {
+            echo json_encode(array("success" => false, 'message' => app_lang('access_denied')));
+            return;
+        }
+
+        $this->validate_submitted_data(array(
+            "shipment_id" => "required",
+            "document_type" => "required"
+        ));
+
+        // Handle file upload
+        $upload_result = $this->_upload_file();
+        if (!$upload_result['success']) {
+            echo json_encode($upload_result);
+            return;
+        }
+
+        $document_model = new \App\Models\Workflow_documents_model();
+        
+        $data = array(
+            "shipment_id" => $this->request->getPost('shipment_id'),
+            "document_type" => $this->request->getPost('document_type'),
+            "document_name" => $this->request->getPost('document_name'),
+            "file_path" => $upload_result['file_path'],
+            "uploaded_by" => $this->login_user->id,
+            "notes" => $this->request->getPost('notes')
+        );
+
+        $document_id = $document_model->upload_document($data);
+
+        if ($document_id) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('document_uploaded_successfully'),
+                "id" => $document_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Verify/approve document
+     */
+    function verify_document() {
+        $this->access_only_allowed_workflow_members();
+        
+        $document_id = $this->request->getPost('document_id');
+        $verification_notes = $this->request->getPost('verification_notes');
+
+        if (!$document_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $document_model = new \App\Models\Workflow_documents_model();
+        $result = $document_model->verify_document($document_id, $this->login_user->id, $verification_notes);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('document_verified_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Generate Loading Order (Task 18)
+     */
+    function generate_loading_order() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        
+        if (!$shipment_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $document_model = new \App\Models\Workflow_documents_model();
+        $document_id = $document_model->generate_loading_order($shipment_id, $this->login_user->id);
+
+        if ($document_id) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('loading_order_generated_successfully'),
+                "id" => $document_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Generate Tracking Report (Task 20)
+     */
+    function generate_tracking_report() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        
+        if (!$shipment_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $document_model = new \App\Models\Workflow_documents_model();
+        $document_id = $document_model->generate_tracking_report($shipment_id, $this->login_user->id);
+
+        if ($document_id) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('tracking_report_generated_successfully'),
+                "id" => $document_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Upload POD (Task 22 - triggers auto-closure)
+     */
+    function upload_pod() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        
+        if (!$shipment_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        // Handle file upload
+        $upload_result = $this->_upload_file();
+        if (!$upload_result['success']) {
+            echo json_encode($upload_result);
+            return;
+        }
+
+        $document_model = new \App\Models\Workflow_documents_model();
+        
+        $data = array(
+            "shipment_id" => $shipment_id,
+            "document_type" => 'pod',
+            "document_name" => 'Proof of Delivery',
+            "file_path" => $upload_result['file_path'],
+            "uploaded_by" => $this->login_user->id
+        );
+
+        $document_id = $document_model->upload_document($data);
+
+        if ($document_id) {
+            // POD upload triggers approval request for shipment closure
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('pod_uploaded_approval_initiated'),
+                "id" => $document_id
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    // ========== PARALLEL ASSIGNMENT METHODS (PHASE 2) ==========
+
+    /**
+     * Assign multiple users to a task (Task 4 requirement)
+     */
+    function assign_parallel_users() {
+        $this->access_only_allowed_workflow_members();
+        
+        $task_id = $this->request->getPost('task_id');
+        $user_ids = $this->request->getPost('user_ids'); // Array of user IDs
+
+        if (!$task_id || !$user_ids) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $task_model = new \App\Models\Workflow_tasks_model();
+        $result = $task_model->add_assignees($task_id, $user_ids, $this->login_user->id);
+
+        if ($result) {
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('users_assigned_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Update individual assignee status
+     */
+    function update_assignee_status() {
+        $this->access_only_allowed_workflow_members();
+        
+        $task_id = $this->request->getPost('task_id');
+        $user_id = $this->request->getPost('user_id') ?: $this->login_user->id;
+        $status = $this->request->getPost('status'); // in_progress, completed
+        $notes = $this->request->getPost('notes');
+
+        if (!$task_id || !$status) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $task_model = new \App\Models\Workflow_tasks_model();
+        $result = $task_model->update_assignee_status($task_id, $user_id, $status, $notes);
+
+        if ($result) {
+            // Check if task should auto-complete
+            $task_model->check_task_completion($task_id);
+            
+            echo json_encode(array(
+                "success" => true, 
+                "message" => app_lang('status_updated_successfully')
+            ));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Get task assignees and their status
+     */
+    function get_task_assignees() {
+        $this->access_only_allowed_workflow_members();
+        
+        $task_id = $this->request->getPost('task_id');
+        
+        if (!$task_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $task_model = new \App\Models\Workflow_tasks_model();
+        $assignees = $task_model->get_task_assignees($task_id);
+
+        echo json_encode(array("success" => true, "data" => $assignees));
+    }
+
+    // ========== HELPER METHODS FOR PHASE 2 ==========
+
+    private function _get_departments_dropdown_for_select() {
+        $db = \Config\Database::connect();
+        $departments = $db->table('departments')
+            ->where('deleted', 0)
+            ->orderBy('title', 'ASC')
+            ->get()
+            ->getResult();
+
+        $dropdown = array("" => "- " . app_lang("select_department") . " -");
+        foreach ($departments as $dept) {
+            $dropdown[$dept->id] = $dept->title;
+        }
+        return $dropdown;
+    }
+
+    private function _upload_file() {
+        $upload_path = get_setting("timeline_file_path");
+        $file = $_FILES['file'] ?? null;
+        
+        if (!$file) {
+            return array("success" => false, 'message' => app_lang('no_file_uploaded'));
+        }
+
+        $validation = new \CodeIgniter\Validation\Validation();
+        $validation->setRule('file', 'file', 'uploaded[file]|max_size[file,20480]');
+        
+        if (!$validation->run(['file' => $file])) {
+            return array("success" => false, 'message' => app_lang('invalid_file'));
+        }
+
+        $file_name = $file['name'];
+        $file_temp = $file['tmp_name'];
+        $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+        $new_file_name = uniqid() . '_' . time() . '.' . $file_ext;
+        $file_path = $upload_path . $new_file_name;
+
+        if (move_uploaded_file($file_temp, $file_path)) {
+            return array(
+                "success" => true, 
+                "file_path" => $new_file_name,
+                "file_name" => $file_name
+            );
+        } else {
+            return array("success" => false, 'message' => app_lang('file_upload_failed'));
+        }
+    }
 }
+
+

@@ -7,6 +7,10 @@
             <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/documents_list/"); ?>" data-bs-target="#documents_list"><?php echo app_lang('documents'); ?></a></li>
             <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/trucks_list/"); ?>" data-bs-target="#trucks_list"><?php echo app_lang('trucks'); ?></a></li>
             <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/tracking_list/"); ?>" data-bs-target="#tracking_list"><?php echo app_lang('tracking'); ?></a></li>
+            <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/escalations_list/"); ?>" data-bs-target="#escalations_list"><i data-feather="alert-triangle" class="icon-14"></i> Escalations</a></li>
+            <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/handovers_list/"); ?>" data-bs-target="#handovers_list"><i data-feather="refresh-cw" class="icon-14"></i> Handovers</a></li>
+            <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/approvals_list/"); ?>" data-bs-target="#approvals_list"><i data-feather="check-circle" class="icon-14"></i> Approvals</a></li>
+            <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("workflow/costs_list/"); ?>" data-bs-target="#costs_list"><i data-feather="dollar-sign" class="icon-14"></i> Costs</a></li>
             
             <div class="tab-title clearfix no-border">
                 <div class="title-button-group">
@@ -30,6 +34,10 @@
             <div role="tabpanel" class="tab-pane fade" id="documents_list"></div>
             <div role="tabpanel" class="tab-pane fade" id="trucks_list"></div>
             <div role="tabpanel" class="tab-pane fade" id="tracking_list"></div>
+            <div role="tabpanel" class="tab-pane fade" id="escalations_list"></div>
+            <div role="tabpanel" class="tab-pane fade" id="handovers_list"></div>
+            <div role="tabpanel" class="tab-pane fade" id="approvals_list"></div>
+            <div role="tabpanel" class="tab-pane fade" id="costs_list"></div>
         </div>
     </div>
 </div>
