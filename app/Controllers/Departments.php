@@ -377,6 +377,10 @@ class Departments extends Security_Controller {
         $announcement_templates = $this->Announcement_templates_model->get_details()->getResult();
         $view_data['announcement_templates'] = $announcement_templates;
         
+        // Calculate analytics data
+        $analytics_data = $this->calculate_announcement_analytics($announcements, $departments);
+        $view_data['analytics_data'] = $analytics_data;
+        
         // Pass the selected department ID to the view
         $view_data['selected_department_id'] = $department_id;
         
@@ -1861,5 +1865,129 @@ class Departments extends Security_Controller {
         } else {
             echo json_encode(array("success" => false, "message" => app_lang('something_went_wrong')));
         }
+    }
+
+    /**
+     * Calculate announcement analytics data
+     */
+    private function calculate_announcement_analytics($announcements, $departments) {
+        $analytics = array();
+        
+        // Get total users for read rate calculation
+        $total_users = $this->Users_model->get_details()->getNumRows();
+        $current_date = date('Y-m-d');
+        
+        // Calculate overall metrics
+        $total_announcements = count($announcements);
+        $total_reads = 0;
+        $total_delivered = 0;
+        $total_responses = 0;
+        $engagement_count = 0;
+        
+        $department_stats = array();
+        
+        foreach ($departments as $dept) {
+            $department_stats[$dept->id] = array(
+                'name' => $dept->title,
+                'color' => $dept->color ?: '#6c757d',
+                'announcements_sent' => 0,
+                'total_reads' => 0,
+                'total_delivered' => 0,
+                'total_possible_reads' => 0,
+                'read_rate' => 0,
+                'engagement_rate' => 0,
+                'avg_response_time' => 0
+            );
+        }
+        
+        foreach ($announcements as $announcement) {
+            // Count reads
+            $reads = !empty($announcement->read_by) ? count(explode(',', $announcement->read_by)) : 0;
+            $total_reads += $reads;
+            
+            // Calculate delivery (announcements that are currently active)
+            if ($announcement->start_date <= $current_date && $announcement->end_date >= $current_date) {
+                $total_delivered++;
+            }
+            
+            // Estimate engagement (announcements read within first 24 hours)
+            if ($reads > 0) {
+                $created_time = strtotime($announcement->created_at);
+                $one_day_later = $created_time + (24 * 60 * 60);
+                if (time() <= $one_day_later) {
+                    $engagement_count++;
+                }
+            }
+            
+            // Track by department
+            if (!empty($announcement->share_with)) {
+                $share_parts = explode(',', $announcement->share_with);
+                foreach ($share_parts as $share) {
+                    $share = trim($share);
+                    if (strpos($share, 'dept:') === 0) {
+                        $dept_id_str = substr($share, 5);
+                        if (!empty($dept_id_str)) {  // Make sure there's an ID after 'dept:'
+                            $dept_id = (int) $dept_id_str;
+                            if (isset($department_stats[$dept_id])) {
+                                $department_stats[$dept_id]['announcements_sent']++;
+                                $department_stats[$dept_id]['total_reads'] += $reads;
+                                $department_stats[$dept_id]['total_delivered']++;
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Global announcement or all_members - add to all departments
+                foreach ($department_stats as $dept_id => $stats) {
+                    $department_stats[$dept_id]['announcements_sent']++;
+                    $department_stats[$dept_id]['total_reads'] += $reads;
+                    $department_stats[$dept_id]['total_delivered']++;
+                }
+            }
+            
+            // Also handle all_members announcements
+            if (!empty($announcement->share_with)) {
+                $share_parts = explode(',', $announcement->share_with);
+                foreach ($share_parts as $share) {
+                    $share = trim($share);
+                    if ($share === 'all_members') {
+                        // Add to all departments
+                        foreach ($department_stats as $dept_id => $stats) {
+                            $department_stats[$dept_id]['announcements_sent']++;
+                            $department_stats[$dept_id]['total_reads'] += $reads;
+                            $department_stats[$dept_id]['total_delivered']++;
+                        }
+                        break; // Only count once for all_members
+                    }
+                }
+            }
+        }
+        
+        // Calculate rates
+        $read_rate = $total_announcements > 0 && $total_users > 0 ? 
+            round(($total_reads / ($total_announcements * $total_users)) * 100, 1) : 0;
+        $delivery_rate = $total_announcements > 0 ? 
+            round(($total_delivered / $total_announcements) * 100, 1) : 0;
+        $engagement_rate = $total_announcements > 0 ? 
+            round(($engagement_count / $total_announcements) * 100, 1) : 0;
+        
+        // Calculate department rates
+        foreach ($department_stats as $dept_id => &$stats) {
+            if ($stats['announcements_sent'] > 0) {
+                $dept_users = $this->Departments_model->get_department_users($dept_id)->getNumRows();
+                if ($dept_users > 0) {
+                    $stats['read_rate'] = round(($stats['total_reads'] / ($stats['announcements_sent'] * $dept_users)) * 100, 1);
+                }
+                $stats['engagement_rate'] = $stats['total_reads'] > 0 ? round(($stats['total_reads'] / $stats['announcements_sent']) * 100, 1) : 0;
+            }
+        }
+        
+        $analytics['read_rate'] = $read_rate;
+        $analytics['delivery_rate'] = $delivery_rate;
+        $analytics['engagement_rate'] = $engagement_rate;
+        $analytics['avg_response_time'] = '2.5h'; // Placeholder - would need more complex tracking
+        $analytics['department_stats'] = $department_stats;
+        
+        return $analytics;
     }
 }

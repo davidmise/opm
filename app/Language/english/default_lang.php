@@ -242,6 +242,21 @@ $lang["announcement"] = "Announcement";
 $lang["announcements"] = "Announcements";
 $lang["all_team_members"] = "All team members";
 $lang["all_team_clients"] = "All Clients";
+$lang["announcement_analytics"] = "Announcement Analytics";
+$lang["track_announcement_performance_and_engagement"] = "Track announcement performance and engagement";
+$lang["analytics"] = "Analytics";
+$lang["read_rate"] = "Read Rate";
+$lang["delivery_rate"] = "Delivery Rate";
+$lang["engagement_rate"] = "Engagement Rate";
+$lang["avg_response_time"] = "Avg Response Time";
+$lang["performance_by_department"] = "Performance by Department";
+$lang["announcements_sent"] = "Announcements Sent";
+$lang["engagement"] = "Engagement";
+$lang["avg_read_percentage"] = "Average read percentage";
+$lang["active_announcements"] = "Currently active";
+$lang["estimated_metric"] = "Estimated metric";
+$lang["early_response_rate"] = "Early response rate";
+$lang["not_available"] = "Not Available";
 
 /* settings */
 $lang["app_settings"] = "App Settings";

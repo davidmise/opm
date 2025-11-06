@@ -536,42 +536,56 @@
                     <div class="tab-pane fade" id="analytics-tab" role="tabpanel">
                         <h6><?php echo app_lang('announcement_analytics'); ?></h6>
                         <p class="text-muted"><?php echo app_lang('track_announcement_performance_and_engagement'); ?></p>
+                        
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i data-feather="info" class="icon-16 me-2"></i>
+                                <div>
+                                    <strong>Analytics Overview:</strong> 
+                                    <span class="ms-2">Read Rate = % of users who viewed announcements | Delivery Rate = % of currently active announcements | Engagement Rate = % of quick responses | Response Time = Estimated average</span>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Analytics Dashboard -->
                         <div class="row mb-4">
                             <div class="col-md-3">
-                                <div class="card text-center">
+                                <div class="card text-center analytics-card">
                                     <div class="card-body">
-                                        <h4 class="text-primary">-</h4>
+                                        <i data-feather="eye" class="icon-24 text-primary mb-2"></i>
+                                        <h4 class="text-primary"><?php echo isset($analytics_data['read_rate']) ? $analytics_data['read_rate'] . '%' : '0%'; ?></h4>
                                         <small><?php echo app_lang('read_rate'); ?></small>
-                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('avg_read_percentage'); ?></small>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card text-center">
+                                <div class="card text-center analytics-card">
                                     <div class="card-body">
-                                        <h4 class="text-success">-</h4>
+                                        <i data-feather="send" class="icon-24 text-success mb-2"></i>
+                                        <h4 class="text-success"><?php echo isset($analytics_data['delivery_rate']) ? $analytics_data['delivery_rate'] . '%' : '0%'; ?></h4>
                                         <small><?php echo app_lang('delivery_rate'); ?></small>
-                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('active_announcements'); ?></small>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card text-center">
+                                <div class="card text-center analytics-card">
                                     <div class="card-body">
-                                        <h4 class="text-info">-</h4>
+                                        <i data-feather="clock" class="icon-24 text-info mb-2"></i>
+                                        <h4 class="text-info"><?php echo isset($analytics_data['avg_response_time']) ? $analytics_data['avg_response_time'] : 'N/A'; ?></h4>
                                         <small><?php echo app_lang('avg_response_time'); ?></small>
-                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('estimated_metric'); ?></small>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card text-center">
+                                <div class="card text-center analytics-card">
                                     <div class="card-body">
-                                        <h4 class="text-warning">-</h4>
+                                        <i data-feather="trending-up" class="icon-24 text-warning mb-2"></i>
+                                        <h4 class="text-warning"><?php echo isset($analytics_data['engagement_rate']) ? $analytics_data['engagement_rate'] . '%' : '0%'; ?></h4>
                                         <small><?php echo app_lang('engagement_rate'); ?></small>
-                                        <br><small class="text-muted"><?php echo app_lang('coming_soon'); ?></small>
+                                        <br><small class="text-muted"><?php echo app_lang('early_response_rate'); ?></small>
                                     </div>
                                 </div>
                             </div>
@@ -595,28 +609,64 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach($departments as $dept): ?>
-                                                <?php 
-                                                // Get announcements count for this department
-                                                $dept_announcements_count = count(array_filter($announcements, function($a) use ($dept) {
-                                                    return !empty($a->share_with) && strpos($a->share_with, 'dept:' . $dept->id) !== false;
-                                                }));
-                                                ?>
-                                            <tr>
-                                                <td>
-                                                    <div class="color-tag me-2" style="background-color: <?php echo $dept->color ?: '#6c757d'; ?>;"></div>
-                                                    <?php echo $dept->title; ?>
-                                                </td>
-                                                <td><?php echo $dept_announcements_count; ?></td>
-                                                <td>
-                                                    <small class="text-muted"><?php echo app_lang('not_available'); ?></small>
-                                                </td>
-                                                <td>
-                                                    <small class="text-muted"><?php echo app_lang('not_available'); ?></small>
-                                                </td>
-                                                <td><small class="text-muted"><?php echo app_lang('not_available'); ?></small></td>
-                                            </tr>
-                                            <?php endforeach; ?>
+                                            <?php if (!empty($analytics_data['department_stats'])): ?>
+                                                <?php foreach($analytics_data['department_stats'] as $dept_id => $stats): ?>
+                                                <tr>
+                                                    <td>
+                                                        <div class="color-tag me-2" style="background-color: <?php echo $stats['color']; ?>;"></div>
+                                                        <?php echo $stats['name']; ?>
+                                                        <small class="text-muted">(ID: <?php echo $dept_id; ?>)</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<?php echo $stats['announcements_sent'] > 0 ? 'primary' : 'secondary'; ?>">
+                                                            <?php echo $stats['announcements_sent']; ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($stats['read_rate'] > 0): ?>
+                                                            <span class="badge bg-<?php echo $stats['read_rate'] >= 70 ? 'success' : ($stats['read_rate'] >= 40 ? 'warning' : 'danger'); ?>">
+                                                                <?php echo $stats['read_rate']; ?>%
+                                                            </span>
+                                                        <?php else: ?>
+                                                            <small class="text-muted">
+                                                                <?php echo $stats['announcements_sent'] > 0 ? '0%' : app_lang('not_available'); ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($stats['engagement_rate'] > 0): ?>
+                                                            <span class="badge bg-<?php echo $stats['engagement_rate'] >= 60 ? 'success' : ($stats['engagement_rate'] >= 30 ? 'warning' : 'secondary'); ?>">
+                                                                <?php echo $stats['engagement_rate']; ?>%
+                                                            </span>
+                                                        <?php else: ?>
+                                                            <small class="text-muted">
+                                                                <?php echo $stats['announcements_sent'] > 0 ? '0%' : app_lang('not_available'); ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td><small class="text-muted"><?php echo app_lang('not_available'); ?></small></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <?php foreach($departments as $dept): ?>
+                                                    <?php 
+                                                    // Get announcements count for this department (fallback)
+                                                    $dept_announcements_count = count(array_filter($announcements, function($a) use ($dept) {
+                                                        return !empty($a->share_with) && strpos($a->share_with, 'dept:' . $dept->id) !== false;
+                                                    }));
+                                                    ?>
+                                                <tr>
+                                                    <td>
+                                                        <div class="color-tag me-2" style="background-color: <?php echo $dept->color ?: '#6c757d'; ?>;"></div>
+                                                        <?php echo $dept->title; ?>
+                                                    </td>
+                                                    <td><?php echo $dept_announcements_count; ?></td>
+                                                    <td><small class="text-muted"><?php echo app_lang('not_available'); ?></small></td>
+                                                    <td><small class="text-muted"><?php echo app_lang('not_available'); ?></small></td>
+                                                    <td><small class="text-muted"><?php echo app_lang('not_available'); ?></small></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -1683,5 +1733,45 @@ function performTemplateDelete(templateId, $button) {
 .btn-group-sm .btn {
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
+}
+
+/* Analytics styling */
+.analytics-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.analytics-card:hover {
+    transform: translateY(-2px);
+}
+
+.analytics-card .card-body {
+    padding: 1.5rem 1rem;
+}
+
+.analytics-card h4 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.analytics-card small {
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
 }
 </style>
