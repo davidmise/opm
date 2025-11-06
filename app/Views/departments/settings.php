@@ -458,3 +458,21 @@ $(function(){
     margin-bottom: 5px;
 }
 </style>
+
+<script>
+$(document).ready(function() {
+    // Settings nested tab persistence
+    var activeSettingsTab = localStorage.getItem('departments_settings_tab') || '#general-settings-tab';
+    
+    // Show the active settings tab
+    if (activeSettingsTab && $('.nav-tabs-horizontal a[href="' + activeSettingsTab + '"]').length) {
+        $('.nav-tabs-horizontal a[href="' + activeSettingsTab + '"]').tab('show');
+    }
+    
+    // Save active settings tab when changed (for nested tabs only)
+    $('.nav-tabs-horizontal a').on('shown.bs.tab', function(e) {
+        var targetTab = $(e.target).attr('href');
+        localStorage.setItem('departments_settings_tab', targetTab);
+    });
+});
+</script>

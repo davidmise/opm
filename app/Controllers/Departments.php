@@ -16,10 +16,12 @@ class Departments extends Security_Controller {
 
     public $Department_templates_model;
     public $User_departments_model;
+    public $Announcement_templates_model;
 
     function __construct() {
         parent::__construct();
         $this->check_module_availability("module_departments");
+        $this->Announcement_templates_model = model('Announcement_templates_model');
 
         // Allow read-only endpoints for department members; restrict management endpoints
         $router = function_exists('service') ? service('router') : null;
@@ -371,11 +373,15 @@ class Departments extends Security_Controller {
             'urgent' => app_lang('urgent')
         );
         
-        // Get announcement templates from database (empty for now)
-        $view_data['announcement_templates'] = array();
+        // Get announcement templates from database
+        $announcement_templates = $this->Announcement_templates_model->get_details()->getResult();
+        $view_data['announcement_templates'] = $announcement_templates;
         
         // Pass the selected department ID to the view
         $view_data['selected_department_id'] = $department_id;
+        
+        // Pass login user data to view for JavaScript access
+        $view_data['login_user'] = $this->login_user;
         
         return $this->template->view("departments/announcements", $view_data);
     }
@@ -628,9 +634,11 @@ class Departments extends Security_Controller {
     }
 
     /**
-     * Save announcement
+     * Save announcement (create or update)
      */
     function save_announcement() {
+        $announcement_id = $this->request->getPost('id');
+        
         $this->validate_submitted_data(array(
             "title" => "required",
             "content" => "required",
@@ -638,37 +646,27 @@ class Departments extends Security_Controller {
             "category" => "required"
         ));
 
-        $announcement_data = array(
-            "title" => $this->request->getPost('title'),
-            "content" => $this->request->getPost('content'),
-            "priority" => $this->request->getPost('priority'),
-            "category" => $this->request->getPost('category'),
-            "target_departments" => json_encode($this->request->getPost('target_departments')),
-            "start_date" => $this->request->getPost('start_date') ?: date('Y-m-d H:i:s'),
-            "end_date" => $this->request->getPost('end_date'),
-            "send_email" => $this->request->getPost('send_email') ? 1 : 0,
-            "send_push" => $this->request->getPost('send_push') ? 1 : 0,
-            "status" => $this->request->getPost('status') ?: 'published',
-            "created_by" => $this->login_user->id,
-            "created_date" => date('Y-m-d H:i:s')
-        );
-
         // Prepare data for Announcements model
         $save_data = array(
-            "title" => $announcement_data['title'],
-            "description" => $announcement_data['content'],
-            "category" => $announcement_data['category'],
-            "priority" => $announcement_data['priority'],
-            "start_date" => $announcement_data['start_date'],
-            "end_date" => !empty($announcement_data['end_date']) ? $announcement_data['end_date'] : null,
-            "created_by" => $announcement_data['created_by']
+            "title" => $this->request->getPost('title'),
+            "description" => $this->request->getPost('content'),
+            "category" => $this->request->getPost('category'),
+            "priority" => $this->request->getPost('priority'),
+            "start_date" => $this->request->getPost('start_date') ?: date('Y-m-d H:i:s'),
+            "end_date" => !empty($this->request->getPost('end_date')) ? $this->request->getPost('end_date') : null
         );
+        
+        // Only set created_by for new announcements
+        if (!$announcement_id) {
+            $save_data['created_by'] = $this->login_user->id;
+        }
         
         // Handle target departments - convert to share_with format
         $target_departments = $this->request->getPost('target_departments');
         $department_id = $this->request->getPost('department_id'); // From department-specific modal
         
         // Debug logging
+        log_message('debug', 'Announcement save - ID: ' . $announcement_id);
         log_message('debug', 'Announcement save - target_departments: ' . json_encode($target_departments));
         log_message('debug', 'Announcement save - department_id: ' . $department_id);
         
@@ -690,13 +688,102 @@ class Departments extends Security_Controller {
         }
 
         // Save announcement to database
-        $announcement_id = $this->Announcements_model->ci_save($save_data);
+        $result = $this->Announcements_model->ci_save($save_data, $announcement_id);
 
-        $message = ($announcement_data['status'] == 'draft') ? 
-                   app_lang('announcement_saved_as_draft') : 
-                   app_lang('announcement_created_successfully');
+        if ($result) {
+            $message = $announcement_id ? 
+                       app_lang('announcement_updated_successfully') : 
+                       app_lang('announcement_created_successfully');
+            
+            return $this->response->setJSON(array("success" => true, "message" => $message));
+        } else {
+            return $this->response->setJSON(array("success" => false, "message" => app_lang('error_occurred')));
+        }
+    }
 
-        return $this->response->setJSON(array("success" => true, "message" => $message));
+    /**
+     * Show announcement form modal for create/edit/view
+     */
+    function announcement_modal_form($announcement_id = 0) {
+        $view_data = array();
+        $mode = $this->request->getGet('mode') ?: 'edit'; // Default to edit if no mode specified
+        
+        if ($announcement_id) {
+            // Edit or view mode
+            $announcement = $this->Announcements_model->get_one($announcement_id);
+            if (!$announcement) {
+                show_404();
+            }
+            $view_data['model_info'] = $announcement;
+        }
+        
+        // Get departments for dropdown
+        $view_data['departments'] = $this->Departments_model->get_details()->getResult();
+        
+        // Get categories and priorities
+        $view_data['announcement_categories'] = array(
+            'general' => app_lang('general'),
+            'urgent' => app_lang('urgent'),
+            'policy' => app_lang('policy'),
+            'event' => app_lang('event'),
+            'maintenance' => app_lang('maintenance')
+        );
+        
+        $view_data['priority_levels'] = array(
+            'low' => app_lang('low'),
+            'normal' => app_lang('normal'),
+            'high' => app_lang('high'),
+            'urgent' => app_lang('urgent')
+        );
+        
+        // Determine which view to show
+        if ($mode === 'view' && $announcement_id) {
+            return $this->template->view('departments/announcements/view_modal', $view_data);
+        } else {
+            return $this->template->view('departments/announcements/modal_form', $view_data);
+        }
+    }
+
+    /**
+     * Duplicate announcement
+     */
+    function duplicate_announcement() {
+        $announcement_id = $this->request->getPost('id');
+        if (!$announcement_id) {
+            echo json_encode(array("success" => false, "message" => app_lang('invalid_request')));
+            return;
+        }
+
+        try {
+            $announcement = $this->Announcements_model->get_one($announcement_id);
+            if (!$announcement) {
+                echo json_encode(array("success" => false, "message" => app_lang('announcement_not_found')));
+                return;
+            }
+
+            // Create duplicate data
+            $duplicate_data = array(
+                "title" => $announcement->title . " (Copy)",
+                "description" => $announcement->description,
+                "category" => $announcement->category,
+                "priority" => $announcement->priority,
+                "share_with" => $announcement->share_with,
+                "start_date" => date('Y-m-d H:i:s'),
+                "end_date" => $announcement->end_date,
+                "created_by" => $this->login_user->id
+            );
+
+            $result = $this->Announcements_model->ci_save($duplicate_data);
+            
+            if ($result) {
+                echo json_encode(array("success" => true, "message" => app_lang('announcement_duplicated_successfully')));
+            } else {
+                echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error duplicating announcement: ' . $e->getMessage());
+            echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
+        }
     }
 
     /**
@@ -719,10 +806,69 @@ class Departments extends Security_Controller {
             "created_date" => date('Y-m-d H:i:s')
         );
 
-        // Save template (this would normally save to database)
-        // In real implementation: $template_id = $this->Announcement_templates_model->ci_save($template_data);
+        // Save template to database
+        $template_id = $this->Announcement_templates_model->ci_save($template_data);
 
-        return $this->response->setJSON(array("success" => true, "message" => app_lang('template_created_successfully')));
+        if ($template_id) {
+            return $this->response->setJSON(array("success" => true, "message" => app_lang('template_created_successfully')));
+        } else {
+            return $this->response->setJSON(array("success" => false, "message" => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Delete announcement template
+     */
+    function delete_announcement_template() {
+        $template_id = $this->request->getPost('id');
+        
+        if (!$template_id) {
+            return $this->response->setJSON(array("success" => false, "message" => app_lang('error_occurred')));
+        }
+
+        // Check if user has permission to delete this template
+        $template = $this->Announcement_templates_model->get_one($template_id);
+        if (!$template || ($template->created_by != $this->login_user->id && !$this->login_user->is_admin)) {
+            return $this->response->setJSON(array("success" => false, "message" => app_lang('permission_denied')));
+        }
+
+        if ($this->Announcement_templates_model->delete($template_id)) {
+            return $this->response->setJSON(array("success" => true, "message" => app_lang('template_deleted_successfully')));
+        } else {
+            return $this->response->setJSON(array("success" => false, "message" => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Show edit form for announcement template
+     */
+    function edit_announcement_template($template_id = 0) {
+        if (!$template_id) {
+            show_404();
+        }
+
+        $template = $this->Announcement_templates_model->get_one($template_id);
+        if (!$template || ($template->created_by != $this->login_user->id && !$this->login_user->is_admin)) {
+            show_404();
+        }
+
+        $view_data['template'] = $template;
+        $view_data['announcement_categories'] = array(
+            'general' => app_lang('general'),
+            'policy' => app_lang('policy'),
+            'event' => app_lang('event'),
+            'update' => app_lang('update'),
+            'maintenance' => app_lang('maintenance')
+        );
+        
+        $view_data['priority_levels'] = array(
+            'low' => app_lang('low'),
+            'normal' => app_lang('normal'),
+            'high' => app_lang('high'),
+            'urgent' => app_lang('urgent')
+        );
+
+        return $this->template->view('departments/announcements/edit_template_modal', $view_data);
     }
 
     /**
@@ -752,43 +898,6 @@ class Departments extends Security_Controller {
                 echo json_encode(array("success" => false, "message" => app_lang('announcement_not_found')));
             }
         } catch (\Exception $e) {
-            echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
-        }
-    }
-
-    /**
-     * Duplicate announcement
-     */
-    function duplicate_announcement() {
-        $announcement_id = $this->request->getPost('id');
-        if (!$announcement_id) {
-            echo json_encode(array("success" => false, "message" => app_lang('invalid_request')));
-            return;
-        }
-
-        try {
-            $original_announcement = $this->Announcements_model->get_one($announcement_id);
-            if (!$original_announcement) {
-                echo json_encode(array("success" => false, "message" => app_lang('announcement_not_found')));
-                return;
-            }
-
-            // Create duplicate with new title
-            $duplicate_data = (array) $original_announcement;
-            unset($duplicate_data['id']); // Remove ID to create new record
-            $duplicate_data['title'] = $original_announcement->title . ' (Copy)';
-            $duplicate_data['created_by'] = $this->login_user->id;
-            $duplicate_data['created_date'] = get_current_utc_time();
-
-            $new_announcement_id = $this->Announcements_model->ci_save($duplicate_data);
-            
-            if ($new_announcement_id) {
-                echo json_encode(array("success" => true, "message" => app_lang('announcement_duplicated_successfully')));
-            } else {
-                echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
-            }
-        } catch (\Exception $e) {
-            log_message('error', 'Error duplicating announcement: ' . $e->getMessage());
             echo json_encode(array("success" => false, "message" => app_lang('error_occurred')));
         }
     }

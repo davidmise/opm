@@ -144,11 +144,13 @@
                             <i data-feather="target" class="icon-14"></i> <?php echo app_lang('department_targeted'); ?>
                         </a>
                     </li>
+                    <?php /* Temporarily hidden
                     <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#templates-tab" role="tab">
                             <i data-feather="layers" class="icon-14"></i> <?php echo app_lang('templates'); ?>
                         </a>
                     </li>
+                    */ ?>
                     <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#analytics-tab" role="tab">
                             <i data-feather="bar-chart-2" class="icon-14"></i> <?php echo app_lang('analytics'); ?>
@@ -207,7 +209,7 @@
                                         <th><?php echo app_lang('target_departments'); ?></th>
                                         <th><?php echo app_lang('status'); ?></th>
                                         <th><?php echo app_lang('created_date'); ?></th>
-                                        <th class="text-center"><?php echo app_lang('actions'); ?></th>
+                                        <th class="text-center option w150"><i data-feather="menu" class="icon-16"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -261,20 +263,35 @@
                                                 </td>
                                                 <td><small><?php echo isset($announcement->start_date) ? format_to_datetime($announcement->start_date) : ''; ?></small></td>
                                                 <td class="text-center">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button class="btn btn-outline-primary announcement-view-btn" title="<?php echo app_lang('view'); ?>" data-id="<?php echo $announcement->id; ?>">
-                                                            <i data-feather="eye" class="icon-14"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-secondary announcement-edit-btn" title="<?php echo app_lang('edit'); ?>" data-id="<?php echo $announcement->id; ?>">
-                                                            <i data-feather="edit-2" class="icon-14"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-success announcement-duplicate-btn" title="<?php echo app_lang('duplicate'); ?>" data-id="<?php echo $announcement->id; ?>">
-                                                            <i data-feather="copy" class="icon-14"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-danger announcement-delete-btn" title="<?php echo app_lang('delete'); ?>" data-id="<?php echo $announcement->id; ?>">
-                                                            <i data-feather="trash-2" class="icon-14"></i>
-                                                        </button>
-                                                    </div>
+                                                    <?php 
+                                                        echo anchor(get_uri("announcements/view/" . $announcement->id), "<i data-feather='eye' class='icon-16'></i>", array(
+                                                            "class" => "btn btn-default btn-sm",
+                                                            "title" => app_lang('view'),
+                                                            "data-post-id" => $announcement->id
+                                                        ));
+                                                        
+                                                        echo modal_anchor(get_uri("departments/announcement_modal_form/" . $announcement->id . "?mode=edit"), "<i data-feather='edit' class='icon-16'></i>", array(
+                                                            "class" => "btn btn-default btn-sm",
+                                                            "title" => app_lang('edit'),
+                                                            "data-post-id" => $announcement->id
+                                                        ));
+                                                        
+                                                        echo js_anchor("<i data-feather='copy' class='icon-16'></i>", array(
+                                                            'title' => app_lang('duplicate'),
+                                                            "class" => "btn btn-default btn-sm duplicate-announcement",
+                                                            "data-id" => $announcement->id,
+                                                            "data-action-url" => get_uri("departments/duplicate_announcement"),
+                                                            "data-action" => "duplicate-announcement"
+                                                        ));
+                                                        
+                                                        echo js_anchor("<i data-feather='x' class='icon-16'></i>", array(
+                                                            'title' => app_lang('delete'),
+                                                            "class" => "btn btn-default btn-sm delete-announcement",
+                                                            "data-id" => $announcement->id,
+                                                            "data-action-url" => get_uri("departments/delete_announcement"),
+                                                            "data-action" => "delete-confirmation"
+                                                        ));
+                                                    ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -327,7 +344,7 @@
                                                             <p class="text-muted small mb-1">
                                                                 <?php echo (strlen($dept_announcements[0]->description) > 80) ? substr(strip_tags($dept_announcements[0]->description), 0, 80) . '...' : strip_tags($dept_announcements[0]->description); ?>
                                                             </p>
-                                                            <div class="d-flex gap-2 flex-wrap">
+                                                            <div class="d-flex gap-2 flex-wrap align-items-center">
                                                                 <span class="badge bg-<?php echo ($dept_announcements[0]->priority == 'urgent' || $dept_announcements[0]->priority == 'high') ? 'danger' : 'info'; ?>">
                                                                     <?php echo ucfirst($dept_announcements[0]->priority ?: 'normal'); ?>
                                                                 </span>
@@ -338,6 +355,38 @@
                                                                     <i data-feather="clock" class="icon-12"></i>
                                                                     <?php echo format_to_relative_time($dept_announcements[0]->created_at); ?>
                                                                 </small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ms-2">
+                                                            <!-- Quick Action Buttons -->
+                                                            <div class="btn-group btn-group-sm" role="group">
+                                                                <?php 
+                                                                    echo anchor(get_uri("announcements/view/" . $dept_announcements[0]->id), "<i data-feather='eye' class='icon-14'></i>", array(
+                                                                        "class" => "btn btn-outline-secondary btn-sm",
+                                                                        "title" => app_lang('view'),
+                                                                        "data-bs-toggle" => "tooltip"
+                                                                    ));
+                                                                    
+                                                                    echo modal_anchor(get_uri("departments/announcement_modal_form/" . $dept_announcements[0]->id . "?mode=edit"), "<i data-feather='edit' class='icon-14'></i>", array(
+                                                                        "class" => "btn btn-outline-primary btn-sm",
+                                                                        "title" => app_lang('edit'),
+                                                                        "data-bs-toggle" => "tooltip"
+                                                                    ));
+                                                                    
+                                                                    echo js_anchor("<i data-feather='copy' class='icon-14'></i>", array(
+                                                                        'title' => app_lang('duplicate'),
+                                                                        "class" => "btn btn-outline-info btn-sm duplicate-announcement",
+                                                                        "data-id" => $dept_announcements[0]->id,
+                                                                        "data-bs-toggle" => "tooltip"
+                                                                    ));
+                                                                    
+                                                                    echo js_anchor("<i data-feather='x' class='icon-14'></i>", array(
+                                                                        'title' => app_lang('delete'),
+                                                                        "class" => "btn btn-outline-danger btn-sm delete-announcement",
+                                                                        "data-id" => $dept_announcements[0]->id,
+                                                                        "data-bs-toggle" => "tooltip"
+                                                                    ));
+                                                                ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -353,7 +402,7 @@
                                                                     <p class="text-muted small mb-1">
                                                                         <?php echo (strlen($dept_announcements[$i]->description) > 80) ? substr(strip_tags($dept_announcements[$i]->description), 0, 80) . '...' : strip_tags($dept_announcements[$i]->description); ?>
                                                                     </p>
-                                                                    <div class="d-flex gap-2 flex-wrap">
+                                                                    <div class="d-flex gap-2 flex-wrap align-items-center">
                                                                         <span class="badge bg-<?php echo ($dept_announcements[$i]->priority == 'urgent' || $dept_announcements[$i]->priority == 'high') ? 'danger' : 'info'; ?>">
                                                                             <?php echo ucfirst($dept_announcements[$i]->priority ?: 'normal'); ?>
                                                                         </span>
@@ -364,6 +413,38 @@
                                                                             <i data-feather="clock" class="icon-12"></i>
                                                                             <?php echo format_to_relative_time($dept_announcements[$i]->created_at); ?>
                                                                         </small>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ms-2">
+                                                                    <!-- Quick Action Buttons -->
+                                                                    <div class="btn-group btn-group-sm" role="group">
+                                                                        <?php 
+                                                                            echo anchor(get_uri("announcements/view/" . $dept_announcements[$i]->id), "<i data-feather='eye' class='icon-14'></i>", array(
+                                                                                "class" => "btn btn-outline-secondary btn-sm",
+                                                                                "title" => app_lang('view'),
+                                                                                "data-bs-toggle" => "tooltip"
+                                                                            ));
+                                                                            
+                                                                            echo modal_anchor(get_uri("departments/announcement_modal_form/" . $dept_announcements[$i]->id . "?mode=edit"), "<i data-feather='edit' class='icon-14'></i>", array(
+                                                                                "class" => "btn btn-outline-primary btn-sm",
+                                                                                "title" => app_lang('edit'),
+                                                                                "data-bs-toggle" => "tooltip"
+                                                                            ));
+                                                                            
+                                                                            echo js_anchor("<i data-feather='copy' class='icon-14'></i>", array(
+                                                                                'title' => app_lang('duplicate'),
+                                                                                "class" => "btn btn-outline-info btn-sm duplicate-announcement",
+                                                                                "data-id" => $dept_announcements[$i]->id,
+                                                                                "data-bs-toggle" => "tooltip"
+                                                                            ));
+                                                                            
+                                                                            echo js_anchor("<i data-feather='x' class='icon-14'></i>", array(
+                                                                                'title' => app_lang('delete'),
+                                                                                "class" => "btn btn-outline-danger btn-sm delete-announcement",
+                                                                                "data-id" => $dept_announcements[$i]->id,
+                                                                                "data-bs-toggle" => "tooltip"
+                                                                            ));
+                                                                        ?>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -404,6 +485,7 @@
                         </div>
                     </div>
 
+                    <?php /* Temporarily hidden templates tab
                     <!-- ANNOUNCEMENT TEMPLATES TAB -->
                     <div class="tab-pane fade" id="templates-tab" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -429,13 +511,16 @@
                                     </div>
                                     <div class="card-footer">
                                         <div class="btn-group btn-group-sm w-100">
-                                            <button class="btn btn-outline-primary">
+                                            <button class="btn btn-outline-primary use-template" data-template-id="<?php echo $template->id; ?>" data-title="<?php echo htmlspecialchars($template->title); ?>" data-content="<?php echo htmlspecialchars($template->content); ?>" data-category="<?php echo $template->category; ?>" data-priority="<?php echo $template->priority; ?>">
                                                 <i data-feather="copy" class="icon-14"></i> <?php echo app_lang('use_template'); ?>
                                             </button>
-                                            <button class="btn btn-outline-secondary">
-                                                <i data-feather="edit-2" class="icon-14"></i> <?php echo app_lang('edit'); ?>
-                                            </button>
-                                            <button class="btn btn-outline-danger">
+                                            <?php
+                                            echo modal_anchor(get_uri("departments/edit_announcement_template/" . $template->id), '<i data-feather="edit-2" class="icon-14"></i> ' . app_lang('edit'), array(
+                                                "class" => "btn btn-outline-secondary btn-sm",
+                                                "title" => app_lang('edit_template')
+                                            ));
+                                            ?>
+                                            <button class="btn btn-outline-danger delete-template" data-template-id="<?php echo $template->id; ?>">
                                                 <i data-feather="trash-2" class="icon-14"></i>
                                             </button>
                                         </div>
@@ -445,6 +530,7 @@
                             <?php endforeach; ?>
                         </div>
                     </div>
+                    */ ?>
 
                     <!-- ANNOUNCEMENTS ANALYTICS TAB -->
                     <div class="tab-pane fade" id="analytics-tab" role="tabpanel">
@@ -923,14 +1009,34 @@ $(document).ready(function() {
     });
     
     // Initialize DataTables
-    $('#announcements-table').DataTable({
+    var announcementsTable = $('#announcements-table').DataTable({
         "pageLength": 10,
         "searching": true,
         "ordering": true,
         "columnDefs": [
             { "orderable": false, "targets": [0, 7] }
-        ]
+        ],
+        "initComplete": function() {
+            // Initialize feather icons after table loads
+            setTimeout(function() {
+                initializeFeatherIcons();
+                console.log('DataTable initComplete - icons initialized');
+            }, 200);
+        },
+        "drawCallback": function() {
+            // Reinitialize feather icons after each table redraw
+            setTimeout(function() {
+                initializeFeatherIcons();
+                console.log('DataTable drawCallback - icons reinitialized');
+            }, 100);
+        }
     });
+
+    // Force icon initialization after table is fully rendered
+    setTimeout(function() {
+        initializeFeatherIcons();
+        console.log('Force icon initialization after 1 second');
+    }, 1000);
 
     // Initialize Select2 with proper configuration for multi-select
     $('#announcement_departments').select2({
@@ -1027,10 +1133,61 @@ $(document).ready(function() {
         table.search($(this).val()).draw();
     });
 
-    // Initialize feather icons
-    if (window.feather && typeof feather.replace === 'function') {
-        feather.replace();
+    // Initialize feather icons safely
+    function initializeFeatherIcons() {
+        try {
+            if (typeof feather !== 'undefined' && feather.replace) {
+                // Check for any broken icons first
+                var brokenIcons = document.querySelectorAll('[data-feather]');
+                console.log('Found ' + brokenIcons.length + ' feather icons to render');
+                
+                feather.replace();
+                
+                // Double-check that icons were replaced
+                var stillBrokenIcons = document.querySelectorAll('[data-feather]');
+                if (stillBrokenIcons.length > 0) {
+                    console.warn('Some icons still not rendered, trying again...');
+                    setTimeout(function() {
+                        feather.replace();
+                    }, 100);
+                }
+            } else {
+                console.warn('Feather library not available');
+            }
+        } catch (e) {
+            console.error('Feather icon replacement failed:', e);
+        }
     }
+
+    // Initialize feather icons on page load - multiple attempts
+    initializeFeatherIcons();
+    
+    // Reinitialize feather icons after DataTable draw
+    $('#announcements-table').on('draw.dt', function() {
+        setTimeout(function() {
+            initializeFeatherIcons();
+            console.log('Icons reinitialized after DataTable draw');
+        }, 50);
+    });
+    
+    // Force feather icons update after short delays (for initial page load)
+    setTimeout(function() {
+        initializeFeatherIcons();
+        console.log('Force icon initialization after 500ms');
+    }, 500);
+    
+    setTimeout(function() {
+        initializeFeatherIcons();
+        console.log('Force icon initialization after 1500ms');
+    }, 1500);
+
+    // Also reinitialize when any modal is shown
+    $(document).on('shown.bs.modal', function() {
+        setTimeout(function() {
+            initializeFeatherIcons();
+            console.log('Icons reinitialized after modal shown');
+        }, 100);
+    });
 
 });
 
@@ -1074,9 +1231,7 @@ function openDepartmentAnnouncementModal(deptId, deptName) {
     
     // Reinitialize feather icons
     setTimeout(function() {
-        if (window.feather && typeof feather.replace === 'function') {
-            feather.replace();
-        }
+        initializeFeatherIcons();
         console.log('Feather icons reinitialized');
     }, 200);
 }
@@ -1101,9 +1256,7 @@ function toggleViewAll(button, deptId) {
         }
         
         // Reinitialize feather icons
-        if (window.feather && typeof feather.replace === 'function') {
-            feather.replace();
-        }
+        initializeFeatherIcons();
     }, 350);
 }
 
@@ -1179,9 +1332,10 @@ function loadAnnouncementsByFilters(department_id, category, priority) {
             if(response && response.success) {
                 $('#announcements-table tbody').html(response.html);
                 // Re-initialize feather icons for the new content
-                if (window.feather && typeof feather.replace === 'function') {
-                    feather.replace();
-                }
+                setTimeout(function() {
+                    initializeFeatherIcons();
+                    console.log('Icons reinitialized after filter');
+                }, 200);
             } else {
                 var errorMsg = (response && response.message) ? response.message : '<?php echo app_lang('error_occurred'); ?>';
                 appAlert.error(errorMsg);
@@ -1208,61 +1362,122 @@ function loadAnnouncementsByDepartment(department_id) {
 }
 
 // Announcement action button handlers
-$(document).on('click', '.announcement-view-btn', function(e) {
+$(document).on('click', '.duplicate-announcement', function(e) {
     e.preventDefault();
     var announcement_id = $(this).data('id');
-    // View announcement - show modal or navigate to detail page
-    console.log('View announcement: ' + announcement_id);
-    appAlert.info('<?php echo app_lang('view_announcement_feature_coming_soon'); ?>');
-});
-
-$(document).on('click', '.announcement-edit-btn', function(e) {
-    e.preventDefault();
-    var announcement_id = $(this).data('id');
-    // Edit announcement - open modal with form
+    var $button = $(this);
+    
+    // Show loading state
+    $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+    
     $.ajax({
-        url: '<?php echo base_url("index.php/departments/get_announcement_data"); ?>',
+        url: '<?php echo get_uri("departments/duplicate_announcement"); ?>',
         type: 'POST',
         data: { id: announcement_id },
+        dataType: 'json',
         success: function(response) {
-            if(response.success && response.data) {
-                var data = response.data;
-                // Populate form fields
-                $('#announcement-title').val(data.title || '');
-                $('#announcement-content').val(data.description || '');
-                $('#announcement-priority').val(data.priority || 'normal');
-                $('#announcement-category').val(data.category || 'general');
-                $('#announcement-start-date').val(data.start_date || '');
-                $('#announcement-end-date').val(data.end_date || '');
-                
-                // Set announcement ID for update
-                $('#announcement-form').data('id', announcement_id);
-                
-                // Open modal
-                var modal = new bootstrap.Modal(document.getElementById('announcement-modal'));
-                modal.show();
+            if(response && response.success) {
+                appAlert.success(response.message || '<?php echo app_lang('announcement_duplicated_successfully'); ?>');
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
             } else {
-                appAlert.error(response.message || '<?php echo app_lang('error_loading_announcement'); ?>');
+                appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
             }
         },
-        error: function() {
+        error: function(xhr, status, error) {
+            console.error('Duplicate error:', error);
             appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+        },
+        complete: function() {
+            // Reset button state
+            $button.prop('disabled', false).html('<i data-feather="copy" class="icon-16"></i>');
+            initializeFeatherIcons();
         }
     });
 });
 
-$(document).on('click', '.announcement-duplicate-btn', function(e) {
+$(document).on('click', '.delete-announcement', function(e) {
     e.preventDefault();
     var announcement_id = $(this).data('id');
-    // Duplicate announcement
+    var $button = $(this);
+    
+    // Function to perform the delete
+    function performDelete() {
+        // Show loading state
+        $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+        
+        $.ajax({
+            url: '<?php echo get_uri("departments/delete_announcement"); ?>',
+            type: 'POST',
+            data: { id: announcement_id },
+            dataType: 'json',
+            success: function(response) {
+                if(response && response.success) {
+                    appAlert.success(response.message || '<?php echo app_lang('announcement_deleted_successfully'); ?>');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
+                    // Reset button state on error
+                    $button.prop('disabled', false).html('<i data-feather="x" class="icon-16"></i>');
+                    initializeFeatherIcons();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete error:', error);
+                appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+                // Reset button state on error
+                $button.prop('disabled', false).html('<i data-feather="x" class="icon-16"></i>');
+                initializeFeatherIcons();
+            }
+        });
+    }
+    
+    // Use confirmationModal if available, otherwise fall back to browser confirm
+    if (typeof confirmationModal === 'function') {
+        confirmationModal({
+            title: '<?php echo app_lang('delete_announcement'); ?>',
+            message: '<?php echo app_lang('confirm_delete_announcement'); ?>',
+            confirmText: '<?php echo app_lang('delete'); ?>',
+            cancelText: '<?php echo app_lang('cancel'); ?>',
+            onConfirm: performDelete
+        });
+    } else {
+        // Fallback to browser confirm if confirmationModal is not available
+        if (confirm('<?php echo app_lang('confirm_delete_announcement'); ?>')) {
+            performDelete();
+        }
+    }
+});
+
+// Delegated AJAX submit handler for announcement form (edit/create) - prevents full redirect
+$(document).on('submit', '#announcement-form', function(e) {
+    e.preventDefault();
+    var $form = $(this);
+    var action = $form.attr('action');
+
     $.ajax({
-        url: '<?php echo base_url("index.php/departments/duplicate_announcement"); ?>',
+        url: action,
         type: 'POST',
-        data: { id: announcement_id },
+        data: $form.serialize(),
+        dataType: 'json',
         success: function(response) {
-            if(response.success) {
-                appAlert.success(response.message || '<?php echo app_lang('announcement_duplicated_successfully'); ?>');
-                location.reload();
+            if (response && response.success) {
+                // Close ajax modal if present
+                try {
+                    var modalEl = document.getElementById('ajaxModal');
+                    if (modalEl) {
+                        var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modalInstance.hide();
+                    }
+                } catch (err) {
+                    console.warn('Error closing modal:', err);
+                }
+
+                appAlert.success(response.message || '<?php echo app_lang('announcement_created_successfully'); ?>');
+                setTimeout(function() { location.reload(); }, 600);
             } else {
                 appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
             }
@@ -1273,29 +1488,171 @@ $(document).on('click', '.announcement-duplicate-btn', function(e) {
     });
 });
 
-$(document).on('click', '.announcement-delete-btn', function(e) {
+// Delegated AJAX submit handler for department-specific announcement form
+$(document).on('submit', '#department-announcement-form', function(e) {
     e.preventDefault();
-    var announcement_id = $(this).data('id');
-    // Delete announcement with confirmation
-    if(confirm('<?php echo app_lang('confirm_delete_announcement'); ?>')){
-        $.ajax({
-            url: '<?php echo base_url("index.php/departments/delete_announcement"); ?>',
-            type: 'POST',
-            data: { id: announcement_id },
-            success: function(response) {
-                if(response.success) {
-                    appAlert.success(response.message || '<?php echo app_lang('announcement_deleted_successfully'); ?>');
-                    location.reload();
-                } else {
-                    appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
+    var $form = $(this);
+    var action = $form.attr('action');
+
+    $.ajax({
+        url: action,
+        type: 'POST',
+        data: $form.serialize(),
+        dataType: 'json',
+        success: function(response) {
+            if (response && response.success) {
+                try {
+                    var modalEl = document.getElementById('department-announcement-modal');
+                    if (modalEl) {
+                        var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modalInstance.hide();
+                    }
+                } catch (err) {
+                    console.warn('Error closing department modal:', err);
                 }
-            },
-            error: function() {
-                appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+
+                appAlert.success(response.message || '<?php echo app_lang('announcement_created_successfully'); ?>');
+                setTimeout(function() { location.reload(); }, 600);
+            } else {
+                appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
+            }
+        },
+        error: function() {
+            appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+        }
+    });
+});
+
+// Tab persistence functionality - handles both main tabs and nested tabs
+$(document).ready(function() {
+    // Get the active tab from URL hash, localStorage, or default to first tab
+    var urlHash = window.location.hash;
+    var activeTab = '';
+    
+    if (urlHash) {
+        // Convert URL hash to tab format (e.g., #all-announcements -> #all-announcements-tab)
+        if (urlHash === '#all-announcements') {
+            activeTab = '#all-announcements-tab';
+        } else if (urlHash === '#department-targeted') {
+            activeTab = '#department-targeted-tab';
+        } else if (urlHash === '#templates') {
+            activeTab = '#templates-tab';
+        } else if (urlHash === '#analytics') {
+            activeTab = '#analytics-tab';
+        } else {
+            activeTab = urlHash + '-tab';
+        }
+        localStorage.setItem('announcements_active_tab', activeTab);
+    } else {
+        activeTab = localStorage.getItem('announcements_active_tab') || '#all-announcements-tab';
+    }
+    
+    // Show the active announcements tab (nested within departments)
+    if (activeTab && $('.nav-tabs-horizontal a[href="' + activeTab + '"]').length) {
+        $('.nav-tabs-horizontal a[href="' + activeTab + '"]').tab('show');
+    }
+    
+    // Save active tab to localStorage when tab is changed (for nested tabs only)
+    $('.nav-tabs-horizontal a').on('shown.bs.tab', function(e) {
+        var targetTab = $(e.target).attr('href');
+        localStorage.setItem('announcements_active_tab', targetTab);
+        
+        // Update URL hash without page reload
+        var hashName = targetTab.replace('#', '').replace('-tab', '');
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, null, '#' + hashName);
+        }
+    });
+});
+
+// Function to return to departments with active tab preserved
+function returnToDepartments() {
+    var activeTab = localStorage.getItem('announcements_active_tab') || '#all-announcements-tab';
+    window.location.href = '<?php echo get_uri("departments"); ?>' + activeTab.replace('-tab', '');
+}
+
+// Template functionality
+$(document).on('click', '.use-template', function(e) {
+    e.preventDefault();
+    var templateData = {
+        title: $(this).data('title'),
+        content: $(this).data('content'),
+        category: $(this).data('category'),
+        priority: $(this).data('priority')
+    };
+    
+    // Open the main announcement modal and populate with template data
+    var modalUrl = '<?php echo get_uri("departments/announcement_modal_form"); ?>';
+    
+    $.get(modalUrl, function(data) {
+        $('#ajaxModal .modal-content').html(data);
+        $('#ajaxModal').modal('show');
+        
+        // Populate form with template data
+        setTimeout(function() {
+            $('#announcement_title').val(templateData.title);
+            $('#announcement_description').val(templateData.content);
+            $('#announcement_category').val(templateData.category).trigger('change');
+            $('#announcement_priority').val(templateData.priority).trigger('change');
+            
+            // Replace placeholders if needed
+            var content = templateData.content;
+            content = content.replace('{department_name}', '{{DEPARTMENT_NAME}}');
+            content = content.replace('{user_name}', '<?php echo isset($login_user) ? $login_user->first_name . " " . $login_user->last_name : "Current User"; ?>');
+            content = content.replace('{date}', new Date().toLocaleDateString());
+            content = content.replace('{time}', new Date().toLocaleTimeString());
+            
+            $('#announcement_description').val(content);
+            
+            // Re-initialize feather icons in modal
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        }, 500);
+    });
+});
+
+// Delete template functionality
+$(document).on('click', '.delete-template', function(e) {
+    e.preventDefault();
+    var templateId = $(this).data('template-id');
+    var $button = $(this);
+    
+    if (typeof confirmationModal === 'function') {
+        confirmationModal({
+            title: '<?php echo app_lang('delete_template'); ?>',
+            message: '<?php echo app_lang('confirm_delete_template'); ?>',
+            confirmText: '<?php echo app_lang('delete'); ?>',
+            callback: function() {
+                performTemplateDelete(templateId, $button);
             }
         });
+    } else if (confirm('<?php echo app_lang('confirm_delete_template'); ?>')) {
+        performTemplateDelete(templateId, $button);
     }
 });
+
+function performTemplateDelete(templateId, $button) {
+    $.ajax({
+        url: '<?php echo get_uri("departments/delete_announcement_template"); ?>',
+        type: 'POST',
+        data: { id: templateId },
+        dataType: 'json',
+        success: function(response) {
+            if (response && response.success) {
+                $button.closest('.col-lg-4').fadeOut(300, function() {
+                    $(this).remove();
+                });
+                appAlert.success(response.message || '<?php echo app_lang('template_deleted_successfully'); ?>');
+            } else {
+                appAlert.error(response.message || '<?php echo app_lang('error_occurred'); ?>');
+            }
+        },
+        error: function() {
+            appAlert.error('<?php echo app_lang('error_occurred'); ?>');
+        }
+    });
+}
 </script>
 
 <style>

@@ -164,7 +164,12 @@
                 <?php if (!empty($department_announcements)): ?>
                     <?php foreach ($department_announcements as $announcement): ?>
                         <div class="announcement-item border-start ps-3 mb-3" style="border-color: <?php echo $department_info->color; ?> !important; border-width: 3px !important;">
-                            <h6 class="mb-1"><?php echo $announcement->title; ?></h6>
+                            <h6 class="mb-1">
+                                <?php echo anchor(get_uri("announcements/view/" . $announcement->id), $announcement->title, array(
+                                    "class" => "text-decoration-none",
+                                    "title" => app_lang('view_announcement')
+                                )); ?>
+                            </h6>
                             <p class="text-muted mb-2"><?php echo character_limiter($announcement->description, 120); ?></p>
                             <small class="text-muted">
                                 <?php echo isset($announcement->created_by_user) ? $announcement->created_by_user : 'Admin'; ?> • 
@@ -265,6 +270,12 @@
 
 .announcement-item:hover {
     background-color: var(--bs-gray-100) !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.announcement-item h6 a:hover {
+    text-decoration: underline !important;
 }
 
 .announcement-item:last-child {

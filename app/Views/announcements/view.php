@@ -1,6 +1,8 @@
 <div id="page-content" class="page-wrapper clearfix">
     <div class="view-container">
-        <div class="pt10 pb10 text-right"> &larr; <?php echo anchor("announcements", app_lang("announcements")); ?></div>
+        <div class="pt10 pb10 text-right"> 
+            &larr; <?php echo anchor("departments", app_lang("departments"), array("onclick" => "returnToDepartments(); return false;")); ?>
+        </div>
         <div class="card no-border">
             <div class="card-body p30">
                 <h1 class="mt0 text-default">
@@ -40,3 +42,22 @@
     </div>
 
 </div>
+
+<script>
+// Function to return to departments with active tab preserved
+function returnToDepartments() {
+    var activeTab = localStorage.getItem('announcements_active_tab') || '#all-announcements-tab';
+    var tabName = activeTab.replace('#', '').replace('-tab', '');
+    
+    // Map tab names to proper hash format
+    var tabMapping = {
+        'all-announcements': 'all-announcements',
+        'department-targeted': 'department-targeted', 
+        'templates': 'templates',
+        'analytics': 'analytics'
+    };
+    
+    var hashName = tabMapping[tabName] || 'all-announcements';
+    window.location.href = '<?php echo get_uri("departments"); ?>#' + hashName;
+}
+</script>

@@ -221,7 +221,12 @@
                         <?php if (!empty($department_announcements)): ?>
                             <?php foreach ($department_announcements as $announcement): ?>
                                 <div class="announcement-item border-start ps-3 mb-3" style="border-color: <?php echo $department_info->color; ?> !important; border-width: 3px !important;">
-                                    <h6 class="mb-1"><?php echo $announcement->title; ?></h6>
+                                    <h6 class="mb-1">
+                                        <?php echo anchor(get_uri("announcements/view/" . $announcement->id), $announcement->title, array(
+                                            "class" => "text-decoration-none",
+                                            "title" => app_lang('view_announcement')
+                                        )); ?>
+                                    </h6>
                                     <p class="text-muted mb-2"><?php echo (strlen($announcement->description) > 120) ? substr($announcement->description, 0, 120) . '...' : $announcement->description; ?></p>
                                     <small class="text-muted">
                                         <?php echo isset($announcement->created_by_user) ? $announcement->created_by_user : 'Admin'; ?> • 
@@ -542,6 +547,15 @@
     border-radius: 8px;
     padding: 15px;
     background-color: #f8f9fa;
+}
+
+.announcement-item:hover {
+    background-color: #e9ecef !important;
+    cursor: pointer;
+}
+
+.announcement-item h6 a:hover {
+    text-decoration: underline !important;
 }
 
 .team-member-item {
