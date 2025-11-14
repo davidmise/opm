@@ -39,7 +39,7 @@ class Updates extends Security_Controller {
 
         $view_data['current_version'] = $updates_info->current_version;
 
-        return $this->template->rander("updates/index", $view_data);
+        return $this->template->render("updates/index", $view_data);
     }
 
     private function _curl_get_contents($url) {

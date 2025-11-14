@@ -13,7 +13,7 @@ class Notifications extends Security_Controller {
     //load notifications view
     function index() {
         $view_data = $this->_prepare_notification_list();
-        return $this->template->rander("notifications/index", $view_data);
+        return $this->template->render("notifications/index", $view_data);
     }
 
     function load_more($offset = 0) {

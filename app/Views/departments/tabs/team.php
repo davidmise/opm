@@ -42,11 +42,19 @@
 </style>
 
 <script type="text/javascript">
-$(document).ready(function () {
-    // Destroy any existing DataTable instance first
-    if ($.fn.DataTable.isDataTable('#department-team-table')) {
-        $('#department-team-table').DataTable().destroy();
+// Wait for jQuery to be available before executing
+function initDepartmentTeamScript() {
+    if (typeof $ === 'undefined') {
+        // jQuery not loaded yet, wait 100ms and try again
+        setTimeout(initDepartmentTeamScript, 100);
+        return;
     }
+    
+    $(document).ready(function () {
+        // Destroy any existing DataTable instance first
+        if ($.fn.DataTable.isDataTable('#department-team-table')) {
+            $('#department-team-table').DataTable().destroy();
+        }
     
     $("#department-team-table").appTable({
         source: '<?php echo_uri("departments/department_team_list_data/" . $department_info->id) ?>',
@@ -141,5 +149,8 @@ $(document).ready(function () {
             }
         }
     });
-});
+}
+
+// Start the initialization
+initDepartmentTeamScript();
 </script>

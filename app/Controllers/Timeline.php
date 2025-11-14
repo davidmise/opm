@@ -46,7 +46,7 @@ class Timeline extends Security_Controller {
             $view_data['team_members'] = $this->Messages_model->get_users_for_messaging($this->get_user_options_for_query("staff"))->getResult();
         }
 
-        return $this->template->rander("timeline/index", $view_data);
+        return $this->template->render("timeline/index", $view_data);
     }
 
     /* save a post */
@@ -179,7 +179,7 @@ class Timeline extends Security_Controller {
         $view_data['is_first_load'] = true;
         $view_data['result_remaining'] = 0;
         $view_data['single_post'] = 'single_post';
-        return $this->template->rander("timeline/post_list", $view_data);
+        return $this->template->render("timeline/post_list", $view_data);
     }
 
 }

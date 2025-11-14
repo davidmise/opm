@@ -71,7 +71,7 @@ class Messages extends Security_Controller {
 
         $view_data['mode'] = "inbox";
         $view_data['auto_select_index'] = clean_data($auto_select_index);
-        return $this->template->rander("messages/index", $view_data);
+        return $this->template->render("messages/index", $view_data);
     }
 
     /* show sent items */
@@ -82,7 +82,7 @@ class Messages extends Security_Controller {
 
         $view_data['mode'] = "sent_items";
         $view_data['auto_select_index'] = clean_data($auto_select_index);
-        return $this->template->rander("messages/index", $view_data);
+        return $this->template->render("messages/index", $view_data);
     }
 
     /* list of messages, prepared for datatable  */

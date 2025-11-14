@@ -945,19 +945,27 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    console.log('=== Announcements page loaded ===');
-    console.log('jQuery version:', $.fn.jquery);
-    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+// Wait for jQuery to be available before executing
+function initAnnouncementsScript() {
+    if (typeof $ === 'undefined') {
+        // jQuery not loaded yet, wait 100ms and try again
+        setTimeout(initAnnouncementsScript, 100);
+        return;
+    }
     
-    // Diagnostic: Log announcement count on page load
-    var announcementCount = $('#announcements-table tbody tr').length;
-    console.log('Page loaded with ' + announcementCount + ' announcements');
-    
-    // Check if department modal exists
-    console.log('Department modal exists:', $('#department-announcement-modal').length > 0);
-    console.log('Department form exists:', $('#department-announcement-form').length > 0);
-    console.log('Publish button exists:', $('#publish-dept-announcement-btn').length > 0);
+    $(document).ready(function() {
+        console.log('=== Announcements page loaded ===');
+        console.log('jQuery version:', $.fn.jquery);
+        console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+        
+        // Diagnostic: Log announcement count on page load
+        var announcementCount = $('#announcements-table tbody tr').length;
+        console.log('Page loaded with ' + announcementCount + ' announcements');
+        
+        // Check if department modal exists
+        console.log('Department modal exists:', $('#department-announcement-modal').length > 0);
+        console.log('Department form exists:', $('#department-announcement-form').length > 0);
+        console.log('Publish button exists:', $('#publish-dept-announcement-btn').length > 0);
     
     // Department announcement submission handler - Professional implementation
     $(document).on('click', '#publish-dept-announcement-btn', function(e) {
@@ -1703,6 +1711,12 @@ function performTemplateDelete(templateId, $button) {
         }
     });
 }
+
+    }); // End of $(document).ready
+}
+
+// Start the initialization
+initAnnouncementsScript();
 </script>
 
 <style>

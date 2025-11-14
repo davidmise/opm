@@ -25,7 +25,7 @@ class Proposals extends Security_Controller {
         if ($this->login_user->user_type === "staff") {
             $this->access_only_allowed_members();
 
-            return $this->template->rander("proposals/index", $view_data);
+            return $this->template->render("proposals/index", $view_data);
         } else {
             //client view
             if (!$this->can_client_access("proposal")) {
@@ -36,7 +36,7 @@ class Proposals extends Security_Controller {
             $view_data['client_id'] = $this->login_user->client_id;
             $view_data['page_type'] = "full";
 
-            return $this->template->rander("clients/proposals/client_portal", $view_data);
+            return $this->template->render("clients/proposals/client_portal", $view_data);
         }
     }
 
@@ -473,7 +473,7 @@ class Proposals extends Security_Controller {
                         "top_bar" => $this->template->view("proposals/proposal_top_bar",  $view_data),
                     ));
                 } else {
-                    return $this->template->rander("proposals/view", $view_data);
+                    return $this->template->render("proposals/view", $view_data);
                 }
             } else {
                 show_404();
@@ -769,7 +769,7 @@ class Proposals extends Security_Controller {
                 $view_data["is_editor_preview"] = clean_data($is_editor_preview);
                 return $this->template->view("proposals/proposal_preview", $view_data);
             } else {
-                return $this->template->rander("proposals/proposal_preview", $view_data);
+                return $this->template->render("proposals/proposal_preview", $view_data);
             }
         } else {
             show_404();

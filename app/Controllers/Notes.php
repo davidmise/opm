@@ -78,7 +78,7 @@ class Notes extends Security_Controller {
 
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown("note", "", true));
 
-        return $this->template->rander("notes/index", $view_data);
+        return $this->template->render("notes/index", $view_data);
     }
 
     function modal_form() {
@@ -383,7 +383,7 @@ class Notes extends Security_Controller {
 
     function categories() {
         $this->can_access_notes();
-        return $this->template->rander("notes/category/index");
+        return $this->template->render("notes/category/index");
     }
 
 
@@ -507,7 +507,7 @@ class Notes extends Security_Controller {
 
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown("note", "", true));
 
-        return $this->template->rander("notes/grid/index", $view_data);
+        return $this->template->render("notes/grid/index", $view_data);
     }
 
     function grid_data() {

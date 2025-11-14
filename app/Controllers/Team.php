@@ -10,7 +10,7 @@ class Team extends Security_Controller {
     }
 
     function index() {
-        return $this->template->rander("team/index");
+        return $this->template->render("team/index");
     }
 
     /* load team add/edit modal */

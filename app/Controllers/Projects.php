@@ -213,7 +213,7 @@ class Projects extends Department_Access_Controller {
             $view_data["can_edit_projects"] = $this->can_edit_projects();
             $view_data["can_delete_projects"] = $this->can_delete_projects();
 
-            return $this->template->rander("projects/index", $view_data);
+            return $this->template->render("projects/index", $view_data);
         } else {
             if (!$this->can_client_access("project", false)) {
                 app_redirect("forbidden");
@@ -221,7 +221,7 @@ class Projects extends Department_Access_Controller {
 
             $view_data['client_id'] = $this->login_user->client_id;
             $view_data['page_type'] = "full";
-            return $this->template->rander("clients/projects/index", $view_data);
+            return $this->template->render("clients/projects/index", $view_data);
         }
     }
 
@@ -1045,7 +1045,7 @@ class Projects extends Department_Access_Controller {
         $view_data["project_statuses"] = $this->Project_status_model->get_details()->getResult();
         $view_data["show_customer_feedback"] = $this->has_client_feedback_access_permission();
 
-        return $this->template->rander("projects/details_view", $view_data);
+        return $this->template->render("projects/details_view", $view_data);
     }
 
     private function can_edit_timesheet_settings($project_id) {
@@ -2147,7 +2147,7 @@ class Projects extends Department_Access_Controller {
         if ($user_id) {
             return $this->template->view("projects/timesheets/all_timesheets", $view_data);
         } else {
-            return $this->template->rander("projects/timesheets/all_timesheets", $view_data);
+            return $this->template->render("projects/timesheets/all_timesheets", $view_data);
         }
     }
 
@@ -3608,7 +3608,7 @@ class Projects extends Department_Access_Controller {
         $view_data["project_status_text_info"] = get_project_status_text_info();
         $view_data["show_time_logged_data"] = get_setting("module_project_timesheet") ? 1 : 0;
 
-        return $this->template->rander("projects/reports/team_members_summary", $view_data);
+        return $this->template->render("projects/reports/team_members_summary", $view_data);
     }
 
     function team_members_summary_data() {

@@ -15,7 +15,7 @@ class Custom_fields extends Security_Controller {
 
     function view($tab = "client") {
         $view_data["tab"] = clean_data($tab);
-        return $this->template->rander("custom_fields/settings/index", $view_data);
+        return $this->template->render("custom_fields/settings/index", $view_data);
     }
 
     //add/edit fields

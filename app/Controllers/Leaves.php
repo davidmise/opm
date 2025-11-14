@@ -40,7 +40,7 @@ class Leaves extends Security_Controller {
         $view_data["can_manage_all_leaves"] = $this->login_user->is_admin || $this->access_type === "all";
         $view_data['tab'] = clean_data($tab);
 
-        return $this->template->rander("leaves/index", $view_data);
+        return $this->template->render("leaves/index", $view_data);
     }
 
     //load assign leave modal 
@@ -465,7 +465,7 @@ class Leaves extends Security_Controller {
             return $this->template->view("team_members/leave_info", $view_data);
         } else {
             $view_data['page_type'] = "full";
-            return $this->template->rander("team_members/leave_info", $view_data);
+            return $this->template->render("team_members/leave_info", $view_data);
         }
     }
 

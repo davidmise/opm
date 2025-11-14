@@ -45,7 +45,7 @@ class Left_menus extends Security_Controller {
             $view_data["setting_active_tab"] = ($type == "client_default") ? "client_left_menu" : "left_menu";
             $view_data["type"] = clean_data($type);
 
-            return $this->template->rander("left_menu/index", $view_data);
+            return $this->template->render("left_menu/index", $view_data);
         }
     }
 

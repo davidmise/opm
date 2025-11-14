@@ -11,7 +11,7 @@ class Ticket_types extends Security_Controller {
 
     function index($tab = "") {
         $view_data["tab"] = clean_data($tab);
-        return $this->template->rander("ticket_types/index", $view_data);
+        return $this->template->render("ticket_types/index", $view_data);
     }
 
     function modal_form() {

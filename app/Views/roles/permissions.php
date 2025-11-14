@@ -1196,6 +1196,100 @@
                     </li>
                 <?php } ?>
 
+                <?php if (get_setting("module_departments")) { ?>
+                    <li>
+                        <span data-feather="key" class="icon-14 ml-20"></span>
+                        <h5><?php echo app_lang("set_department_permissions"); ?>:</h5>
+                        <div>
+                            <?php
+                            echo form_checkbox("can_view_departments", "1", $can_view_departments ? true : false, "id='can_view_departments' class='form-check-input'");
+                            ?>
+                            <label for="can_view_departments"><?php echo app_lang("can_view_departments"); ?></label>
+                        </div>
+                        
+                        <div id="department_permission_details_area" class="form-group <?php echo !$can_view_departments ? "hide" : ""; ?>">
+                            <div>
+                                <?php
+                                echo form_checkbox("can_manage_departments", "1", $can_manage_departments ? true : false, "id='can_manage_departments' class='form-check-input'");
+                                ?>
+                                <label for="can_manage_departments"><?php echo app_lang("can_manage_departments"); ?></label>
+                            </div>
+                            
+                            <div id="department_individual_permission_area" class="<?php echo $can_manage_departments ? "hide" : ""; ?>">
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_view_all_departments", "1", $can_view_all_departments ? true : false, "id='can_view_all_departments' class='form-check-input'");
+                                    ?>
+                                    <label for="can_view_all_departments"><?php echo app_lang("can_view_all_departments"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_create_departments", "1", $can_create_departments ? true : false, "id='can_create_departments' class='form-check-input'");
+                                    ?>
+                                    <label for="can_create_departments"><?php echo app_lang("can_create_departments"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_edit_departments", "1", $can_edit_departments ? true : false, "id='can_edit_departments' class='form-check-input'");
+                                    ?>
+                                    <label for="can_edit_departments"><?php echo app_lang("can_edit_departments"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_delete_departments", "1", $can_delete_departments ? true : false, "id='can_delete_departments' class='form-check-input'");
+                                    ?>
+                                    <label for="can_delete_departments"><?php echo app_lang("can_delete_departments"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_manage_department_users", "1", $can_manage_department_users ? true : false, "id='can_manage_department_users' class='form-check-input'");
+                                    ?>
+                                    <label for="can_manage_department_users"><?php echo app_lang("can_manage_department_users"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_view_department_reports", "1", $can_view_department_reports ? true : false, "id='can_view_department_reports' class='form-check-input'");
+                                    ?>
+                                    <label for="can_view_department_reports"><?php echo app_lang("can_view_department_reports"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_export_department_data", "1", $can_export_department_data ? true : false, "id='can_export_department_data' class='form-check-input'");
+                                    ?>
+                                    <label for="can_export_department_data"><?php echo app_lang("can_export_department_data"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_manage_department_settings", "1", $can_manage_department_settings ? true : false, "id='can_manage_department_settings' class='form-check-input'");
+                                    ?>
+                                    <label for="can_manage_department_settings"><?php echo app_lang("can_manage_department_settings"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_manage_department_announcements", "1", $can_manage_department_announcements ? true : false, "id='can_manage_department_announcements' class='form-check-input'");
+                                    ?>
+                                    <label for="can_manage_department_announcements"><?php echo app_lang("can_manage_department_announcements"); ?></label>
+                                </div>
+                                
+                                <div>
+                                    <?php
+                                    echo form_checkbox("can_view_department_analytics", "1", $can_view_department_analytics ? true : false, "id='can_view_department_analytics' class='form-check-input'");
+                                    ?>
+                                    <label for="can_view_department_analytics"><?php echo app_lang("can_view_department_analytics"); ?></label>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                <?php } ?>
+
 
                 <?php
                 try {
@@ -1371,6 +1465,23 @@
                 $("#workflow_permission_details_area").removeClass("hide");
             } else {
                 $("#workflow_permission_details_area").addClass("hide");
+            }
+        });
+
+        // Department permissions show/hide
+        $("#can_view_departments").click(function() {
+            if ($(this).is(":checked")) {
+                $("#department_permission_details_area").removeClass("hide");
+            } else {
+                $("#department_permission_details_area").addClass("hide");
+            }
+        });
+
+        $("#can_manage_departments").click(function() {
+            if ($(this).is(":checked")) {
+                $("#department_individual_permission_area").addClass("hide");
+            } else {
+                $("#department_individual_permission_area").removeClass("hide");
             }
         });
 

@@ -23,7 +23,7 @@ class External_tickets extends App_Controller {
 
         $view_data["custom_fields"] = $this->Custom_fields_model->get_combined_details("tickets", 0, 0, "client")->getResult();
 
-        return $this->template->rander("external_tickets/index", $view_data);
+        return $this->template->render("external_tickets/index", $view_data);
     }
 
     //save external ticket

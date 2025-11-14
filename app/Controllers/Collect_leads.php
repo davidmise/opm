@@ -29,7 +29,7 @@ class Collect_leads extends App_Controller {
         $view_data["lead_source_id"] = $source_id;
         $view_data["lead_owner_id"] = $ownder_id;
 
-        return $this->template->rander("collect_leads/index", $view_data);
+        return $this->template->render("collect_leads/index", $view_data);
     }
 
     //save external lead

@@ -32,7 +32,7 @@ class Reports extends Security_Controller {
         }
 
         $view_data["redirect_to"] = $redirect_to;
-        return $this->template->rander("reports/index", $view_data);
+        return $this->template->render("reports/index", $view_data);
     }
 }
 

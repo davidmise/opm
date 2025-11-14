@@ -1997,7 +1997,7 @@ class Tasks extends Department_Access_Controller {
         $view_data["checklist_groups"] = $this->Checklist_groups_model->get_details()->getResult();
 
         if ($view_type == "details") {
-            return $this->template->rander('tasks/view', $view_data);
+            return $this->template->render('tasks/view', $view_data);
         } else {
             return $this->template->view('tasks/view', $view_data);
         }
@@ -2241,7 +2241,7 @@ class Tasks extends Department_Access_Controller {
 
         $view_data["custom_field_filters"] = $this->Custom_fields_model->get_custom_field_filters("tasks", $this->login_user->is_admin, $this->login_user->user_type);
 
-        return $this->template->rander("projects/gantt/index", $view_data);
+        return $this->template->render("projects/gantt/index", $view_data);
     }
 
     function save_dependency_tasks() {
@@ -2576,7 +2576,7 @@ class Tasks extends Department_Access_Controller {
         $view_data["has_all_projects_restricted_role"] = $this->has_all_projects_restricted_role();
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown("task", "", true));
 
-        return $this->template->rander("tasks/all_tasks", $view_data);
+        return $this->template->render("tasks/all_tasks", $view_data);
     }
 
     function _get_accessible_contexts_dropdown($type = "view") {
@@ -2644,7 +2644,7 @@ class Tasks extends Department_Access_Controller {
         $view_data["has_all_projects_restricted_role"] = $this->has_all_projects_restricted_role();
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown("task", "", true));
 
-        return $this->template->rander("tasks/kanban/all_tasks", $view_data);
+        return $this->template->render("tasks/kanban/all_tasks", $view_data);
     }
 
     //check user's task editting permission on changing of project

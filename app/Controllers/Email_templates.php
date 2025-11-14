@@ -128,7 +128,7 @@ class Email_templates extends Security_Controller {
 
     function index() {
         $view_data["templates"] = $this->_templates();
-        return $this->template->rander("email_templates/index", $view_data);
+        return $this->template->render("email_templates/index", $view_data);
     }
 
     function save() {

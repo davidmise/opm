@@ -11,7 +11,7 @@ class Leave_types extends Security_Controller {
 
     //load leave type list view
     function index() {
-        return $this->template->rander("leave_types/index");
+        return $this->template->render("leave_types/index");
     }
 
     //load leave type add/edit form

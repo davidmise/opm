@@ -11,7 +11,7 @@ class Client_groups extends Security_Controller {
 
     //load client groups list view
     function index() {
-        return $this->template->rander("client_groups/index");
+        return $this->template->render("client_groups/index");
     }
 
     //load client groups add/edit modal form

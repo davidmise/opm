@@ -27,7 +27,7 @@ class Events extends Security_Controller {
         $view_data['encrypted_event_id'] = clean_data($encrypted_event_id);
         $view_data['calendar_filter_dropdown'] = $this->get_calendar_filter_dropdown();
         $view_data['event_labels_dropdown'] = json_encode($this->make_labels_dropdown("event", "", true, app_lang("event_label")));
-        return $this->template->rander("events/index", $view_data);
+        return $this->template->render("events/index", $view_data);
     }
 
     private function can_share_events() {

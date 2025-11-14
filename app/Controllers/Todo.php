@@ -18,7 +18,7 @@ class Todo extends Security_Controller {
     function index() {
         $this->check_module_availability("module_todo");
 
-        return $this->template->rander("todo/index");
+        return $this->template->render("todo/index");
     }
 
     function modal_form() {

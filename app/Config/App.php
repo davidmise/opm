@@ -14,17 +14,22 @@ class App extends BaseConfig {
 
     private function set_base_url() {
         if (!$this->baseURL) {
+            // Check if we're in a web request context
+            if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['SCRIPT_NAME'])) {
+                $domain = $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
 
-            $domain = $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
-
-            $domain = preg_replace('/index.php.*/', '', $domain);
-            $domain = strtolower($domain);
-            if (!empty($_SERVER['HTTPS'])) {
-                $this->baseURL = 'https://' . $domain;
-            } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-                $this->baseURL = 'https://' . $domain;
+                $domain = preg_replace('/index.php.*/', '', $domain);
+                $domain = strtolower($domain);
+                if (!empty($_SERVER['HTTPS'])) {
+                    $this->baseURL = 'https://' . $domain;
+                } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                    $this->baseURL = 'https://' . $domain;
+                } else {
+                    $this->baseURL = 'http://' . $domain;
+                }
             } else {
-                $this->baseURL = 'http://' . $domain;
+                // Fallback for CLI or when server variables are not available
+                $this->baseURL = 'http://localhost/overland_pm/';
             }
         }
     }

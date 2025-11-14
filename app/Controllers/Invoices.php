@@ -43,7 +43,7 @@ class Invoices extends Security_Controller {
             $view_data["currencies_dropdown"] = $this->_get_currencies_dropdown(true, $selected_currency);
             $view_data["conversion_rate"] = $this->get_conversion_rate_with_currency_symbol();
 
-            return $this->template->rander("invoices/index", $view_data);
+            return $this->template->render("invoices/index", $view_data);
         } else {
             if (!$this->can_client_access("invoice")) {
                 app_redirect("forbidden");
@@ -52,7 +52,7 @@ class Invoices extends Security_Controller {
             $view_data["client_info"] = $this->Clients_model->get_one($this->login_user->client_id);
             $view_data['client_id'] = $this->login_user->client_id;
             $view_data['page_type'] = "full";
-            return $this->template->rander("clients/invoices/index", $view_data);
+            return $this->template->render("clients/invoices/index", $view_data);
         }
     }
 
@@ -899,7 +899,7 @@ class Invoices extends Security_Controller {
                         "top_bar" => $this->template->view("invoices/invoice_top_bar",  $view_data),
                     ));
                 } else {
-                    return $this->template->rander("invoices/view", $view_data);
+                    return $this->template->render("invoices/view", $view_data);
                 }
             } else {
                 show_404();
@@ -1158,7 +1158,7 @@ class Invoices extends Security_Controller {
             $paytm = new Paytm();
             $view_data['paytm_url'] = $paytm->get_paytm_url();
 
-            return $this->template->rander("invoices/invoice_preview", $view_data);
+            return $this->template->render("invoices/invoice_preview", $view_data);
         } else {
             show_404();
         }
@@ -1820,7 +1820,7 @@ class Invoices extends Security_Controller {
             app_redirect("forbidden");
         }
         $view_data["currencies_dropdown"] = $this->_get_currencies_dropdown();
-        return $this->template->rander("invoices/reports/invoices_summary", $view_data);
+        return $this->template->render("invoices/reports/invoices_summary", $view_data);
     }
 
     function monthly_invoices_summary() {
@@ -1966,7 +1966,7 @@ class Invoices extends Security_Controller {
         $dropdown_list = new Dropdown_list($this);
         $view_data['clients_dropdown'] = $dropdown_list->get_clients_id_and_text_dropdown(array("blank_option_text" => "- " . app_lang("client") . " -"));
 
-        return $this->template->rander("invoices/reports/invoice_details", $view_data);
+        return $this->template->render("invoices/reports/invoice_details", $view_data);
     }
 
     function monthly_invoice_details() {

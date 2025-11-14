@@ -48,7 +48,7 @@ class Leads extends Security_Controller {
 
         $view_data['selected_status_id'] = clean_data($status_id);
 
-        return $this->template->rander("leads/index", $view_data);
+        return $this->template->render("leads/index", $view_data);
     }
 
     /* load lead add/edit modal */
@@ -337,7 +337,7 @@ class Leads extends Security_Controller {
 
                 $view_data["tab"] = clean_data($tab);
 
-                return $this->template->rander("leads/view", $view_data);
+                return $this->template->render("leads/view", $view_data);
             } else {
                 show_404();
             }
@@ -591,7 +591,7 @@ class Leads extends Security_Controller {
             $view_data['show_cotact_info'] = true;
             $view_data['show_social_links'] = true;
             $view_data['social_link'] = $this->Social_links_model->get_one($contact_id);
-            return $this->template->rander("leads/contacts/view", $view_data);
+            return $this->template->render("leads/contacts/view", $view_data);
         } else {
             show_404();
         }
@@ -1018,7 +1018,7 @@ class Leads extends Security_Controller {
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown("client", "", true));
         $view_data["custom_field_filters"] = $this->Custom_fields_model->get_custom_field_filters("leads", $this->login_user->is_admin, $this->login_user->user_type);
 
-        return $this->template->rander("leads/kanban/all_leads", $view_data);
+        return $this->template->render("leads/kanban/all_leads", $view_data);
     }
 
     function all_leads_kanban_data() {
@@ -1480,7 +1480,7 @@ class Leads extends Security_Controller {
         $view_data['sources_dropdown'] = json_encode($this->_get_sources_dropdown());
         $view_data['owners_dropdown'] = json_encode($this->_get_owners_dropdown("filter"));
 
-        return $this->template->rander("leads/reports/converted_to_client", $view_data);
+        return $this->template->render("leads/reports/converted_to_client", $view_data);
     }
 
     function converted_to_client_charts_data() {

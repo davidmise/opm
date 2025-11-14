@@ -49,7 +49,7 @@ class My_department extends Department_Access_Controller {
                 'has_department' => false,
                 'message' => app_lang('no_department_assigned')
             );
-            return $this->template->rander("my_department/no_department", $view_data);
+            return $this->template->render("my_department/no_department", $view_data);
         }
 
         // Get primary department for default view
@@ -200,7 +200,7 @@ class My_department extends Department_Access_Controller {
             'can_create_tasks' => ($this->login_user->user_type == "staff" || $this->login_user->is_admin)
         );
 
-        return $this->template->rander("my_department/index", $view_data);
+        return $this->template->render("my_department/index", $view_data);
     }
 
     /**

@@ -12,7 +12,7 @@ class Taxes extends Security_Controller {
     }
 
     function index() {
-        return $this->template->rander("taxes/index");
+        return $this->template->render("taxes/index");
     }
 
     function modal_form() {

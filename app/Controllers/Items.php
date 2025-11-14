@@ -51,7 +51,7 @@ class Items extends Security_Controller {
         $view_data["custom_field_headers"] = $this->Custom_fields_model->get_custom_field_headers_for_table("items", $this->login_user->is_admin, $this->login_user->user_type);
         $view_data["custom_field_filters"] = $this->Custom_fields_model->get_custom_field_filters("items", $this->login_user->is_admin, $this->login_user->user_type);
 
-        return $this->template->rander("items/index", $view_data);
+        return $this->template->render("items/index", $view_data);
     }
 
     //get categories dropdown

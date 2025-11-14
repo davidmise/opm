@@ -107,7 +107,7 @@ class Team_members extends Security_Controller {
         $view_data["custom_field_headers"] = $this->Custom_fields_model->get_custom_field_headers_for_table("team_members", $this->login_user->is_admin, $this->login_user->user_type);
         $view_data["custom_field_filters"] = $this->Custom_fields_model->get_custom_field_filters("team_members", $this->login_user->is_admin, $this->login_user->user_type);
 
-        return $this->template->rander("team_members/index", $view_data);
+        return $this->template->render("team_members/index", $view_data);
     }
 
     private function access_only_admin_or_member_creator() {
@@ -579,7 +579,7 @@ class Team_members extends Security_Controller {
                     $view_data["show_timesheets"] = true;
                 }
 
-                return $this->template->rander("team_members/view", $view_data);
+                return $this->template->render("team_members/view", $view_data);
             } else {
                 show_404();
             }
@@ -591,7 +591,7 @@ class Team_members extends Security_Controller {
 
             //we don't have any specific id to view. show the list of team_member
             $view_data['team_members'] = $this->Users_model->get_details(array("user_type" => "staff", "status" => "active"))->getResult();
-            return $this->template->rander("team_members/profile_card", $view_data);
+            return $this->template->render("team_members/profile_card", $view_data);
         }
     }
 

@@ -30,7 +30,7 @@ class Estimates extends Security_Controller {
             $this->access_only_allowed_members();
 
             $view_data["conversion_rate"] = $this->get_conversion_rate_with_currency_symbol();
-            return $this->template->rander("estimates/index", $view_data);
+            return $this->template->render("estimates/index", $view_data);
         } else {
             //client view
             if (!$this->can_client_access("estimate")) {
@@ -45,7 +45,7 @@ class Estimates extends Security_Controller {
                 $view_data['can_request_estimate'] = true;
             }
 
-            return $this->template->rander("clients/estimates/client_portal", $view_data);
+            return $this->template->render("clients/estimates/client_portal", $view_data);
         }
     }
 
@@ -537,7 +537,7 @@ class Estimates extends Security_Controller {
                         "estimate_info" => $this->template->view("estimates/estimate_info", $view_data)
                     ));
                 } else {
-                    return $this->template->rander("estimates/view", $view_data);
+                    return $this->template->render("estimates/view", $view_data);
                 }
             } else {
                 show_404();
@@ -808,7 +808,7 @@ class Estimates extends Security_Controller {
 
             $view_data['estimate_id'] = $estimate_id;
 
-            return $this->template->rander("estimates/estimate_preview", $view_data);
+            return $this->template->render("estimates/estimate_preview", $view_data);
         } else {
             show_404();
         }

@@ -164,15 +164,23 @@
 </div>
 
 <script type="text/javascript">
-$(document).ready(function () {
-    // Initialize feather icons
-    setTimeout(function() {
-        if (typeof feather !== 'undefined' && feather.replace) {
-            try {
-                feather.replace();
-            } catch (e) {
-                console.warn('Feather icon replacement failed:', e);
-            }
+// Wait for jQuery to be available before executing
+function initViewModalScript() {
+    if (typeof $ === 'undefined') {
+        // jQuery not loaded yet, wait 100ms and try again
+        setTimeout(initViewModalScript, 100);
+        return;
+    }
+    
+    $(document).ready(function () {
+        // Initialize feather icons
+        setTimeout(function() {
+            if (typeof feather !== 'undefined' && feather.replace) {
+                try {
+                    feather.replace();
+                } catch (e) {
+                    console.warn('Feather icon replacement failed:', e);
+                }
         }
     }, 100);
 });
@@ -193,4 +201,10 @@ function editAnnouncement(announcementId) {
         });
     }, 300);
 }
+
+    }); // End of $(document).ready
+}
+
+// Start the initialization
+initViewModalScript();
 </script>

@@ -11,7 +11,7 @@ class Item_categories extends Security_Controller {
 
     //load item categories list view
     function index() {
-        return $this->template->rander("item_categories/index");
+        return $this->template->render("item_categories/index");
     }
 
     //load item category add/edit modal form

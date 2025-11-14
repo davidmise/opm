@@ -17,26 +17,69 @@ class Departments extends Security_Controller {
     public $Department_templates_model;
     public $User_departments_model;
     public $Announcement_templates_model;
+    public $Department_permissions_model;
 
     function __construct() {
         parent::__construct();
         $this->check_module_availability("module_departments");
         $this->Announcement_templates_model = model('Announcement_templates_model');
+        $this->Department_permissions_model = model('Department_permissions_model');
 
-        // Allow read-only endpoints for department members; restrict management endpoints
+        // RBAC-based access control for department methods
         $router = function_exists('service') ? service('router') : null;
         $method = $router ? $router->methodName() : '';
-        $public_methods = array(
-            'view', 'dashboard', 'team', 'projects', 'tasks', 'overview',
-            'announcements', 'department_team_list_data', 'get_dashboard_data'
+        
+        // Public methods that don't require special permissions
+        $public_methods = array('index', 'dashboard', 'overview');
+        
+        // Read-only methods that require view permission
+        $view_methods = array('view', 'team', 'projects', 'tasks', 'announcements', 'department_team_list_data', 'get_dashboard_data');
+        
+        // Management methods that require specific permissions
+        $management_methods = array(
+            'modal_form' => 'can_create_departments',
+            'save' => 'can_create_departments', 
+            'delete' => 'can_delete_departments',
+            'settings' => 'can_manage_department_settings',
+            'save_rbac_settings' => 'can_manage_department_settings',
+            'save_general_settings' => 'can_manage_department_settings',
+            'add_user_to_department' => 'can_manage_department_users',
+            'remove_user_from_department' => 'can_manage_department_users',
+            'set_primary_department' => 'can_manage_department_users'
         );
 
         if (!in_array($method, $public_methods)) {
-            $this->access_only_admin_or_manage_departments_permission();
+            // Check for view permissions
+            if (in_array($method, $view_methods)) {
+                $this->check_department_permission('can_view_all_departments');
+            }
+            // Check for specific management permissions
+            else if (isset($management_methods[$method])) {
+                $this->check_department_permission($management_methods[$method]);
+            }
+            // Default fallback - admin only
+            else {
+                $this->access_only_admin_or_manage_departments_permission();
+            }
         }
         
         // Initialize models
         $this->Announcements_model = model("App\Models\Announcements_model");
+    }
+
+    /**
+     * Check if user has a specific department permission
+     */
+    private function check_department_permission($permission) {
+        // Admin always has access
+        if ($this->login_user->is_admin) {
+            return;
+        }
+        
+        // Check RBAC permission
+        if (!$this->Department_permissions_model->has_permission($this->login_user->id, $permission)) {
+            app_redirect("forbidden");
+        }
     }
 
     /**
@@ -55,9 +98,34 @@ class Departments extends Security_Controller {
      * @return string Rendered view
      */
     function index() {
-        // Aggregate stats and collections for dashboard
-        $departments = $this->Departments_model->get_details()->getResult();
+        // Check if user can view departments
+        if (!$this->login_user->is_admin && !$this->Department_permissions_model->has_permission($this->login_user->id, 'can_view_all_departments')) {
+            // If user can't view all departments, show only their own departments
+            $user_departments = $this->Departments_model->get_user_departments($this->login_user->id)->getResult();
+            $department_ids = array_column($user_departments, 'department_id');
+            
+            if (empty($department_ids)) {
+                // No departments - show message
+                $view_data['no_departments'] = true;
+                $view_data['departments'] = array();
+                $view_data['user_permissions'] = $this->get_user_permissions();
+                return $this->template->render("departments/index", $view_data);
+            }
+            
+            // Get only user's departments
+            $departments = array();
+            foreach ($department_ids as $dept_id) {
+                $dept = $this->Departments_model->get_one($dept_id);
+                if ($dept && $dept->id) {
+                    $departments[] = $dept;
+                }
+            }
+        } else {
+            // User can view all departments
+            $departments = $this->Departments_model->get_details()->getResult();
+        }
 
+        // Aggregate stats and collections for dashboard
         $total_departments = count($departments);
         $active_departments = 0;
         $total_members = 0;
@@ -113,10 +181,38 @@ class Departments extends Security_Controller {
             'top_by_members' => $top_by_members,
             'top_by_tasks' => $top_by_tasks,
             'departments_grid_json' => json_encode($departments_for_grid),
-            'accessible_departments' => $accessible_departments
+            'accessible_departments' => $accessible_departments,
+            'user_permissions' => $this->get_user_permissions()
         );
 
-        return $this->template->rander("departments/index", $view_data);
+        return $this->template->render("departments/index", $view_data);
+    }
+
+    /**
+     * Get user's department permissions
+     */
+    private function get_user_permissions() {
+        if ($this->login_user->is_admin) {
+            return array(
+                'can_view_all_departments' => true,
+                'can_create_departments' => true,
+                'can_edit_departments' => true,
+                'can_delete_departments' => true,
+                'can_manage_department_users' => true,
+                'can_view_department_reports' => true,
+                'can_export_department_data' => true,
+                'can_manage_department_settings' => true
+            );
+        }
+        
+        $permissions = array();
+        $all_perms = $this->Department_permissions_model->get_available_permissions();
+        
+        foreach ($all_perms as $perm_key => $perm_name) {
+            $permissions[$perm_key] = $this->Department_permissions_model->has_permission($this->login_user->id, $perm_key);
+        }
+        
+        return $permissions;
     }
 
     /**
@@ -237,16 +333,18 @@ class Departments extends Security_Controller {
         
         // RBAC roles and permissions
         $view_data['rbac_roles'] = array('admin', 'manager', 'member', 'client');
-        $view_data['rbac_permissions'] = array(
-            'view_all_departments' => 'View All Departments',
-            'create_departments' => 'Create Departments', 
-            'edit_departments' => 'Edit Departments',
-            'delete_departments' => 'Delete Departments',
-            'manage_department_users' => 'Manage Department Users',
-            'view_department_reports' => 'View Department Reports',
-            'export_department_data' => 'Export Department Data',
-            'manage_department_settings' => 'Manage Department Settings'
-        );
+        $view_data['rbac_permissions'] = $this->Department_permissions_model->get_available_permissions();
+        
+        // Load current RBAC settings from database
+        $current_permissions = array();
+        foreach ($view_data['rbac_roles'] as $role) {
+            $role_perms = $this->Department_permissions_model->get_role_permissions($role)->getResult();
+            $current_permissions[$role] = array();
+            foreach ($role_perms as $perm) {
+                $current_permissions[$role][$perm->permission] = $perm->value;
+            }
+        }
+        $view_data['current_rbac_settings'] = $current_permissions;
         
         // Sample templates for demo
         $view_data['department_templates'] = array(
@@ -608,11 +706,21 @@ class Departments extends Security_Controller {
             return $this->response->setJSON(array("success" => false, "message" => app_lang('no_rbac_data_provided')));
         }
 
-        // Save RBAC settings (this would normally save to database)
-        // For demo purposes, we'll just return success
-        // In real implementation: $this->RBAC_model->save_permissions($rbac_data);
-
-        return $this->response->setJSON(array("success" => true, "message" => app_lang('rbac_settings_saved_successfully')));
+        try {
+            // Process each role's permissions
+            foreach ($rbac_data as $role => $permissions) {
+                // Admin role cannot be modified
+                if ($role === 'admin') {
+                    continue;
+                }
+                
+                $this->Department_permissions_model->save_role_permissions($role, $permissions);
+            }
+            
+            return $this->response->setJSON(array("success" => true, "message" => app_lang('rbac_settings_saved_successfully')));
+        } catch (\Exception $e) {
+            return $this->response->setJSON(array("success" => false, "message" => $e->getMessage()));
+        }
     }
 
     /**
@@ -1301,7 +1409,7 @@ class Departments extends Security_Controller {
             $view_data['department_info'] = $department_info;
             $view_data['dashboard_data'] = $this->Departments_model->get_department_dashboard_data($department_id);
             
-            return $this->template->rander("departments/dashboard", $view_data);
+            return $this->template->render("departments/dashboard", $view_data);
         } else {
             show_404();
         }
@@ -1328,7 +1436,7 @@ class Departments extends Security_Controller {
             $view_data['department_info'] = $department_info;
             $view_data['department_users'] = $this->Departments_model->get_department_users($department_id);
             
-            return $this->template->rander("departments/manage_users", $view_data);
+            return $this->template->render("departments/manage_users", $view_data);
         } else {
             show_404();
         }

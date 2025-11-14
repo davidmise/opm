@@ -41,7 +41,7 @@ class Expenses extends Security_Controller {
         $view_data['members_dropdown'] = json_encode($members_dropdown);
         $view_data["projects_dropdown"] = $this->_get_projects_dropdown_for_income_and_expenses("expenses");
 
-        return $this->template->rander("expenses/index", $view_data);
+        return $this->template->render("expenses/index", $view_data);
     }
 
     //get categories dropdown
@@ -60,7 +60,7 @@ class Expenses extends Security_Controller {
     function summary() {
         $this->check_module_availability("module_expense");
 
-        return $this->template->rander("expenses/reports/expenses_summary");
+        return $this->template->render("expenses/reports/expenses_summary");
     }
 
     //load the recurring view of expense list 
@@ -487,7 +487,7 @@ class Expenses extends Security_Controller {
 
     function income_vs_expenses() {
         $view_data["projects_dropdown"] = $this->_get_projects_dropdown_for_income_and_expenses();
-        return $this->template->rander("expenses/reports/income_vs_expenses_chart", $view_data);
+        return $this->template->render("expenses/reports/income_vs_expenses_chart", $view_data);
     }
 
     function income_vs_expenses_chart_data() {

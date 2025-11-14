@@ -31,7 +31,7 @@ class Invoice_payments extends Security_Controller {
             }
             $view_data["can_edit_invoices"] = $can_edit_invoices;
 
-            return $this->template->rander("invoices/payment_received", $view_data);
+            return $this->template->render("invoices/payment_received", $view_data);
         } else {
             if (!($this->can_client_access("invoice") && $this->can_client_access("payment", false))) {
                 app_redirect("forbidden");
@@ -44,7 +44,7 @@ class Invoice_payments extends Security_Controller {
             $view_data['show_client_wallet'] = false;
             $view_data["can_edit_invoices"] = false;
 
-            return $this->template->rander("clients/payments/index", $view_data);
+            return $this->template->render("clients/payments/index", $view_data);
         }
     }
 
@@ -407,7 +407,7 @@ class Invoice_payments extends Security_Controller {
         $view_data['can_access_clients'] = $this->can_access_clients();
         $view_data["currencies_dropdown"] = $this->_get_currencies_dropdown(false);
         $view_data['payment_method_dropdown'] = $this->Payment_methods_model->get_payment_methods_dropdown();
-        return $this->template->rander("invoices/reports/yearly_payments_summary", $view_data);
+        return $this->template->render("invoices/reports/yearly_payments_summary", $view_data);
     }
 
     function yearly_payment_summary_list_data() {

@@ -39,7 +39,7 @@ class Dashboard extends Security_Controller {
             $view_data["dashboard_id"] = 0;
 
             $this->Settings_model->save_setting("user_" . $this->login_user->id . "_dashboard", "", "user");
-            return $this->template->rander("dashboards/custom_dashboards/view", $view_data);
+            return $this->template->render("dashboards/custom_dashboards/view", $view_data);
         } else {
             // client dashboard
 
@@ -402,7 +402,7 @@ class Dashboard extends Security_Controller {
             $view_data["dashboard_type"] = "custom";
             $view_data["dashboard_id"] = $id;
 
-            return $this->template->rander("dashboards/custom_dashboards/view", $view_data);
+            return $this->template->render("dashboards/custom_dashboards/view", $view_data);
         } else {
             app_redirect("dashboard/index/1"); //no dashbord selected. go to default dashboard  
         }
@@ -727,7 +727,7 @@ class Dashboard extends Security_Controller {
         $view_data["widget_sortable_rows"] = $this->_make_editable_rows(unserialize($dashboard_info->data));
         $view_data["widgets"] = $this->_make_widgets($dashboard_info->id);
 
-        return $this->template->rander("dashboards/custom_dashboards/edit/index", $view_data);
+        return $this->template->render("dashboards/custom_dashboards/edit/index", $view_data);
     }
 
     function save() {
@@ -1297,7 +1297,7 @@ class Dashboard extends Security_Controller {
         $this->show_staff_on_staff = false;
         $view_data = array();
         $view_data["dashboard_view"] = $this->_get_client_dashboard($view_data, true);
-        return $this->template->rander("settings/client_default_dashboard/index", $view_data);
+        return $this->template->render("settings/client_default_dashboard/index", $view_data);
     }
 
     private function _get_client_dashboard($view_data, $return_data = false) {
@@ -1314,7 +1314,7 @@ class Dashboard extends Security_Controller {
         if ($return_data) {
             return $this->template->view($dashboard_view, $view_data);
         } else {
-            echo $this->template->rander($dashboard_view, $view_data);
+            echo $this->template->render($dashboard_view, $view_data);
         }
     }
 
@@ -1377,7 +1377,7 @@ class Dashboard extends Security_Controller {
         $view_data["widget_sortable_rows"] = $this->_make_editable_rows($widget_data);
         $view_data["widgets"] = $this->_make_widgets();
 
-        return $this->template->rander("settings/client_default_dashboard/edit_dashboard", $view_data);
+        return $this->template->render("settings/client_default_dashboard/edit_dashboard", $view_data);
     }
 
     function save_client_default_dashboard() {

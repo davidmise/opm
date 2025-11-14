@@ -13,7 +13,7 @@ class Pages extends Security_Controller {
     }
 
     function index() {
-        return $this->template->rander("pages/index");
+        return $this->template->render("pages/index");
     }
 
     function modal_form() {

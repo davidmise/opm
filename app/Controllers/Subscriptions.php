@@ -55,7 +55,7 @@ class Subscriptions extends Security_Controller {
             $view_data["currencies_dropdown"] = $this->_get_currencies_dropdown();
             $view_data["conversion_rate"] = $this->get_conversion_rate_with_currency_symbol();
 
-            return $this->template->rander("subscriptions/index", $view_data);
+            return $this->template->render("subscriptions/index", $view_data);
         } else {
             if (!$this->can_client_access("subscription")) {
                 app_redirect("forbidden");
@@ -64,7 +64,7 @@ class Subscriptions extends Security_Controller {
             $view_data["client_info"] = $this->Clients_model->get_one($this->login_user->client_id);
             $view_data['client_id'] = $this->login_user->client_id;
             $view_data['page_type'] = "full";
-            return $this->template->rander("clients/subscriptions/index", $view_data);
+            return $this->template->render("clients/subscriptions/index", $view_data);
         }
     }
 
@@ -509,7 +509,7 @@ class Subscriptions extends Security_Controller {
                 "top_bar" => $this->template->view("subscriptions/subscription_top_bar",  $view_data),
             ));
         } else {
-            return $this->template->rander("subscriptions/view", $view_data);
+            return $this->template->render("subscriptions/view", $view_data);
         }
     }
 
@@ -674,7 +674,7 @@ class Subscriptions extends Security_Controller {
             $view_data["custom_field_headers"] = $this->Custom_fields_model->get_custom_field_headers_for_table("invoices", $this->login_user->is_admin, $this->login_user->user_type);
             $view_data["custom_field_filters"] = $this->Custom_fields_model->get_custom_field_filters("invoices", $this->login_user->is_admin, $this->login_user->user_type);
 
-            return $this->template->rander("subscriptions/subscription_preview", $view_data);
+            return $this->template->render("subscriptions/subscription_preview", $view_data);
         } else {
             show_404();
         }

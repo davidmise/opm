@@ -57,7 +57,7 @@ class About extends App_Controller {
             $view_data["topbar"] = false;
         }
 
-        return $this->template->rander("about/index", $view_data);
+        return $this->template->render("about/index", $view_data);
     }
 }
 

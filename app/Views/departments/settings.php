@@ -150,13 +150,23 @@
                                     <tr>
                                         <td><strong><?php echo $permission_name; ?></strong></td>
                                         <?php foreach($rbac_roles as $role): ?>
+                                            <?php 
+                                            $is_checked = ($role == 'admin') ? true : 
+                                                (isset($current_rbac_settings[$role][$permission_key]) && $current_rbac_settings[$role][$permission_key] == 1);
+                                            $is_disabled = ($role == 'admin');
+                                            ?>
                                             <td class="text-center">
                                                 <div class="form-check form-switch">
                                                     <input class="form-check-input" type="checkbox" 
                                                            name="rbac[<?php echo $role; ?>][<?php echo $permission_key; ?>]" 
                                                            id="rbac_<?php echo $role; ?>_<?php echo $permission_key; ?>"
-                                                           <?php echo ($role == 'admin') ? 'checked' : ''; ?>>
+                                                           <?php echo $is_checked ? 'checked' : ''; ?>
+                                                           <?php echo $is_disabled ? 'disabled' : ''; ?>
+                                                           value="1">
                                                     <label class="form-check-label" for="rbac_<?php echo $role; ?>_<?php echo $permission_key; ?>"></label>
+                                                    <?php if ($is_disabled): ?>
+                                                        <input type="hidden" name="rbac[<?php echo $role; ?>][<?php echo $permission_key; ?>]" value="1">
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         <?php endforeach; ?>

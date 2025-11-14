@@ -29,7 +29,7 @@ class Help extends Security_Controller {
         $view_data["categories"] = $this->Help_categories_model->get_details(array("type" => $type, "only_active_categories" => true))->getResult();
         $view_data["type"] = $type;
         $view_data['can_manage_help_and_kb'] = $this->_can_manage_help_and_kb();
-        return $this->template->rander("help_and_knowledge_base/index", $view_data);
+        return $this->template->render("help_and_knowledge_base/index", $view_data);
     }
 
     private function _can_manage_help_and_kb() {
@@ -70,7 +70,7 @@ class Help extends Security_Controller {
 
         $view_data['article_label_classes'] = $this->_make_article_label_classes("help", $model_info->labels_list);
 
-        return $this->template->rander('help_and_knowledge_base/articles/view_page', $view_data);
+        return $this->template->render('help_and_knowledge_base/articles/view_page', $view_data);
     }
 
     //get search suggestion for autocomplete
@@ -112,7 +112,7 @@ class Help extends Security_Controller {
 
         $view_data['can_manage_help_and_kb'] = $this->_can_manage_help_and_kb();
 
-        return $this->template->rander("help_and_knowledge_base/articles/view_page", $view_data);
+        return $this->template->render("help_and_knowledge_base/articles/view_page", $view_data);
     }
 
     //show help articles list
@@ -123,7 +123,7 @@ class Help extends Security_Controller {
         $view_data['categories_dropdown'] = $this->_get_categories_dropdown($view_data["type"]);
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown($view_data["type"], "", true));
         $view_data['status_dropdown'] = json_encode($this->_get_status_dropdown());
-        return $this->template->rander("help_and_knowledge_base/articles/index", $view_data);
+        return $this->template->render("help_and_knowledge_base/articles/index", $view_data);
     }
 
     private function _get_status_dropdown() {
@@ -143,7 +143,7 @@ class Help extends Security_Controller {
         $view_data['labels_dropdown'] = json_encode($this->make_labels_dropdown($view_data["type"], "", true));
         $view_data['status_dropdown'] = json_encode($this->_get_status_dropdown());
         
-        return $this->template->rander("help_and_knowledge_base/articles/index", $view_data);
+        return $this->template->render("help_and_knowledge_base/articles/index", $view_data);
     }
 
 
@@ -164,7 +164,7 @@ class Help extends Security_Controller {
         $this->access_only_allowed_members();
 
         $view_data["type"] = "help";
-        return $this->template->rander("help_and_knowledge_base/categories/index", $view_data);
+        return $this->template->render("help_and_knowledge_base/categories/index", $view_data);
     }
 
     //show knowledge base articles list
@@ -172,7 +172,7 @@ class Help extends Security_Controller {
         $this->access_only_allowed_members();
 
         $view_data["type"] = "knowledge_base";
-        return $this->template->rander("help_and_knowledge_base/categories/index", $view_data);
+        return $this->template->render("help_and_knowledge_base/categories/index", $view_data);
     }
 
     //show add/edit category modal
@@ -315,7 +315,7 @@ class Help extends Security_Controller {
         //prepare label suggestions
         $view_data['label_suggestions'] = $this->make_labels_dropdown($type, $view_data['model_info']->labels);
 
-        return $this->template->rander('help_and_knowledge_base/articles/form', $view_data);
+        return $this->template->render('help_and_knowledge_base/articles/form', $view_data);
     }
 
     //save article

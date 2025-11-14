@@ -14,7 +14,7 @@ class Roles extends Security_Controller {
 
     //load the role view
     function index() {
-        return $this->template->rander("roles/index");
+        return $this->template->render("roles/index");
     }
 
     //load the role add/edit modal
@@ -144,6 +144,20 @@ class Roles extends Security_Controller {
             $view_data['can_edit_shipments'] = get_array_value($permissions, "can_edit_shipments");
             $view_data['can_delete_shipments'] = get_array_value($permissions, "can_delete_shipments");
             $view_data['can_manage_documents'] = get_array_value($permissions, "can_manage_documents");
+
+            // Department permissions
+            $view_data['can_view_departments'] = get_array_value($permissions, "can_view_departments");
+            $view_data['can_manage_departments'] = get_array_value($permissions, "can_manage_departments");
+            $view_data['can_view_all_departments'] = get_array_value($permissions, "can_view_all_departments");
+            $view_data['can_create_departments'] = get_array_value($permissions, "can_create_departments");
+            $view_data['can_edit_departments'] = get_array_value($permissions, "can_edit_departments");
+            $view_data['can_delete_departments'] = get_array_value($permissions, "can_delete_departments");
+            $view_data['can_manage_department_users'] = get_array_value($permissions, "can_manage_department_users");
+            $view_data['can_view_department_reports'] = get_array_value($permissions, "can_view_department_reports");
+            $view_data['can_export_department_data'] = get_array_value($permissions, "can_export_department_data");
+            $view_data['can_manage_department_settings'] = get_array_value($permissions, "can_manage_department_settings");
+            $view_data['can_manage_department_announcements'] = get_array_value($permissions, "can_manage_department_announcements");
+            $view_data['can_view_department_analytics'] = get_array_value($permissions, "can_view_department_analytics");
 
             $view_data['permissions'] = $permissions;
 
@@ -320,6 +334,20 @@ class Roles extends Security_Controller {
         $can_delete_shipments = $this->request->getPost('can_delete_shipments');
         $can_manage_documents = $this->request->getPost('can_manage_documents');
 
+        // Department permissions
+        $can_view_departments = $this->request->getPost('can_view_departments');
+        $can_manage_departments = $this->request->getPost('can_manage_departments');
+        $can_view_all_departments = $this->request->getPost('can_view_all_departments');
+        $can_create_departments = $this->request->getPost('can_create_departments');
+        $can_edit_departments = $this->request->getPost('can_edit_departments');
+        $can_delete_departments = $this->request->getPost('can_delete_departments');
+        $can_manage_department_users = $this->request->getPost('can_manage_department_users');
+        $can_view_department_reports = $this->request->getPost('can_view_department_reports');
+        $can_export_department_data = $this->request->getPost('can_export_department_data');
+        $can_manage_department_settings = $this->request->getPost('can_manage_department_settings');
+        $can_manage_department_announcements = $this->request->getPost('can_manage_department_announcements');
+        $can_view_department_analytics = $this->request->getPost('can_view_department_analytics');
+
         $permissions = array(
             "leave" => $leave,
             "leave_specific" => $leave_specific,
@@ -388,6 +416,18 @@ class Roles extends Security_Controller {
             "can_edit_shipments" => $can_edit_shipments,
             "can_delete_shipments" => $can_delete_shipments,
             "can_manage_documents" => $can_manage_documents,
+            "can_view_departments" => $can_view_departments,
+            "can_manage_departments" => $can_manage_departments,
+            "can_view_all_departments" => $can_view_all_departments,
+            "can_create_departments" => $can_create_departments,
+            "can_edit_departments" => $can_edit_departments,
+            "can_delete_departments" => $can_delete_departments,
+            "can_manage_department_users" => $can_manage_department_users,
+            "can_view_department_reports" => $can_view_department_reports,
+            "can_export_department_data" => $can_export_department_data,
+            "can_manage_department_settings" => $can_manage_department_settings,
+            "can_manage_department_announcements" => $can_manage_department_announcements,
+            "can_view_department_analytics" => $can_view_department_analytics,
         );
 
         try {
@@ -459,7 +499,7 @@ class Roles extends Security_Controller {
 
     //load the user roles view
     function user_roles() {
-        return $this->template->rander("roles/user_roles/index");
+        return $this->template->render("roles/user_roles/index");
     }
 
     //list of user roles for datatable

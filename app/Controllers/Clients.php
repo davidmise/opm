@@ -47,7 +47,7 @@ class Clients extends Security_Controller {
 
         $view_data['tab'] = clean_data($tab);
 
-        return $this->template->rander("clients/index", $view_data);
+        return $this->template->render("clients/index", $view_data);
     }
 
     private function _validate_view_file_access() {
@@ -279,7 +279,7 @@ class Clients extends Security_Controller {
 
                 $view_data = array_merge($view_data, $this->_get_details_page_layout_setting());
 
-                return $this->template->rander("clients/view", $view_data);
+                return $this->template->render("clients/view", $view_data);
             } else {
                 show_404();
             }
@@ -455,7 +455,7 @@ class Clients extends Security_Controller {
 
         if ($view_type == "page_view") {
             $view_data['page_view'] = true;
-            return $this->template->rander("clients/files/index", $view_data);
+            return $this->template->render("clients/files/index", $view_data);
         } else {
             return $this->template->view("clients/files/index", $view_data);
         }
@@ -656,7 +656,7 @@ class Clients extends Security_Controller {
             $view_data['show_cotact_info'] = true;
             $view_data['show_social_links'] = true;
             $view_data['social_link'] = $this->Social_links_model->get_one($contact_id);
-            return $this->template->rander("clients/contacts/view", $view_data);
+            return $this->template->render("clients/contacts/view", $view_data);
         } else {
             show_404();
         }
@@ -1374,7 +1374,7 @@ class Clients extends Security_Controller {
     function users() {
         if ($this->login_user->user_type === "client") {
             $view_data['client_id'] = $this->login_user->client_id;
-            return $this->template->rander("clients/contacts/users", $view_data);
+            return $this->template->render("clients/contacts/users", $view_data);
         }
     }
 

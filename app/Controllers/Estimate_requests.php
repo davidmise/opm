@@ -38,7 +38,7 @@ class Estimate_requests extends Security_Controller {
 
         $view_data['statuses_dropdown'] = json_encode($statuses_dropdown);
 
-        return $this->template->rander('estimate_requests/index', $view_data);
+        return $this->template->render('estimate_requests/index', $view_data);
     }
 
     //view estimate request
@@ -79,7 +79,7 @@ class Estimate_requests extends Security_Controller {
 
         $view_data["estimates"] = $this->Estimates_model->get_all_where(array("estimate_request_id" => $id))->getResult();
 
-        return $this->template->rander('estimate_requests/view_estimate_request', $view_data);
+        return $this->template->render('estimate_requests/view_estimate_request', $view_data);
     }
 
     // download files 
@@ -265,7 +265,7 @@ class Estimate_requests extends Security_Controller {
     function estimate_forms() {
         $this->access_only_allowed_members();
 
-        return $this->template->rander('estimate_requests/estimate_forms');
+        return $this->template->render('estimate_requests/estimate_forms');
     }
 
     private function _get_assign_to_dropdown() {
@@ -393,7 +393,7 @@ class Estimate_requests extends Security_Controller {
 
         $model_info = $this->Estimate_forms_model->get_one($id);
         $view_data['model_info'] = $model_info;
-        return $this->template->rander('estimate_requests/edit_estimate_form', $view_data);
+        return $this->template->render('estimate_requests/edit_estimate_form', $view_data);
     }
 
     //update assigne to field for estimate request
@@ -457,7 +457,7 @@ class Estimate_requests extends Security_Controller {
 
         $model_info = $this->Estimate_forms_model->get_one($id);
         $view_data['model_info'] = $model_info;
-        return $this->template->rander('estimate_requests/preview_estimate_form', $view_data);
+        return $this->template->render('estimate_requests/preview_estimate_form', $view_data);
     }
 
     //add/edit form of estimate request form field 
@@ -648,7 +648,7 @@ class Estimate_requests extends Security_Controller {
                  $view_data['clients_dropdown'] = $dropdown_list->get_clients_and_leads_id_and_text_dropdown();
             }
 
-            return $this->template->rander('estimate_requests/submit_estimate_request_form', $view_data);
+            return $this->template->render('estimate_requests/submit_estimate_request_form', $view_data);
         } else {
             show_404();
         }

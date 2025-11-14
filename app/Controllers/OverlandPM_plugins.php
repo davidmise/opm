@@ -11,7 +11,7 @@ class OverlandPM_plugins extends Security_Controller {
 
     //load plugin list view
     function index() {
-        return $this->template->rander("plugins/index");
+        return $this->template->render("plugins/index");
     }
 
     //load plugin upload modal form

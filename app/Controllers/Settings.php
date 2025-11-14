@@ -17,7 +17,7 @@ class Settings extends Security_Controller {
     }
 
     function general() {
-        return $this->template->rander("settings/general");
+        return $this->template->render("settings/general");
     }
 
     function save_general_settings() {
@@ -147,7 +147,7 @@ class Settings extends Security_Controller {
     }
 
     function email() {
-        return $this->template->rander("settings/email");
+        return $this->template->render("settings/email");
     }
 
     function save_email_settings() {
@@ -203,7 +203,7 @@ class Settings extends Security_Controller {
     }
 
     function ip_restriction() {
-        return $this->template->rander("settings/ip_restriction");
+        return $this->template->render("settings/ip_restriction");
     }
 
     function save_ip_settings() {
@@ -246,7 +246,7 @@ class Settings extends Security_Controller {
 
         $view_data['project_tabs_dropdown'] = $this->_get_client_project_tabs_dropdown();
 
-        return $this->template->rander("settings/client_permissions", $view_data);
+        return $this->template->render("settings/client_permissions", $view_data);
     }
 
     function save_client_settings() {
@@ -306,7 +306,7 @@ class Settings extends Security_Controller {
 
     function invoices() {
         $view_data["last_id"] = $this->Invoices_model->get_last_invoice_sequence();
-        return $this->template->rander("settings/invoices/index", $view_data);
+        return $this->template->render("settings/invoices/index", $view_data);
     }
 
     function invoice_general() {
@@ -404,7 +404,7 @@ class Settings extends Security_Controller {
     }
 
     function events() {
-        return $this->template->rander("settings/events");
+        return $this->template->render("settings/events");
     }
 
     function save_event_settings() {
@@ -462,7 +462,7 @@ class Settings extends Security_Controller {
         }
 
         $view_data['categories_dropdown'] = json_encode($category_suggestions);
-        return $this->template->rander("settings/notifications/index", $view_data);
+        return $this->template->render("settings/notifications/index", $view_data);
     }
 
     function notification_modal_form() {
@@ -626,7 +626,7 @@ class Settings extends Security_Controller {
     }
 
     function modules() {
-        return $this->template->rander("settings/modules");
+        return $this->template->render("settings/modules");
     }
 
     function save_module_settings() {
@@ -646,14 +646,14 @@ class Settings extends Security_Controller {
     /* show the cron job tab */
 
     function cron_job() {
-        return $this->template->rander("settings/cron_job");
+        return $this->template->render("settings/cron_job");
     }
 
     /* show the integration tab */
 
     function integration($tab = "") {
         $view_data["tab"] = clean_data($tab);
-        return $this->template->rander("settings/integration/index", $view_data);
+        return $this->template->render("settings/integration/index", $view_data);
     }
 
     /* load content in reCAPTCHA tab */
@@ -744,7 +744,7 @@ class Settings extends Security_Controller {
 
         $view_data['show_in_kanban_dropdown'] = json_encode($show_in_kanban_dropdown);
 
-        return $this->template->rander("settings/tasks", $view_data);
+        return $this->template->render("settings/tasks", $view_data);
     }
 
     /* show imap settings tab */
@@ -875,7 +875,7 @@ class Settings extends Security_Controller {
         $estimate_info = $this->Estimates_model->get_estimate_last_id();
         $view_data["last_id"] = $estimate_info;
 
-        return $this->template->rander("settings/estimates", $view_data);
+        return $this->template->render("settings/estimates", $view_data);
     }
 
     function save_estimate_settings() {
@@ -917,7 +917,7 @@ class Settings extends Security_Controller {
     /* show timesheet settings tab */
 
     function timesheets() {
-        return $this->template->rander("settings/timesheets");
+        return $this->template->render("settings/timesheets");
     }
 
     /* save timesheet settings */
@@ -940,7 +940,7 @@ class Settings extends Security_Controller {
     }
 
     function gdpr() {
-        return $this->template->rander("settings/gdpr");
+        return $this->template->render("settings/gdpr");
     }
 
     function save_gdpr_settings() {
@@ -1153,7 +1153,7 @@ class Settings extends Security_Controller {
         $view_data["last_id"] = $order_info;
         $view_data['taxes_dropdown'] = $this->Taxes_model->get_dropdown_list_with_blank_option(array("title"));
 
-        return $this->template->rander("settings/orders", $view_data);
+        return $this->template->render("settings/orders", $view_data);
     }
 
     function save_order_settings() {
@@ -1216,7 +1216,7 @@ class Settings extends Security_Controller {
         }
 
         $view_data['project_tabs_dropdown'] = json_encode($project_tabs_dropdown);
-        return $this->template->rander("settings/projects", $view_data);
+        return $this->template->render("settings/projects", $view_data);
     }
 
     function save_projects_settings() {
@@ -1327,7 +1327,7 @@ class Settings extends Security_Controller {
         $Contract_templates_model = model("App\Models\Contract_templates_model");
         $view_data['contract_templates_dropdown'] = array("" => "-") + $Contract_templates_model->get_dropdown_list(array("title"), "id");
 
-        return $this->template->rander("settings/contracts", $view_data);
+        return $this->template->render("settings/contracts", $view_data);
     }
 
     function save_contract_settings() {
@@ -1381,7 +1381,7 @@ class Settings extends Security_Controller {
         $Proposal_templates_model = model("App\Models\Proposal_templates_model");
         $view_data['proposal_templates_dropdown'] = array("" => "-") + $Proposal_templates_model->get_dropdown_list(array("title"), "id");
 
-        return $this->template->rander("settings/proposals", $view_data);
+        return $this->template->render("settings/proposals", $view_data);
     }
 
     function save_proposal_settings() {
@@ -1414,7 +1414,7 @@ class Settings extends Security_Controller {
         $view_data['language_dropdown'] = get_language_list();
 
         $view_data["currency_dropdown"] = get_international_currency_code_dropdown();
-        return $this->template->rander("settings/localization", $view_data);
+        return $this->template->render("settings/localization", $view_data);
     }
 
     /* save localization settings */
@@ -1468,7 +1468,7 @@ class Settings extends Security_Controller {
 
         $view_data['order_statuses_dropdown'] = $order_statuses_dropdown;
 
-        return $this->template->rander("settings/store", $view_data);
+        return $this->template->render("settings/store", $view_data);
     }
 
     function save_store_settings() {
@@ -1510,7 +1510,7 @@ class Settings extends Security_Controller {
         $stripe_payment_method = $this->Payment_methods_model->get_oneline_payment_method("stripe");
         $view_data["stripe_payment_method_enabled"] = $stripe_payment_method->available_on_invoice ? true : false;
 
-        return $this->template->rander("settings/subscriptions/index", $view_data);
+        return $this->template->render("settings/subscriptions/index", $view_data);
     }
 
     function save_subscription_settings() {

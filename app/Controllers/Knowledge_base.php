@@ -58,7 +58,7 @@ class Knowledge_base extends App_Controller {
 
         $view_data['can_manage_help_and_kb'] = $this->_can_manage_help_and_kb();
 
-        return $this->template->rander("help_and_knowledge_base/index", $view_data);
+        return $this->template->render("help_and_knowledge_base/index", $view_data);
     }
 
     //show knowledge base category
@@ -96,7 +96,7 @@ class Knowledge_base extends App_Controller {
 
         $view_data['can_manage_help_and_kb'] = $this->_can_manage_help_and_kb();
 
-        return $this->template->rander("help_and_knowledge_base/articles/view_page", $view_data);
+        return $this->template->render("help_and_knowledge_base/articles/view_page", $view_data);
     }
 
     //show article
@@ -150,7 +150,7 @@ class Knowledge_base extends App_Controller {
 
         $view_data['article_label_classes'] = $this->_make_article_label_classes("knowledge_base", $model_info->labels_list);
 
-        return $this->template->rander('help_and_knowledge_base/articles/view_page', $view_data);
+        return $this->template->render('help_and_knowledge_base/articles/view_page', $view_data);
     }
 
     private function _can_manage_help_and_kb() {

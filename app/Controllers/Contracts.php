@@ -25,7 +25,7 @@ class Contracts extends Security_Controller {
 
             $view_data["can_edit_contracts"] = $this->can_edit_contracts();
 
-            return $this->template->rander("contracts/index", $view_data);
+            return $this->template->render("contracts/index", $view_data);
         } else {
             //client view
             if (!$this->can_client_access("contract")) {
@@ -36,7 +36,7 @@ class Contracts extends Security_Controller {
             $view_data['client_id'] = $this->login_user->client_id;
             $view_data['page_type'] = "full";
 
-            return $this->template->rander("clients/contracts/client_portal", $view_data);
+            return $this->template->render("clients/contracts/client_portal", $view_data);
         }
     }
 
@@ -549,7 +549,7 @@ class Contracts extends Security_Controller {
                         "top_bar" => $this->template->view("contracts/contract_top_bar",  $view_data),
                     ));
                 } else {
-                    return $this->template->rander("contracts/view", $view_data);
+                    return $this->template->render("contracts/view", $view_data);
                 }
             } else {
                 show_404();
@@ -845,7 +845,7 @@ class Contracts extends Security_Controller {
                 $view_data["is_editor_preview"] = true;
                 return $this->template->view("contracts/contract_preview", $view_data);
             } else {
-                return $this->template->rander("contracts/contract_preview", $view_data);
+                return $this->template->render("contracts/contract_preview", $view_data);
             }
         } else {
             show_404();

@@ -48,7 +48,7 @@ class Attendance extends Security_Controller {
 
         $view_data['team_members_dropdown'] = json_encode($this->_get_members_dropdown_list_for_filter());
         $view_data['tab'] = clean_data($tab); //selected tab
-        return $this->template->rander("attendance/index", $view_data);
+        return $this->template->render("attendance/index", $view_data);
     }
 
     //show add/edit attendance modal
@@ -256,7 +256,7 @@ class Attendance extends Security_Controller {
             return $this->template->view("team_members/attendance_info", $view_data);
         } else {
             $view_data['page_type'] = "full";
-            return $this->template->rander("team_members/attendance_info", $view_data);
+            return $this->template->render("team_members/attendance_info", $view_data);
         }
     }
 

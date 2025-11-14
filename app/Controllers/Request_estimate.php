@@ -19,7 +19,7 @@ class Request_estimate extends App_Controller {
         $view_data['left_menu'] = false;
 
         $view_data["estimate_forms"] = $this->Estimate_forms_model->get_all_where(array("status" => "active", "public" => "1", "deleted" => 0))->getResult();
-        return $this->template->rander("request_estimate/index", $view_data);
+        return $this->template->render("request_estimate/index", $view_data);
     }
 
     function form($id = 0, $embedded = 0) {
@@ -47,7 +47,7 @@ class Request_estimate extends App_Controller {
 
         if (get_setting("module_estimate_request") && $model_info->id) {
             $view_data['model_info'] = $model_info;
-            return $this->template->rander('request_estimate/estimate_request_form', $view_data);
+            return $this->template->render('request_estimate/estimate_request_form', $view_data);
         } else {
             show_404();
         }

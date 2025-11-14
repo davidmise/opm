@@ -11,7 +11,7 @@ class Expense_categories extends Security_Controller {
 
     //load expense categories list view
     function index() {
-        return $this->template->rander("expense_categories/index");
+        return $this->template->render("expense_categories/index");
     }
 
     //load expense category add/edit modal form

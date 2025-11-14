@@ -13,7 +13,7 @@ class Company extends Security_Controller {
     }
 
     function index() {
-        return $this->template->rander("company/index");
+        return $this->template->render("company/index");
     }
 
     function modal_form() {

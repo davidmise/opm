@@ -10,7 +10,7 @@ class Lead_status extends Security_Controller {
     }
 
     function index() {
-        return $this->template->rander("lead_status/index");
+        return $this->template->render("lead_status/index");
     }
 
     function modal_form() {

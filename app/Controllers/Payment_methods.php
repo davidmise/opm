@@ -11,7 +11,7 @@ class Payment_methods extends Security_Controller {
 
     //load payment methods list
     function index() {
-        return $this->template->rander("payment_methods/index");
+        return $this->template->render("payment_methods/index");
     }
 
     //load payment method add/edit form

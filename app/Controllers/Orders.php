@@ -19,7 +19,7 @@ class Orders extends Security_Controller {
 
         if ($this->login_user->user_type === "staff") {
             $view_data['order_statuses'] = $this->Order_status_model->get_details()->getResult();
-            return $this->template->rander("orders/index", $view_data);
+            return $this->template->render("orders/index", $view_data);
         } else {
             //client view
             if (!$this->can_client_access("store", false)) {
@@ -30,7 +30,7 @@ class Orders extends Security_Controller {
             $view_data['client_id'] = $this->login_user->client_id;
             $view_data['page_type'] = "full";
 
-            return $this->template->rander("clients/orders/client_portal", $view_data);
+            return $this->template->render("clients/orders/client_portal", $view_data);
         }
     }
 
@@ -265,7 +265,7 @@ class Orders extends Security_Controller {
                 $view_data["custom_field_headers_of_invoice"] = $this->Custom_fields_model->get_custom_field_headers_for_table("invoices", $this->login_user->is_admin, $this->login_user->user_type);
                 $view_data["custom_field_headers_of_task"] = $this->Custom_fields_model->get_custom_field_headers_for_table("tasks", $this->login_user->is_admin, $this->login_user->user_type);
 
-                return $this->template->rander("orders/view", $view_data);
+                return $this->template->render("orders/view", $view_data);
             } else {
                 show_404();
             }
@@ -490,7 +490,7 @@ class Orders extends Security_Controller {
         $this->access_only_allowed_members();
 
         $view_data["currencies_dropdown"] = $this->_get_currencies_dropdown(false);
-        return $this->template->rander("orders/reports/orders_summary", $view_data);
+        return $this->template->render("orders/reports/orders_summary", $view_data);
     }
 
     function monthly_orders_summary() {

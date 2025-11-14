@@ -26,7 +26,7 @@ class Announcements extends Security_Controller {
             $view_data["show_option"] = false;
         }
 
-        return $this->template->rander("announcements/index", $view_data);
+        return $this->template->render("announcements/index", $view_data);
     }
 
     //show add/edit announcement form
@@ -39,7 +39,7 @@ class Announcements extends Security_Controller {
 
         $view_data['get_sharing_options_view'] = $this->get_sharing_options_view(false, $view_data['model_info']);
 
-        return $this->template->rander('announcements/modal_form', $view_data);
+        return $this->template->render('announcements/modal_form', $view_data);
     }
 
     function get_client_groups_dropdown() {
@@ -78,7 +78,7 @@ class Announcements extends Security_Controller {
 
                 //mark the announcement as read for loged in user
                 $this->Announcements_model->mark_as_read($id, $this->login_user->id);
-                return $this->template->rander("announcements/view", $view_data);
+                return $this->template->render("announcements/view", $view_data);
             }
         }
 

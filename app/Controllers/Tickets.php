@@ -68,7 +68,7 @@ class Tickets extends Security_Controller {
             $view_data["custom_field_headers"] = $custom_field_headers;
             $view_data["custom_field_filters"] = $custom_field_filters;
 
-            return $this->template->rander("tickets/tickets_list", $view_data);
+            return $this->template->render("tickets/tickets_list", $view_data);
         } else {
             if (!$this->can_client_access("ticket")) {
                 app_redirect("forbidden");
@@ -80,7 +80,7 @@ class Tickets extends Security_Controller {
             $view_data["custom_field_headers_of_tickets"] = $custom_field_headers;
             $view_data["custom_field_filters_of_tickets"] = $custom_field_filters;
 
-            return $this->template->rander("clients/tickets/index", $view_data);
+            return $this->template->render("clients/tickets/index", $view_data);
         }
     }
 
@@ -761,7 +761,7 @@ class Tickets extends Security_Controller {
                         "client_info" => $this->template->view("tickets/ticket_client_info",  $view_data),
                     ));
                 } else {
-                    return $this->template->rander("tickets/view", $view_data);
+                    return $this->template->render("tickets/view", $view_data);
                 }
             } else {
                 show_404();
@@ -918,7 +918,7 @@ class Tickets extends Security_Controller {
     //load the ticket templates view of ticket template list
     function ticket_templates() {
         $this->access_only_team_members();
-        return $this->template->rander("tickets/templates/index");
+        return $this->template->render("tickets/templates/index");
     }
 
     private function can_view_ticket_template($id = 0) {
@@ -1394,7 +1394,7 @@ class Tickets extends Security_Controller {
         $view_data['assigned_to_dropdown'] = json_encode($this->_get_assiged_to_dropdown());
         $view_data['ticket_types_dropdown'] = json_encode($this->_get_ticket_types_dropdown_list_for_filter());
 
-        return $this->template->rander("tickets/reports/chart_report_container", $view_data);
+        return $this->template->render("tickets/reports/chart_report_container", $view_data);
     }
 
     function tickets_chart_report_data() {

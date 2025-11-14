@@ -195,19 +195,27 @@
 <?php echo form_close(); ?>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        // Load department team table
-        $("#department-team-table").appTable({
-            source: '<?php echo_uri("departments/department_team_list_data/" . $department_info->id) ?>',
-            order: [[1, "asc"]],
-            columns: [
-                {title: "<?php echo app_lang("member") ?>", "class": "w-20p"},
-                {title: "<?php echo app_lang("role") ?>", "class": "w-15p"},
-                {title: "<?php echo app_lang("primary_department") ?>", "class": "text-center w-10p"},
-                {title: "<?php echo app_lang("email") ?>", "class": "w-20p"},
-                {title: "<i class='ti ti-menu-2'></i>", "class": "text-center option w-100px"}
-            ],
-            printColumns: [0, 1, 2, 3],
+    // Wait for jQuery to be available before executing
+    function initDashboardScript() {
+        if (typeof $ === 'undefined') {
+            // jQuery not loaded yet, wait 100ms and try again
+            setTimeout(initDashboardScript, 100);
+            return;
+        }
+        
+        $(document).ready(function () {
+            // Load department team table
+            $("#department-team-table").appTable({
+                source: '<?php echo_uri("departments/department_team_list_data/" . $department_info->id) ?>',
+                order: [[1, "asc"]],
+                columns: [
+                    {title: "<?php echo app_lang("member") ?>", "class": "w-20p"},
+                    {title: "<?php echo app_lang("role") ?>", "class": "w-15p"},
+                    {title: "<?php echo app_lang("primary_department") ?>", "class": "text-center w-10p"},
+                    {title: "<?php echo app_lang("email") ?>", "class": "w-20p"},
+                    {title: "<i class='ti ti-menu-2'></i>", "class": "text-center option w-100px"}
+                ],
+                printColumns: [0, 1, 2, 3],
             xlsColumns: [0, 1, 2, 3]
         });
 
@@ -216,4 +224,8 @@
             location.reload();
         }, 300000); // 5 minutes
     });
+}
+
+// Start the initialization
+initDashboardScript();
 </script>

@@ -159,6 +159,29 @@ $lang["department"] = "Department";
 $lang["departments"] = "Departments";
 $lang["department_has_dependencies"] = "This department cannot be deleted because it has team members or projects assigned to it.";
 $lang["select_a_department"] = "Select a department";
+
+/* Department RBAC Permissions */
+$lang["can_manage_departments"] = "Can manage departments";
+$lang["can_view_all_departments"] = "Can view all departments";
+$lang["can_create_departments"] = "Can create departments"; 
+$lang["can_edit_departments"] = "Can edit departments";
+$lang["can_delete_departments"] = "Can delete departments";
+$lang["can_manage_department_users"] = "Can manage department users";
+$lang["can_view_department_reports"] = "Can view department reports";
+$lang["can_export_department_data"] = "Can export department data";
+$lang["can_manage_department_settings"] = "Can manage department settings";
+$lang["rbac_permissions"] = "RBAC Permissions";
+$lang["role_based_access_control"] = "Role Based Access Control";
+$lang["configure_department_permissions_by_user_role"] = "Configure department permissions by user role";
+$lang["save_rbac_settings"] = "Save RBAC Settings";
+$lang["reset_to_defaults"] = "Reset to Defaults";
+$lang["admin_role_has_all_permissions_by_default"] = "Admin role has all permissions by default and cannot be changed";
+$lang["rbac_settings_saved_successfully"] = "RBAC settings saved successfully";
+$lang["confirm_reset_rbac_to_defaults"] = "Are you sure you want to reset RBAC settings to defaults?";
+$lang["rbac_reset_to_defaults"] = "RBAC settings have been reset to defaults";
+$lang["no_rbac_data_provided"] = "No RBAC data provided";
+$lang["access_denied_insufficient_permissions"] = "Access denied: Insufficient permissions";
+$lang["permission_denied_contact_administrator"] = "Permission denied. Contact your administrator for access";
 $lang["statistics"] = "Statistics";
 $lang["members"] = "Members";
 $lang["color"] = "Color";
@@ -3156,6 +3179,21 @@ $lang["can_create_shipments"] = "Can create shipments";
 $lang["can_edit_shipments"] = "Can edit shipments";
 $lang["can_delete_shipments"] = "Can delete shipments";
 $lang["can_manage_documents"] = "Can manage workflow documents";
+
+// Department permissions
+$lang["set_department_permissions"] = "Set Department Permissions";
+$lang["can_view_departments"] = "Can view departments";
+$lang["can_manage_departments"] = "Can manage all departments";
+$lang["can_view_all_departments"] = "Can view all departments";
+$lang["can_create_departments"] = "Can create departments";
+$lang["can_edit_departments"] = "Can edit departments";
+$lang["can_delete_departments"] = "Can delete departments";
+$lang["can_manage_department_users"] = "Can manage department users";
+$lang["can_view_department_reports"] = "Can view department reports";
+$lang["can_export_department_data"] = "Can export department data";
+$lang["can_manage_department_settings"] = "Can manage department settings";
+$lang["can_manage_department_announcements"] = "Can manage department announcements";
+$lang["can_view_department_analytics"] = "Can view department analytics";
 
 // Quick actions and task integration
 $lang["quick_actions"] = "Quick Actions";

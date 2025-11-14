@@ -72,7 +72,7 @@ class Store extends Security_Controller {
         } else if ($item_search) { //search suggestions view
             echo json_encode(array("success" => true, "data" => $this->template->view("items/items_grid_data", $view_data)));
         } else { //default view
-            return $this->template->rander("items/grid_view", $view_data);
+            return $this->template->render("items/grid_view", $view_data);
         }
     }
 
@@ -328,7 +328,7 @@ class Store extends Security_Controller {
             $view_data['left_menu'] = false;
         }
 
-        return $this->template->rander("orders/process_order", $view_data);
+        return $this->template->render("orders/process_order", $view_data);
     }
 
     function item_list_data_of_login_user() {
@@ -644,7 +644,7 @@ class Store extends Security_Controller {
             $view_data['left_menu'] = false;
         }
 
-        return $this->template->rander("orders/order_preview", $view_data);
+        return $this->template->render("orders/order_preview", $view_data);
     }
 
     private function create_new_client() {

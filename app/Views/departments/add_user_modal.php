@@ -35,28 +35,40 @@
 <?php echo form_close(); ?>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        $("#add-user-form").appForm({
-            onSuccess: function (result) {
-                if (result.success) {
-                    appAlert.success(result.message, {duration: 10000});
-                    $("#department-team-table").appTable({reload: true});
-                } else {
-                    appAlert.error(result.message);
-                }
-            }
-        });
+    // Wait for jQuery to be available before executing
+    function initAddUserModalScript() {
+        if (typeof $ === 'undefined') {
+            // jQuery not loaded yet, wait 100ms and try again
+            setTimeout(initAddUserModalScript, 100);
+            return;
+        }
         
-        $("#user_ids").select2({
-            placeholder: "<?php echo app_lang('select_team_members'); ?>",
-            allowClear: true
-        });
+        $(document).ready(function () {
+            $("#add-user-form").appForm({
+                onSuccess: function (result) {
+                    if (result.success) {
+                        appAlert.success(result.message, {duration: 10000});
+                        $("#department-team-table").appTable({reload: true});
+                    } else {
+                        appAlert.error(result.message);
+                    }
+                }
+            });
+            
+            $("#user_ids").select2({
+                placeholder: "<?php echo app_lang('select_team_members'); ?>",
+                allowClear: true
+            });
 
-        // Initialize feather icons
-        setTimeout(function() {
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
-        }, 100);
-    });
+            // Initialize feather icons
+            setTimeout(function() {
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            }, 100);
+        });
+    }
+    
+    // Start the initialization
+    initAddUserModalScript();
 </script>
