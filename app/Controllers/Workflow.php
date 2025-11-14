@@ -297,13 +297,18 @@ class Workflow extends Department_Access_Controller
 
     function shipment_details($shipment_id = 0)
     {
+        $this->access_only_allowed_workflow_members();
+        
         if (!$shipment_id) {
-            show_404();
+            // Redirect to shipments list if no ID provided
+            redirect('workflow/shipments');
         }
         
         $data['shipment_info'] = $this->_get_shipment_details($shipment_id);
         if (!$data['shipment_info']) {
-            show_404();
+            // Set error message and redirect to shipments list
+            $this->session->setFlashdata('error', app_lang('shipment_not_found'));
+            redirect('workflow/shipments');
         }
         
         $data['shipment_documents'] = $this->_get_shipment_documents($shipment_id);
@@ -655,12 +660,22 @@ class Workflow extends Department_Access_Controller
             $result[] = $this->_make_shipment_row($data);
         }
         
-        // Debug logging
-        error_log('Workflow list_shipments: Found ' . count($result) . ' shipments');
+        // Debug information
+        error_log('Workflow list_shipments: Found ' . count($list_data) . ' raw records');
+        error_log('Workflow list_shipments: Processed ' . count($result) . ' rows');
+        error_log('Sample data: ' . json_encode(array_slice($result, 0, 1)));
         
         // Add headers for proper JSON response
         header('Content-Type: application/json');
-        echo json_encode(array("data" => $result));
+        echo json_encode(array(
+            "data" => $result,
+            "recordsTotal" => count($result),
+            "recordsFiltered" => count($result),
+            "debug" => array(
+                "raw_records" => count($list_data),
+                "processed_rows" => count($result)
+            )
+        ));
     }
 
     function list_documents() {
@@ -784,7 +799,7 @@ class Workflow extends Department_Access_Controller
         $checkbox = "<input type='checkbox' class='form-check-input shipment-checkbox' data-shipment-id='$data->id'>";
 
         return array(
-            $checkbox,
+            $data->id, // Include the ID as the first element for easier access
             $data->shipment_number,
             $data->company_name ?: 'Unknown Client',
             $data->cargo_type,
@@ -1730,5 +1745,219 @@ class Workflow extends Department_Access_Controller
             ->update(['status' => 'cancelled', 'updated_at' => get_current_utc_time()]);
         
         return $result;
+    }
+
+    // ========== ADDITIONAL MODAL FORMS AND FUNCTIONS ==========
+
+    /**
+     * Status and phase update modal form
+     */
+    function status_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        $current_status = $this->request->getPost('current_status');
+        $current_phase = $this->request->getPost('current_phase');
+        
+        $view_data['shipment_id'] = $shipment_id;
+        $view_data['current_status'] = $current_status;
+        $view_data['current_phase'] = $current_phase;
+        
+        // Status options
+        $view_data['status_options'] = array(
+            'active' => app_lang('active'),
+            'completed' => app_lang('completed'),
+            'cancelled' => app_lang('cancelled'),
+            'on_hold' => app_lang('on_hold')
+        );
+        
+        // Phase options
+        $view_data['phase_options'] = array(
+            'clearing_intake' => app_lang('clearing_intake'),
+            'regulatory_processing' => app_lang('regulatory_processing'),
+            'internal_review' => app_lang('internal_review'),
+            'transport_loading' => app_lang('transport_loading'),
+            'tracking' => app_lang('tracking')
+        );
+        
+        return $this->template->view("workflow/status_modal_form", $view_data);
+    }
+
+    /**
+     * Assignment modal form
+     */
+    function assignment_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        $current_assigned_to = $this->request->getPost('current_assigned_to');
+        
+        $view_data['shipment_id'] = $shipment_id;
+        $view_data['current_assigned_to'] = $current_assigned_to;
+        $view_data['team_members_dropdown'] = $this->_get_team_members_dropdown_for_modal();
+        $view_data['departments_dropdown'] = $this->_get_departments_dropdown();
+        
+        return $this->template->view("workflow/assignment_modal_form", $view_data);
+    }
+
+    /**
+     * Tracking modal form
+     */
+    function tracking_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        $id = $this->request->getPost('id');
+        
+        if ($id) {
+            // Edit mode - get existing tracking data
+            $view_data['model_info'] = $this->_get_tracking_info($id);
+        } else {
+            // Create mode
+            $model_info = new \stdClass();
+            $model_info->id = "";
+            $model_info->shipment_id = $shipment_id;
+            $model_info->location = "";
+            $model_info->status = "";
+            $model_info->notes = "";
+            $model_info->tracking_date = "";
+            $view_data['model_info'] = $model_info;
+        }
+        
+        return $this->template->view("workflow/tracking_modal_form", $view_data);
+    }
+
+    /**
+     * Truck allocation modal form
+     */
+    function truck_allocation_modal_form() {
+        $this->access_only_allowed_workflow_members();
+        
+        $shipment_id = $this->request->getPost('shipment_id');
+        $id = $this->request->getPost('id');
+        
+        if ($id) {
+            // Edit mode - get existing allocation data
+            $view_data['model_info'] = $this->_get_truck_allocation_info($id);
+        } else {
+            // Create mode
+            $model_info = new \stdClass();
+            $model_info->id = "";
+            $model_info->shipment_id = $shipment_id;
+            $model_info->truck_id = "";
+            $model_info->driver_name = "";
+            $model_info->driver_phone = "";
+            $model_info->allocated_at = "";
+            $model_info->status = "allocated";
+            $view_data['model_info'] = $model_info;
+        }
+        
+        $view_data['trucks_dropdown'] = $this->_get_trucks_dropdown();
+        
+        return $this->template->view("workflow/truck_allocation_modal_form", $view_data);
+    }
+
+    /**
+     * Update shipment phase
+     */
+    function update_shipment_phase() {
+        if (!$this->can_edit_shipments()) {
+            echo json_encode(array("success" => false, 'message' => app_lang('access_denied')));
+            return;
+        }
+
+        $shipment_id = $this->request->getPost('shipment_id');
+        $phase = $this->request->getPost('phase');
+
+        if (!$shipment_id || !$phase) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $db = \Config\Database::connect();
+        $result = $db->table('opm_workflow_shipments')
+            ->where('id', $shipment_id)
+            ->update(['current_phase' => $phase, 'updated_at' => get_current_utc_time()]);
+
+        if ($result) {
+            echo json_encode(array("success" => true, "message" => app_lang('phase_updated_successfully')));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    /**
+     * Save assignment
+     */
+    function save_assignment() {
+        if (!$this->can_edit_shipments()) {
+            echo json_encode(array("success" => false, 'message' => app_lang('access_denied')));
+            return;
+        }
+
+        $shipment_id = $this->request->getPost('shipment_id');
+        $assigned_to = $this->request->getPost('assigned_to');
+        $department_id = $this->request->getPost('department_id');
+
+        if (!$shipment_id) {
+            echo json_encode(array("success" => false, 'message' => app_lang('required_fields_missing')));
+            return;
+        }
+
+        $db = \Config\Database::connect();
+        $update_data = array(
+            'updated_at' => get_current_utc_time()
+        );
+
+        if ($assigned_to) {
+            $update_data['assigned_to'] = $assigned_to;
+        }
+
+        if ($department_id) {
+            $update_data['department_id'] = $department_id;
+        }
+
+        $result = $db->table('opm_workflow_shipments')
+            ->where('id', $shipment_id)
+            ->update($update_data);
+
+        if ($result) {
+            echo json_encode(array("success" => true, "message" => app_lang('assignment_updated_successfully')));
+        } else {
+            echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
+        }
+    }
+
+    // ========== ADDITIONAL HELPER METHODS ==========
+
+    private function _get_tracking_info($id) {
+        $db = \Config\Database::connect();
+        return $db->table('opm_workflow_tracking_reports')
+            ->where('id', $id)
+            ->get()
+            ->getRow();
+    }
+
+    private function _get_truck_allocation_info($id) {
+        $db = \Config\Database::connect();
+        return $db->table('opm_workflow_truck_allocations')
+            ->where('id', $id)
+            ->get()
+            ->getRow();
+    }
+
+    private function _get_trucks_dropdown() {
+        $db = \Config\Database::connect();
+        $trucks = $db->table('opm_workflow_trucks')
+            ->orderBy('truck_number', 'ASC')
+            ->get()
+            ->getResult();
+
+        $dropdown = array('' => '- ' . app_lang('select_truck') . ' -');
+        foreach ($trucks as $truck) {
+            $dropdown[$truck->id] = $truck->truck_number . ' (' . ($truck->driver_name ?? 'No Driver') . ')';
+        }
+
+        return $dropdown;
     }
 }

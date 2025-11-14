@@ -43,7 +43,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover" id="shipments-table">
+                        <table class="table table-hover display" id="shipments-table">
                             <thead>
                                 <tr>
                                     <th><?php echo app_lang('shipment_number'); ?></th>
@@ -56,67 +56,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Sample data - will be replaced with dynamic data -->
-                                <tr>
-                                    <td><a href="#" class="text-primary">SHP-2025-001</a></td>
-                                    <td>ABC Trading Ltd</td>
-                                    <td>Electronics</td>
-                                    <td><span class="badge bg-primary">Active</span></td>
-                                    <td>Clearing Intake</td>
-                                    <td><?php echo format_to_date(date('Y-m-d'), false); ?></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewShipment(1)">
-                                                <i data-feather="eye" class="icon-12"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editShipment(1)">
-                                                <i data-feather="edit" class="icon-12"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteShipment(1)">
-                                                <i data-feather="trash-2" class="icon-12"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><a href="#" class="text-primary">SHP-2025-002</a></td>
-                                    <td>XYZ Imports</td>
-                                    <td>Textiles</td>
-                                    <td><span class="badge bg-warning">Pending</span></td>
-                                    <td>Regulatory Processing</td>
-                                    <td><?php echo format_to_date(date('Y-m-d', strtotime('-1 day')), false); ?></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewShipment(2)">
-                                                <i data-feather="eye" class="icon-12"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editShipment(2)">
-                                                <i data-feather="edit" class="icon-12"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteShipment(2)">
-                                                <i data-feather="trash-2" class="icon-12"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><a href="#" class="text-primary">SHP-2025-003</a></td>
-                                    <td>Global Logistics Corp</td>
-                                    <td>Machinery</td>
-                                    <td><span class="badge bg-success">Completed</span></td>
-                                    <td>Delivery Complete</td>
-                                    <td><?php echo format_to_date(date('Y-m-d', strtotime('-3 days')), false); ?></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewShipment(3)">
-                                                <i data-feather="eye" class="icon-12"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="downloadDocuments(3)">
-                                                <i data-feather="download" class="icon-12"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <!-- Data will be loaded via DataTables AJAX -->
                             </tbody>
                         </table>
                     </div>
@@ -213,48 +153,92 @@ function deleteShipment(id) {
     }
 }
 
-function exportShipments() {
-    alert('Export feature coming soon!');
-}
-
-function downloadDocuments(id) {
-    alert('Download Documents feature coming soon!');
-}
-
-// Filter functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('[data-filter]');
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Remove active class from all buttons
-            filterButtons.forEach(btn => btn.classList.remove('active', 'btn-primary'));
-            filterButtons.forEach(btn => btn.classList.add('btn-outline-secondary'));
-            
-            // Add active class to clicked button
-            this.classList.remove('btn-outline-secondary');
-            this.classList.add('btn-primary', 'active');
-            
-            const filter = this.getAttribute('data-filter');
-            filterShipments(filter);
-        });
+// Initialize DataTable when page loads
+$(document).ready(function() {
+    $('#shipments-table').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "ajax": {
+            "url": "<?php echo get_uri('workflow/list_shipments'); ?>",
+            "type": "POST"
+        },
+        "columns": [
+            {
+                "data": "shipment_number",
+                "render": function(data, type, row) {
+                    return '<a href="<?php echo get_uri("workflow/shipment_details/"); ?>' + row.id + '" class="text-primary">' + data + '</a>';
+                }
+            },
+            {"data": "client_name"},
+            {"data": "cargo_type"},
+            {
+                "data": "status",
+                "render": function(data, type, row) {
+                    var badgeClass = 'secondary';
+                    switch(data) {
+                        case 'active':
+                            badgeClass = 'primary';
+                            break;
+                        case 'completed':
+                            badgeClass = 'success';
+                            break;
+                        case 'cancelled':
+                            badgeClass = 'warning';
+                            break;
+                    }
+                    return '<span class="badge bg-' + badgeClass + '">' + data.charAt(0).toUpperCase() + data.slice(1) + '</span>';
+                }
+            },
+            {
+                "data": "current_phase",
+                "render": function(data, type, row) {
+                    return data ? data.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A';
+                }
+            },
+            {"data": "created_at"},
+            {
+                "data": "id",
+                "orderable": false,
+                "render": function(data, type, row) {
+                    return '<div class="btn-group">' +
+                        '<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewShipment(' + data + ')" title="View Details">' +
+                        '<i data-feather="eye" class="icon-12"></i>' +
+                        '</button>' +
+                        '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editShipment(' + data + ')" title="Edit">' +
+                        '<i data-feather="edit" class="icon-12"></i>' +
+                        '</button>' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteShipment(' + data + ')" title="Delete">' +
+                        '<i data-feather="trash-2" class="icon-12"></i>' +
+                        '</button>' +
+                        '</div>';
+                }
+            }
+        ],
+        "order": [[5, "desc"]], // Order by created date descending
+        "pageLength": 25,
+        "responsive": true,
+        "dom": '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip',
+        "language": {
+            "processing": "Loading shipments...",
+            "emptyTable": "No shipments found",
+            "zeroRecords": "No matching shipments found"
+        },
+        "drawCallback": function(settings) {
+            // Re-initialize Feather icons after table redraw
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        }
     });
 });
 
 function filterShipments(status) {
-    const rows = document.querySelectorAll('#shipments-table tbody tr');
-    rows.forEach(row => {
-        if (status === 'all') {
-            row.style.display = '';
-        } else {
-            const statusCell = row.querySelector('td:nth-child(4) .badge');
-            const shipmentStatus = statusCell.textContent.toLowerCase();
-            if (shipmentStatus.includes(status)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        }
-    });
+    var table = $('#shipments-table').DataTable();
+    if (status === 'all') {
+        table.column(3).search('').draw(); // Clear search on status column
+    } else {
+        table.column(3).search(status).draw(); // Search in status column
+    }
 }
 </script>
 

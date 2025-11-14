@@ -2934,4 +2934,175 @@ $lang["keep_filter_bar_collapsed"] = "Garder la barre de filtre réduite";
 $lang["keep_filter_bar_expanded_until_any_saved_filter_is_selected"] = "Gardez la barre de filtre développée jusqu&#39;à ce qu&#39;un filtre enregistré soit sélectionné";
 $lang["keep_filter_bar_always_expanded"] = "Gardez la barre de filtre toujours étendue";
 
+/* Workflow Management French Translations */
+$lang["workflow"] = "Flux de travail";
+$lang["workflows"] = "Flux de travail";
+$lang["workflow_management"] = "Gestion du flux de travail";
+$lang["shipment"] = "Expédition";
+$lang["shipments"] = "Expéditions";
+$lang["shipment_details"] = "Détails de l'expédition";
+$lang["shipment_number"] = "Numéro d'expédition";
+$lang["shipment_information"] = "Informations sur l'expédition";
+$lang["shipping_information"] = "Informations d'expédition";
+$lang["shipment_documents"] = "Documents d'expédition";
+$lang["shipment_tracking"] = "Suivi de l'expédition";
+$lang["add_shipment"] = "Ajouter une expédition";
+$lang["edit_shipment"] = "Modifier l'expédition";
+$lang["delete_shipment"] = "Supprimer l'expédition";
+$lang["create_shipment"] = "Créer une expédition";
+$lang["new_shipment"] = "Nouvelle expédition";
+$lang["total_shipments"] = "Total des expéditions";
+$lang["active_shipments"] = "Expéditions actives";
+$lang["completed_shipments"] = "Expéditions terminées";
+$lang["pending_shipments"] = "Expéditions en attente";
+$lang["cancelled_shipments"] = "Expéditions annulées";
+
+$lang["cargo"] = "Cargaison";
+$lang["cargo_type"] = "Type de cargaison";
+$lang["cargo_weight"] = "Poids de la cargaison";
+$lang["cargo_value"] = "Valeur de la cargaison";
+$lang["cargo_description"] = "Description de la cargaison";
+$lang["cargo_volume"] = "Volume de la cargaison";
+$lang["cargo_dimensions"] = "Dimensions de la cargaison";
+
+$lang["origin_port"] = "Port d'origine";
+$lang["destination_port"] = "Port de destination";
+$lang["final_destination"] = "Destination finale";
+$lang["intermediate_ports"] = "Ports intermédiaires";
+$lang["port_of_loading"] = "Port de chargement";
+$lang["port_of_discharge"] = "Port de déchargement";
+
+$lang["current_phase"] = "Phase actuelle";
+$lang["workflow_phase"] = "Phase du flux de travail";
+$lang["phase"] = "Phase";
+$lang["phases"] = "Phases";
+$lang["clearing_intake"] = "Admission de dédouanement";
+$lang["regulatory_processing"] = "Traitement réglementaire";
+$lang["internal_review"] = "Examen interne";
+$lang["transport_loading"] = "Chargement de transport";
+$lang["tracking"] = "Suivi";
+$lang["phase_updated_successfully"] = "Phase mise à jour avec succès";
+$lang["update_phase"] = "Mettre à jour la phase";
+$lang["advance_phase"] = "Avancer la phase";
+$lang["click_to_set_phase"] = "Cliquer pour définir cette phase";
+
+$lang["update_status"] = "Mettre à jour le statut";
+$lang["update_status_and_phase"] = "Mettre à jour le statut et la phase";
+$lang["status_updated_successfully"] = "Statut mis à jour avec succès";
+$lang["on_hold"] = "En attente";
+$lang["in_transit"] = "En transit";
+$lang["delivered"] = "Livré";
+
+$lang["assign"] = "Assigner";
+$lang["assign_shipment"] = "Assigner l'expédition";
+$lang["assigned_to"] = "Assigné à";
+$lang["reassign"] = "Réassigner";
+$lang["assign_to_user"] = "Assigner à l'utilisateur";
+$lang["assign_to_department"] = "Assigner au département";
+$lang["assignment_updated_successfully"] = "Assignment mis à jour avec succès";
+$lang["assignment_instructions_optional"] = "Instructions d'assignment (optionnel)";
+$lang["optional_department_assignment"] = "Optionnel: Assigner également au département";
+$lang["shipments_assigned_to_department"] = "%s expéditions assignées au département";
+$lang["not_assigned"] = "Non assigné";
+
+$lang["document"] = "Document";
+$lang["documents"] = "Documents";
+$lang["upload_document"] = "Télécharger un document";
+$lang["download_document"] = "Télécharger le document";
+$lang["delete_document"] = "Supprimer le document";
+$lang["document_name"] = "Nom du document";
+$lang["document_type"] = "Type de document";
+$lang["document_status"] = "Statut du document";
+$lang["upload_documents"] = "Télécharger des documents";
+$lang["upload_documents_to_get_started"] = "Téléchargez des documents pour commencer";
+$lang["no_documents_found"] = "Aucun document trouvé";
+$lang["upload_first_document"] = "Télécharger le premier document";
+
+$lang["workflow_tasks"] = "Tâches de flux de travail";
+$lang["task_name"] = "Nom de la tâche";
+$lang["add_task"] = "Ajouter une tâche";
+$lang["edit_task"] = "Modifier la tâche";
+$lang["delete_task"] = "Supprimer la tâche";
+$lang["mark_complete"] = "Marquer comme terminé";
+$lang["task_complete"] = "Tâche terminée";
+$lang["create_tasks_to_track_progress"] = "Créer des tâches pour suivre les progrès";
+$lang["create_first_task"] = "Créer la première tâche";
+
+$lang["tracking_updates"] = "Mises à jour de suivi";
+$lang["add_tracking_update"] = "Ajouter une mise à jour de suivi";
+$lang["edit_tracking"] = "Modifier le suivi";
+$lang["delete_tracking"] = "Supprimer le suivi";
+$lang["tracking_location"] = "Emplacement";
+$lang["tracking_status"] = "Statut";
+$lang["tracking_date"] = "Date";
+$lang["tracking_notes"] = "Notes";
+$lang["no_tracking_updates"] = "Aucune mise à jour de suivi";
+$lang["add_tracking_updates_to_monitor_progress"] = "Ajouter des mises à jour de suivi pour surveiller les progrès";
+$lang["add_first_update"] = "Ajouter la première mise à jour";
+
+$lang["truck_allocation"] = "Allocation de camion";
+$lang["truck_allocations"] = "Allocations de camions";
+$lang["allocate_truck"] = "Allouer un camion";
+$lang["truck_number"] = "Numéro de camion";
+$lang["driver"] = "Conducteur";
+$lang["driver_name"] = "Nom du conducteur";
+$lang["driver_phone"] = "Téléphone du conducteur";
+$lang["allocated_at"] = "Alloué à";
+$lang["allocation_status"] = "Statut";
+$lang["edit_allocation"] = "Modifier l'allocation";
+$lang["deallocate_truck"] = "Désallouer le camion";
+$lang["deallocate_truck_confirmation"] = "Êtes-vous sûr de vouloir désallouer ce camion?";
+$lang["track_truck"] = "Suivre le camion";
+$lang["no_trucks_allocated"] = "Aucun camion alloué";
+$lang["allocate_trucks_for_transportation"] = "Allouer des camions pour le transport";
+$lang["allocate_first_truck"] = "Allouer le premier camion";
+$lang["select_truck"] = "Sélectionner un camion";
+
+$lang["estimated_arrival"] = "Arrivée estimée";
+$lang["actual_arrival"] = "Arrivée réelle";
+$lang["departure_date"] = "Date de départ";
+$lang["arrival_date"] = "Date d'arrivée";
+$lang["created_at"] = "Créé à";
+$lang["updated_at"] = "Mis à jour à";
+$lang["last_updated"] = "Dernière mise à jour";
+
+$lang["back_to_shipments"] = "Retour aux expéditions";
+$lang["back_to_workflow"] = "Retour au flux de travail";
+$lang["generate_report"] = "Générer un rapport";
+$lang["shipment_report"] = "Rapport d'expédition";
+$lang["workflow_analytics"] = "Analytique du flux de travail";
+$lang["more_actions"] = "Plus d'actions";
+
+$lang["shipment_created_successfully"] = "Expédition créée avec succès";
+$lang["shipment_updated_successfully"] = "Expédition mise à jour avec succès";
+$lang["shipment_deleted_successfully"] = "Expédition supprimée avec succès";
+$lang["shipment_not_found"] = "Expédition introuvable";
+$lang["access_denied"] = "Accès refusé";
+$lang["required_fields_missing"] = "Champs obligatoires manquants";
+$lang["record_not_found"] = "Enregistrement introuvable";
+$lang["feature_coming_soon"] = "Fonctionnalité à venir";
+
+$lang["workflow_dashboard"] = "Tableau de bord du flux de travail";
+$lang["workflow_overview"] = "Aperçu du flux de travail";
+$lang["recent_shipments"] = "Expéditions récentes";
+$lang["urgent_tasks"] = "Tâches urgentes";
+$lang["phase_statistics"] = "Statistiques de phase";
+$lang["shipment_statistics"] = "Statistiques d'expédition";
+$lang["workflow_performance"] = "Performance du flux de travail";
+
+$lang["processing"] = "En traitement";
+$lang["review"] = "Examen";
+$lang["approved"] = "Approuvé";
+$lang["rejected"] = "Rejeté";
+$lang["on_schedule"] = "À l'heure";
+$lang["delayed"] = "Retardé";
+$lang["urgent"] = "Urgent";
+$lang["normal"] = "Normal";
+$lang["low"] = "Bas";
+$lang["high"] = "Élevé";
+$lang["critical"] = "Critique";
+$lang["location"] = "Emplacement";
+$lang["notes"] = "Notes";
+$lang["add_notes_optional"] = "Ajouter des notes (optionnel)";
+
 return $lang;

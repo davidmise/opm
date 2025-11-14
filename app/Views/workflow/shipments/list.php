@@ -34,7 +34,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table id="shipments-table" class="display" cellspacing="0" width="100%">
+            <table id="shipments-table" class="table table-striped" width="100%">
                 <thead>
                     <tr>
                         <th class="w50">
@@ -45,15 +45,105 @@
                         <th><?php echo app_lang('cargo_type'); ?></th>
                         <th><?php echo app_lang('weight'); ?></th>
                         <th><?php echo app_lang('status'); ?></th>
-                        <th><?php echo app_lang('priority'); ?></th>
                         <th><?php echo app_lang('current_phase'); ?></th>
                         <th><?php echo app_lang('origin'); ?></th>
                         <th><?php echo app_lang('destination'); ?></th>
                         <th><?php echo app_lang('created_date'); ?></th>
-                        <th class="w100"></th>
+                        <th class="w100"><?php echo app_lang('actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
+                    <?php 
+                    // Get shipments data directly in the view for now
+                    $db = \Config\Database::connect();
+                    $builder = $db->table('opm_workflow_shipments s');
+                    $builder->select('s.*, c.company_name');
+                    $builder->join('opm_clients c', 's.client_id = c.id', 'left');
+                    $builder->orderBy('s.created_at', 'DESC');
+                    $builder->limit(50); // Limit for performance
+                    
+                    $shipments = $builder->get()->getResult();
+                    
+                    if (!empty($shipments)) {
+                        foreach ($shipments as $shipment) {
+                            $status_class = '';
+                            switch($shipment->status) {
+                                case 'active': $status_class = 'warning'; break;
+                                case 'completed': $status_class = 'success'; break;
+                                case 'cancelled': $status_class = 'danger'; break;
+                                default: $status_class = 'secondary';
+                            }
+                            
+                            $phase_display = ucwords(str_replace('_', ' ', $shipment->current_phase ?? 'N/A'));
+                            ?>
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input shipment-checkbox" data-shipment-id="<?php echo $shipment->id; ?>">
+                                </td>
+                                <td>
+                                    <a href="<?php echo get_uri('workflow/shipment_details/' . $shipment->id); ?>" class="text-primary">
+                                        <?php echo $shipment->shipment_number; ?>
+                                    </a>
+                                </td>
+                                <td><?php echo $shipment->company_name ?: 'Unknown Client'; ?></td>
+                                <td><?php echo $shipment->cargo_type; ?></td>
+                                <td><?php echo $shipment->cargo_weight ? $shipment->cargo_weight . ' tons' : '-'; ?></td>
+                                <td>
+                                    <span class="badge bg-<?php echo $status_class; ?>">
+                                        <?php echo ucfirst($shipment->status); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <?php echo $phase_display; ?>
+                                    </span>
+                                </td>
+                                <td><?php echo $shipment->origin_port; ?></td>
+                                <td><?php echo $shipment->destination_port; ?></td>
+                                <td><?php echo format_to_date($shipment->created_at, false); ?></td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i data-feather="more-horizontal" class="icon-16"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="<?php echo get_uri('workflow/shipment_details/' . $shipment->id); ?>">
+                                                    <i data-feather="eye" class="icon-16 me-2"></i><?php echo app_lang('view_details'); ?>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" onclick="editShipment(<?php echo $shipment->id; ?>)">
+                                                    <i data-feather="edit" class="icon-16 me-2"></i><?php echo app_lang('edit'); ?>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" onclick="quickAssignTask(<?php echo $shipment->id; ?>, this)">
+                                                    <i data-feather="plus-circle" class="icon-16 me-2"></i><?php echo app_lang('assign_task'); ?>
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#" onclick="deleteShipment(<?php echo $shipment->id; ?>)">
+                                                    <i data-feather="trash-2" class="icon-16 me-2"></i><?php echo app_lang('delete'); ?>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                    } else {
+                        ?>
+                        <tr>
+                            <td colspan="11" class="text-center text-muted">
+                                <?php echo app_lang('no_data_available'); ?>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
@@ -68,7 +158,7 @@
                 <h5 class="modal-title" id="shipmentModalLabel"><?php echo app_lang('add_shipment'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="shipment-form" action="<?php echo get_uri("workflow/save_shipment"); ?>" method="post">
+            <form id="shipment-form" action="<?php echo get_uri("workflow/save_shipment"); ?>" method="post" onsubmit="return false;">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -230,123 +320,136 @@
 </div>
 
 <script type="text/javascript">
-$(document).ready(function () {
-    // Initialize DataTable
-    $("#shipments-table").appTable({
-        source: '<?php echo_uri("workflow/list_shipments") ?>',
-        order: [[10, "desc"]], // Created date column
-        columns: [
-            {title: '', "class": "text-center option w50"},
-            {title: '<?php echo app_lang("shipment_number") ?>'},
-            {title: '<?php echo app_lang("client") ?>'},
-            {title: '<?php echo app_lang("cargo_type") ?>'},
-            {title: '<?php echo app_lang("weight") ?>'},
-            {title: '<?php echo app_lang("status") ?>'},
-            {title: '<?php echo app_lang("priority") ?>'},
-            {title: '<?php echo app_lang("current_phase") ?>'},
-            {title: '<?php echo app_lang("origin") ?>'},
-            {title: '<?php echo app_lang("destination") ?>'},
-            {title: '<?php echo app_lang("created_date") ?>', "iDataSort": 10},
-            {title: '<i data-feather="menu" class="icon-16"></i>', "class": "text-center option w100"}
-        ],
-        printColumns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        xlsColumns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        onRelaodCallback: function() {
-            // Replace feather icons safely
-            if (typeof feather !== 'undefined' && feather.replace) {
-                feather.replace();
-            } else if (typeof safeFeatherReplace === 'function') {
-                safeFeatherReplace();
-            }
-            console.log('DataTable reloaded');
-        },
-        onInitComplete: function() {
-            console.log('DataTable initialized successfully');
+$(document).ready(function() {
+    // Initialize feather icons when tab loads
+    setTimeout(function() {
+        if (typeof feather !== 'undefined' && feather.replace) {
+            feather.replace();
         }
-    });
-
+    }, 100);
+    
+    // Initialize basic table functionality
+    initShipmentsTable();
+    
     // Initialize select2 for client dropdown
     $("#client_id").select2({
-        data: <?php echo json_encode([]) ?>, // Load clients via AJAX
         placeholder: "<?php echo app_lang('select_client'); ?>",
         allowClear: true
     });
+    
+    // Prevent any form submission that might bypass AJAX
+    $(document).on('submit', 'form', function(e) {
+        if ($(this).attr('id') === 'shipment-form') {
+            e.preventDefault();
+            return false;
+        }
+    });
 
     // Handle form submission
-    $("#shipment-form").appForm({
-        onSuccess: function (result) {
-            if (result.success) {
-                $("#shipmentModal").modal('hide');
-                $("#shipments-table").appTable({newData: result.data, dataId: result.id});
-                appAlert.success(result.message);
-            } else {
-                appAlert.error(result.message);
-            }
-        }
-    });
-
-    // Load departments for assignment
-    loadDepartments();
-    loadTeamMembers();
-
-    // Quick Actions Functions
-    function loadDepartments() {
+    $("#shipment-form").on('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var $form = $(this);
+        var $submitBtn = $form.find('button[type="submit"]');
+        var originalBtnText = $submitBtn.text();
+        
+        // Disable submit button and show loading
+        $submitBtn.prop('disabled', true).text('Saving...');
+        
+        var formData = new FormData(this);
+        
         $.ajax({
-            url: '<?php echo_uri("departments/get_departments_dropdown") ?>',
+            url: $(this).attr('action'),
             type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
-                var departments = JSON.parse(response);
-                var options = '<option value=""><?php echo app_lang("select_department"); ?></option>';
-                departments.forEach(function(dept) {
-                    options += '<option value="' + dept.id + '">' + dept.title + '</option>';
-                });
-                $('#department_select').html(options);
+                try {
+                    var result = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (result.success) {
+                        $("#shipmentModal").modal('hide');
+                        showAlert('success', result.message || 'Shipment saved successfully');
+                        
+                        // Clear form
+                        $form[0].reset();
+                        $('#client_id').val(null).trigger('change');
+                        
+                        // Reload page after a short delay
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert('error', result.message || 'Error saving shipment');
+                    }
+                } catch (e) {
+                    console.log('Response parsing error:', e);
+                    showAlert('error', 'An error occurred while processing the response');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', error);
+                showAlert('error', 'Network error occurred. Please try again.');
+            },
+            complete: function() {
+                // Re-enable submit button
+                $submitBtn.prop('disabled', false).text(originalBtnText);
             }
         });
-    }
-
-    function loadTeamMembers() {
-        $.ajax({
-            url: '<?php echo_uri("team_members/get_team_members_dropdown") ?>',
-            type: 'POST',
-            success: function(response) {
-                var members = JSON.parse(response);
-                var options = '<option value=""><?php echo app_lang("select_user"); ?></option>';
-                members.forEach(function(member) {
-                    options += '<option value="' + member.id + '">' + member.first_name + ' ' + member.last_name + '</option>';
-                });
-                $('#task_assigned_to').html(options);
-            }
-        });
-    }
-
-    // Quick action handlers
-    $("#assign-department-form").appForm({
-        onSuccess: function (result) {
-            if (result.success) {
-                $("#assignDepartmentModal").modal('hide');
-                $("#shipments-table").appTable({reload: true});
-                appAlert.success(result.message);
-            }
-        }
+        
+        return false; // Extra safety to prevent form submission
     });
 
-    $("#create-task-form").appForm({
-        onSuccess: function (result) {
-            if (result.success) {
-                $("#createTaskModal").modal('hide');
-                $("#shipments-table").appTable({reload: true});
-                appAlert.success(result.message);
-            }
-        }
+    // Additional safety: handle submit button clicks
+    $(document).on('click', '#shipment-form button[type="submit"]', function(e) {
+        e.preventDefault();
+        $('#shipment-form').trigger('submit');
+        return false;
+    });
     });
 });
 
-// Global quick action functions
+function initShipmentsTable() {
+    // Simple table initialization without complex DataTables for now
+    console.log('Basic shipments table initialized');
+    
+    // Add row highlighting on hover
+    $('#shipments-table tbody tr').hover(
+        function() { $(this).addClass('table-hover-highlight'); },
+        function() { $(this).removeClass('table-hover-highlight'); }
+    );
+}
+
+// Utility function for alerts
+function showAlert(type, message) {
+    if (typeof appAlert !== 'undefined') {
+        if (type === 'success') appAlert.success(message);
+        else if (type === 'error') appAlert.error(message);
+        else appAlert.info(message);
+    } else {
+        alert(message);
+    }
+}
+
+// Select all functionality
+$(document).ready(function() {
+    $('#select-all-shipments').on('change', function() {
+        $('.shipment-checkbox').prop('checked', this.checked);
+    });
+    
+    $(document).on('change', '.shipment-checkbox', function() {
+        var totalCheckboxes = $('.shipment-checkbox').length;
+        var checkedCheckboxes = $('.shipment-checkbox:checked').length;
+        $('#select-all-shipments').prop('checked', totalCheckboxes === checkedCheckboxes);
+    });
+});
+
+// Global functions
 function bulkAssignDepartment() {
     var selectedRows = getSelectedShipments();
     if (selectedRows.length === 0) {
-        appAlert.warning('<?php echo app_lang("please_select_shipments"); ?>');
+        showAlert('warning', 'Please select shipments first');
         return;
     }
     $("#assignDepartmentModal").modal('show');
@@ -355,17 +458,16 @@ function bulkAssignDepartment() {
 function updateStatusBulk() {
     var selectedRows = getSelectedShipments();
     if (selectedRows.length === 0) {
-        appAlert.warning('<?php echo app_lang("please_select_shipments"); ?>');
+        showAlert('warning', 'Please select shipments first');
         return;
     }
-    // Implement status update modal
-    appAlert.info('Status update feature coming soon...');
+    showAlert('info', 'Status update feature coming soon...');
 }
 
 function createTaskBulk() {
     var selectedRows = getSelectedShipments();
     if (selectedRows.length === 0) {
-        appAlert.warning('<?php echo app_lang("please_select_shipments"); ?>');
+        showAlert('warning', 'Please select shipments first');
         return;
     }
     $("#createTaskModal").modal('show');
@@ -382,25 +484,11 @@ function getSelectedShipments() {
     return selectedRows;
 }
 
-// Select all functionality
-$(document).ready(function() {
-    $('#select-all-shipments').on('change', function() {
-        $('.shipment-checkbox').prop('checked', this.checked);
-    });
-    
-    $(document).on('change', '.shipment-checkbox', function() {
-        var totalCheckboxes = $('.shipment-checkbox').length;
-        var checkedCheckboxes = $('.shipment-checkbox:checked').length;
-        $('#select-all-shipments').prop('checked', totalCheckboxes === checkedCheckboxes);
-    });
-});
-
-// Quick assign task to shipment
 function quickAssignTask(shipmentId, element) {
-    var taskTitle = prompt('<?php echo app_lang("enter_task_title"); ?>:');
+    var taskTitle = prompt('Enter task title:');
     if (!taskTitle) return;
     
-    var userId = prompt('<?php echo app_lang("enter_user_id_or_name"); ?>:');
+    var userId = prompt('Enter user ID or name:');
     if (!userId) return;
 
     $.ajax({
@@ -412,68 +500,141 @@ function quickAssignTask(shipmentId, element) {
             task_title: taskTitle
         },
         success: function(response) {
-            var result = JSON.parse(response);
-            if (result.success) {
-                appAlert.success(result.message);
-                $(element).closest('tr').find('.task-indicator').show();
-            } else {
-                appAlert.error(result.message);
+            try {
+                var result = typeof response === 'string' ? JSON.parse(response) : response;
+                if (result.success) {
+                    showAlert('success', 'Task assigned successfully');
+                    $(element).closest('tr').find('.task-indicator').show();
+                } else {
+                    showAlert('error', result.message || 'Error assigning task');
+                }
+            } catch (e) {
+                console.log('Error:', e);
+                showAlert('error', 'An error occurred');
             }
         }
     });
 }
 
-// Edit shipment function
 function editShipment(shipmentId) {
-    $.ajax({
-        url: '<?php echo_uri("workflow/get_shipment_info") ?>',
-        type: 'POST',
-        data: {id: shipmentId},
-        success: function(response) {
-            var result = JSON.parse(response);
-            if (result.success) {
-                // Populate the modal form with existing data
-                var data = result.data;
-                $('#shipment-id').val(data.id);
-                $('#client-id').val(data.client_id);
-                $('#cargo-type').val(data.cargo_type);
-                $('#cargo-weight').val(data.cargo_weight);
-                $('#cargo-value').val(data.cargo_value);
-                $('#origin-port').val(data.origin_port);
-                $('#destination-port').val(data.destination_port);
-                $('#final-destination').val(data.final_destination);
-                $('#estimated-arrival').val(data.estimated_arrival);
-                
-                $('#shipmentModal').modal('show');
-            } else {
-                appAlert.error(result.message);
-            }
-        }
-    });
+    // For now, redirect to a simple edit page or show modal
+    showAlert('info', 'Edit functionality will be implemented soon');
 }
 
-// Delete shipment function
 function deleteShipment(shipmentId) {
-    if (confirm('<?php echo app_lang("delete_confirmation_message"); ?>')) {
+    if (confirm('Are you sure you want to delete this shipment?')) {
         $.ajax({
             url: '<?php echo_uri("workflow/delete_shipment") ?>',
             type: 'POST',
             data: {id: shipmentId},
             success: function(response) {
-                var result = JSON.parse(response);
-                if (result.success) {
-                    appAlert.success(result.message);
-                    $('#shipments-table').DataTable().ajax.reload();
-                } else {
-                    appAlert.error(result.message);
+                try {
+                    var result = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (result.success) {
+                        showAlert('success', 'Shipment deleted successfully');
+                        location.reload();
+                    } else {
+                        showAlert('error', result.message || 'Error deleting shipment');
+                    }
+                } catch (e) {
+                    console.log('Error:', e);
+                    showAlert('error', 'An error occurred');
                 }
             }
         });
     }
 }
 
-// View shipment details function
 function viewShipmentDetails(shipmentId) {
     window.location.href = '<?php echo_uri("workflow/shipment_details/") ?>' + shipmentId;
 }
+
+// Add event listener for tab activation to fix icon rendering
+$(document).on('shown.bs.tab', 'a[data-bs-target="#shipments_list"]', function() {
+    setTimeout(function() {
+        if (typeof feather !== 'undefined' && feather.replace) {
+            feather.replace();
+        }
+    }, 50);
+});
+</script>
+
+<style>
+.table-hover-highlight {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.dropdown-toggle::after {
+    margin-left: 0.255em;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.icon-16 {
+    width: 16px;
+    height: 16px;
+}
+
+.w50 {
+    width: 50px !important;
+}
+
+.w100 {
+    width: 100px !important;
+}
+
+#shipments-table {
+    font-size: 0.9em;
+}
+
+#shipments-table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 8px;
+}
+
+#shipments-table td {
+    padding: 8px;
+    vertical-align: middle;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.dropdown-menu {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid #e9ecef;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.text-primary {
+    text-decoration: none;
+}
+
+.text-primary:hover {
+    text-decoration: underline;
+}
+</style>
 </script>

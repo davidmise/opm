@@ -3286,4 +3286,189 @@ $lang["active_members"] = "Active Members";
 $lang["days_remaining"] = "days remaining";
 $lang["view_details"] = "View Details";
 
+/* Workflow Management Language Keys */
+$lang["workflow"] = "Workflow";
+$lang["workflows"] = "Workflows";
+$lang["workflow_management"] = "Workflow Management";
+$lang["shipment"] = "Shipment";
+$lang["shipments"] = "Shipments";
+$lang["shipment_details"] = "Shipment Details";
+$lang["shipment_number"] = "Shipment Number";
+$lang["shipment_information"] = "Shipment Information";
+$lang["shipping_information"] = "Shipping Information";
+$lang["shipment_documents"] = "Shipment Documents";
+$lang["shipment_tracking"] = "Shipment Tracking";
+$lang["add_shipment"] = "Add Shipment";
+$lang["edit_shipment"] = "Edit Shipment";
+$lang["delete_shipment"] = "Delete Shipment";
+$lang["create_shipment"] = "Create Shipment";
+$lang["new_shipment"] = "New Shipment";
+$lang["total_shipments"] = "Total Shipments";
+$lang["active_shipments"] = "Active Shipments";
+$lang["completed_shipments"] = "Completed Shipments";
+$lang["pending_shipments"] = "Pending Shipments";
+$lang["cancelled_shipments"] = "Cancelled Shipments";
+
+/* Cargo Information */
+$lang["cargo"] = "Cargo";
+$lang["cargo_type"] = "Cargo Type";
+$lang["cargo_weight"] = "Cargo Weight";
+$lang["cargo_value"] = "Cargo Value";
+$lang["cargo_description"] = "Cargo Description";
+$lang["cargo_volume"] = "Cargo Volume";
+$lang["cargo_dimensions"] = "Cargo Dimensions";
+
+/* Ports and Destinations */
+$lang["origin_port"] = "Origin Port";
+$lang["destination_port"] = "Destination Port";
+$lang["final_destination"] = "Final Destination";
+$lang["intermediate_ports"] = "Intermediate Ports";
+$lang["port_of_loading"] = "Port of Loading";
+$lang["port_of_discharge"] = "Port of Discharge";
+
+/* Workflow Phases */
+$lang["current_phase"] = "Current Phase";
+$lang["workflow_phase"] = "Workflow Phase";
+$lang["phase"] = "Phase";
+$lang["phases"] = "Phases";
+$lang["clearing_intake"] = "Clearing Intake";
+$lang["regulatory_processing"] = "Regulatory Processing";
+$lang["internal_review"] = "Internal Review";
+$lang["transport_loading"] = "Transport Loading";
+$lang["tracking"] = "Tracking";
+$lang["phase_updated_successfully"] = "Phase updated successfully";
+$lang["update_phase"] = "Update Phase";
+$lang["advance_phase"] = "Advance Phase";
+$lang["click_to_set_phase"] = "Click to set this phase";
+
+/* Status Management */
+$lang["update_status"] = "Update Status";
+$lang["update_status_and_phase"] = "Update Status & Phase";
+$lang["status_updated_successfully"] = "Status updated successfully";
+$lang["on_hold"] = "On Hold";
+$lang["in_transit"] = "In Transit";
+$lang["delivered"] = "Delivered";
+
+/* Assignment and Team Management */
+$lang["assign"] = "Assign";
+$lang["assign_shipment"] = "Assign Shipment";
+$lang["assigned_to"] = "Assigned To";
+$lang["reassign"] = "Reassign";
+$lang["assign_to_user"] = "Assign to User";
+$lang["assign_to_department"] = "Assign to Department";
+$lang["assignment_updated_successfully"] = "Assignment updated successfully";
+$lang["assignment_instructions_optional"] = "Assignment instructions (optional)";
+$lang["optional_department_assignment"] = "Optional: Also assign to department";
+$lang["shipments_assigned_to_department"] = "%s shipments assigned to department";
+$lang["not_assigned"] = "Not assigned";
+
+/* Document Management */
+$lang["document"] = "Document";
+$lang["documents"] = "Documents";
+$lang["upload_document"] = "Upload Document";
+$lang["download_document"] = "Download Document";
+$lang["delete_document"] = "Delete Document";
+$lang["document_name"] = "Document Name";
+$lang["document_type"] = "Document Type";
+$lang["document_status"] = "Document Status";
+$lang["upload_documents"] = "Upload Documents";
+$lang["upload_documents_to_get_started"] = "Upload documents to get started";
+$lang["no_documents_found"] = "No documents found";
+$lang["upload_first_document"] = "Upload First Document";
+
+/* Task Management */
+$lang["workflow_tasks"] = "Workflow Tasks";
+$lang["task_name"] = "Task Name";
+$lang["add_task"] = "Add Task";
+$lang["edit_task"] = "Edit Task";
+$lang["delete_task"] = "Delete Task";
+$lang["mark_complete"] = "Mark Complete";
+$lang["task_complete"] = "Task Complete";
+$lang["create_tasks_to_track_progress"] = "Create tasks to track progress";
+$lang["create_first_task"] = "Create First Task";
+
+/* Tracking and Updates */
+$lang["tracking_updates"] = "Tracking Updates";
+$lang["add_tracking_update"] = "Add Tracking Update";
+$lang["edit_tracking"] = "Edit Tracking";
+$lang["delete_tracking"] = "Delete Tracking";
+$lang["tracking_location"] = "Location";
+$lang["tracking_status"] = "Status";
+$lang["tracking_date"] = "Date";
+$lang["tracking_notes"] = "Notes";
+$lang["no_tracking_updates"] = "No tracking updates";
+$lang["add_tracking_updates_to_monitor_progress"] = "Add tracking updates to monitor progress";
+$lang["add_first_update"] = "Add First Update";
+
+/* Truck Allocation */
+$lang["truck_allocation"] = "Truck Allocation";
+$lang["truck_allocations"] = "Truck Allocations";
+$lang["allocate_truck"] = "Allocate Truck";
+$lang["truck_number"] = "Truck Number";
+$lang["driver"] = "Driver";
+$lang["driver_name"] = "Driver Name";
+$lang["driver_phone"] = "Driver Phone";
+$lang["allocated_at"] = "Allocated At";
+$lang["allocation_status"] = "Status";
+$lang["edit_allocation"] = "Edit Allocation";
+$lang["deallocate_truck"] = "Deallocate Truck";
+$lang["deallocate_truck_confirmation"] = "Are you sure you want to deallocate this truck?";
+$lang["track_truck"] = "Track Truck";
+$lang["no_trucks_allocated"] = "No trucks allocated";
+$lang["allocate_trucks_for_transportation"] = "Allocate trucks for transportation";
+$lang["allocate_first_truck"] = "Allocate First Truck";
+$lang["select_truck"] = "Select Truck";
+
+/* Dates and Timeline */
+$lang["estimated_arrival"] = "Estimated Arrival";
+$lang["actual_arrival"] = "Actual Arrival";
+$lang["departure_date"] = "Departure Date";
+$lang["arrival_date"] = "Arrival Date";
+$lang["created_at"] = "Created At";
+$lang["updated_at"] = "Updated At";
+$lang["last_updated"] = "Last Updated";
+
+/* Navigation and Actions */
+$lang["back_to_shipments"] = "Back to Shipments";
+$lang["back_to_workflow"] = "Back to Workflow";
+$lang["generate_report"] = "Generate Report";
+$lang["shipment_report"] = "Shipment Report";
+$lang["workflow_analytics"] = "Workflow Analytics";
+$lang["more_actions"] = "More Actions";
+
+/* Status Messages */
+$lang["shipment_created_successfully"] = "Shipment created successfully";
+$lang["shipment_updated_successfully"] = "Shipment updated successfully";
+$lang["shipment_deleted_successfully"] = "Shipment deleted successfully";
+$lang["shipment_not_found"] = "Shipment not found";
+$lang["access_denied"] = "Access denied";
+$lang["required_fields_missing"] = "Required fields are missing";
+$lang["record_not_found"] = "Record not found";
+$lang["feature_coming_soon"] = "Feature coming soon";
+
+/* Workflow Dashboard */
+$lang["workflow_dashboard"] = "Workflow Dashboard";
+$lang["workflow_overview"] = "Workflow Overview";
+$lang["recent_shipments"] = "Recent Shipments";
+$lang["urgent_tasks"] = "Urgent Tasks";
+$lang["phase_statistics"] = "Phase Statistics";
+$lang["shipment_statistics"] = "Shipment Statistics";
+$lang["workflow_performance"] = "Workflow Performance";
+
+/* General Workflow Terms */
+$lang["processing"] = "Processing";
+$lang["review"] = "Review";
+$lang["approved"] = "Approved";
+$lang["rejected"] = "Rejected";
+$lang["on_schedule"] = "On Schedule";
+$lang["delayed"] = "Delayed";
+$lang["urgent"] = "Urgent";
+$lang["normal"] = "Normal";
+$lang["low"] = "Low";
+$lang["high"] = "High";
+$lang["critical"] = "Critical";
+$lang["location"] = "Location";
+$lang["notes"] = "Notes";
+$lang["add_notes_optional"] = "Add notes (optional)";
+
 return $lang;
