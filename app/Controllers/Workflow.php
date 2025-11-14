@@ -113,7 +113,7 @@ class Workflow extends Department_Access_Controller
     function test_data() {
         // Simple test endpoint without authentication for debugging
         $db = \Config\Database::connect();
-        $count = $db->table('workflow_shipments')->countAllResults();
+        $count = $db->table('opm_workflow_shipments')->countAllResults();
         
         echo json_encode(array(
             "success" => true, 
@@ -367,7 +367,7 @@ class Workflow extends Department_Access_Controller
         $db = \Config\Database::connect();
         
         // Use table name without manual prefix since CodeIgniter adds it automatically
-        $table_name = 'workflow_shipments';
+        $table_name = 'opm_workflow_shipments';
         
         // Check if table exists first
         if (!$db->tableExists($table_name)) {
@@ -414,9 +414,9 @@ class Workflow extends Department_Access_Controller
         
         try {
             // Use table name without manual prefix
-            $builder = $db->table('workflow_shipments s');
+            $builder = $db->table('opm_workflow_shipments s');
             $builder->select('s.*, c.company_name as client_name');
-            $builder->join('clients c', 's.client_id = c.id', 'left');
+            $builder->join('opm_clients c', 's.client_id = c.id', 'left');
             // Remove deleted check since the table doesn't have a deleted column
             $builder->orderBy('s.created_at', 'DESC');
             $builder->limit($limit);
@@ -501,7 +501,7 @@ class Workflow extends Department_Access_Controller
         $phase_counts = [];
         
         // Check if table exists
-        if (!$db->tableExists('workflow_shipments')) {
+        if (!$db->tableExists('opm_workflow_shipments')) {
             // Return sample data
             return [
                 'clearing_intake' => 2,
@@ -515,7 +515,7 @@ class Workflow extends Department_Access_Controller
         try {
             $total_count = 0;
             foreach ($phases as $phase) {
-                $count = $db->table('workflow_shipments')
+                $count = $db->table('opm_workflow_shipments')
                     ->where('current_phase', $phase)
                     ->where('status', 'active')
                     // Remove deleted check since the table doesn't have this column
@@ -551,14 +551,15 @@ class Workflow extends Department_Access_Controller
     private function _get_shipment_details($shipment_id)
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('workflow_shipments s');
+        $builder = $db->table('opm_workflow_shipments s');
         $builder->select('s.*, c.company_name, u.first_name, u.last_name');
-        $builder->join('clients c', 's.client_id = c.id', 'left');
-        $builder->join('users u', 's.created_by = u.id', 'left');
+        $builder->join('opm_clients c', 's.client_id = c.id', 'left');
+        $builder->join('opm_users u', 's.assigned_to = u.id', 'left');
         $builder->where('s.id', $shipment_id);
         // Removed deleted check since table doesn't have this column
         
-        $result = $builder->get()->getRow();
+        $query = $builder->get();
+        $result = $query ? $query->getRow() : null;
         
         // If no result, create sample data for testing
         if (!$result) {
@@ -588,57 +589,59 @@ class Workflow extends Department_Access_Controller
     private function _get_shipment_documents($shipment_id)
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('documents d');
+        $builder = $db->table('opm_workflow_documents d');
         $builder->select('d.*, u.first_name, u.last_name');
-        $builder->join('users u', 'd.uploaded_by = u.id', 'left');
+        $builder->join('opm_users u', 'd.uploaded_by = u.id', 'left');
         $builder->where('d.shipment_id', $shipment_id);
         // Removed deleted check since table doesn't have this column
-        $builder->orderBy('d.uploaded_at', 'DESC');
+        $builder->orderBy('d.upload_date', 'DESC');
         
-        return $builder->get()->getResult();
+        $query = $builder->get();
+        return $query ? $query->getResult() : [];
     }
 
     private function _get_shipment_tasks($shipment_id)
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('workflow_tasks t');
-        $builder->select('t.*, wp.name as phase_name, assigned.first_name as assigned_first_name, assigned.last_name as assigned_last_name, creator.first_name as creator_first_name, creator.last_name as creator_last_name');
-        $builder->join('workflow_phases wp', 't.phase_id = wp.id', 'left');
-        $builder->join('users assigned', 't.assigned_to = assigned.id', 'left');
-        $builder->join('users creator', 't.assigned_by = creator.id', 'left');
+        $builder = $db->table('opm_workflow_tasks t');
+        $builder->select('t.*, t.phase as phase_name, assigned.first_name as assigned_first_name, assigned.last_name as assigned_last_name');
+        $builder->join('opm_users assigned', 't.assigned_to = assigned.id', 'left');
         $builder->where('t.shipment_id', $shipment_id);
         // Removed deleted check since table doesn't have this column
         $builder->orderBy('t.created_at', 'DESC');
         
-        return $builder->get()->getResult();
+        $query = $builder->get();
+        return $query ? $query->getResult() : [];
     }
 
     private function _get_tracking_reports($shipment_id)
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('tracking_reports tr');
-        $builder->select('tr.*, u.first_name, u.last_name, ta.truck_id');
-        $builder->join('users u', 'tr.updated_by = u.id', 'left');
-        $builder->join('truck_allocations ta', 'tr.truck_allocation_id = ta.id', 'left');
+        $builder = $db->table('opm_workflow_tracking tr');
+        $builder->select('tr.*, u.first_name, u.last_name');
+        $builder->join('opm_users u', 'tr.updated_by = u.id', 'left');
+        // Removed truck allocation join as truck_allocation_id column doesn't exist in tracking table
         $builder->where('tr.shipment_id', $shipment_id);
         // Removed deleted check since table doesn't have this column
-        $builder->orderBy('tr.updated_at', 'DESC');
+        $builder->orderBy('tr.timestamp', 'DESC');
         
-        return $builder->get()->getResult();
+        $query = $builder->get();
+        return $query ? $query->getResult() : [];
     }
 
     private function _get_truck_allocations($shipment_id)
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('truck_allocations ta');
-        $builder->select('ta.*, t.truck_number, t.driver_name, t.driver_phone, u.first_name, u.last_name');
-        $builder->join('trucks t', 'ta.truck_id = t.id', 'left');
-        $builder->join('users u', 'ta.allocated_by = u.id', 'left');
+        $builder = $db->table('opm_workflow_truck_allocations ta');
+        $builder->select('ta.*, t.truck_number, t.driver_name, t.driver_phone');
+        $builder->join('opm_workflow_trucks t', 'ta.truck_id = t.id', 'left');
+        // Removed user join as allocated_by column doesn't exist in truck allocations table
         $builder->where('ta.shipment_id', $shipment_id);
         // Removed deleted check since table doesn't have this column
-        $builder->orderBy('ta.allocation_date', 'DESC');
+        $builder->orderBy('ta.allocated_at', 'DESC');
         
-        return $builder->get()->getResult();
+        $query = $builder->get();
+        return $query ? $query->getResult() : [];
     }
 
     // AJAX endpoints for data tables
@@ -707,9 +710,9 @@ class Workflow extends Department_Access_Controller
     private function _get_shipments_list_data()
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('workflow_shipments s');
+        $builder = $db->table('opm_workflow_shipments s');
         $builder->select('s.*, c.company_name');
-        $builder->join('clients c', 's.client_id = c.id', 'left');
+        $builder->join('opm_clients c', 's.client_id = c.id', 'left');
         // Removed deleted check since table doesn't have this column
         $builder->orderBy('s.created_at', 'DESC');
         
@@ -799,7 +802,7 @@ class Workflow extends Department_Access_Controller
     // Helper methods for fetching team members from database
     private function _get_team_members_dropdown() {
         $db = \Config\Database::connect();
-        $builder = $db->table('users');
+        $builder = $db->table('opm_users');
         $builder->select('id, first_name, last_name');
         // Removed deleted check since table doesn't have this column
         $builder->where('status', 'active');
@@ -842,7 +845,7 @@ class Workflow extends Department_Access_Controller
         $db = \Config\Database::connect();
         $sql = "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count 
                 FROM opm_workflow_shipments 
-                WHERE deleted = 0 AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
                 GROUP BY DATE_FORMAT(created_at, '%Y-%m')
                 ORDER BY month ASC";
         
@@ -856,7 +859,7 @@ class Workflow extends Department_Access_Controller
         $sql = "SELECT current_phase, 
                        AVG(DATEDIFF(updated_at, created_at)) as avg_days
                 FROM opm_workflow_shipments 
-                WHERE deleted = 0 AND status = 'completed'
+                WHERE status = 'completed'
                 GROUP BY current_phase";
         
         return $db->query($sql)->getResult();
@@ -878,7 +881,7 @@ class Workflow extends Department_Access_Controller
                        AVG(DATEDIFF(NOW(), updated_at)) as avg_stuck_days,
                        COUNT(*) as stuck_count
                 FROM opm_workflow_shipments 
-                WHERE deleted = 0 AND status = 'active'
+                WHERE status = 'active'
                 GROUP BY current_phase
                 ORDER BY avg_stuck_days DESC";
         
@@ -894,8 +897,7 @@ class Workflow extends Department_Access_Controller
                         ELSE NULL END) as avg_completion_days,
                     COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count,
                     COUNT(*) as total_count
-                FROM opm_workflow_shipments 
-                WHERE deleted = 0";
+                FROM opm_workflow_shipments";
         
         return $db->query($sql)->getRow();
     }
@@ -908,7 +910,7 @@ class Workflow extends Department_Access_Controller
                        COUNT(*) as total,
                        ROUND(COUNT(CASE WHEN status = 'completed' THEN 1 END) * 100.0 / COUNT(*), 2) as completion_rate
                 FROM opm_workflow_shipments 
-                WHERE deleted = 0 AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
                 GROUP BY DATE_FORMAT(created_at, '%Y-%m')
                 ORDER BY month ASC";
         
@@ -1208,8 +1210,7 @@ class Workflow extends Department_Access_Controller
      */
     function get_departments_dropdown() {
         $db = \Config\Database::connect();
-        $departments = $db->table('opm_departments')
-            ->where('deleted', 0)
+        $departments = $db->table('omp_departments')
             ->where('is_active', 1)
             ->orderBy('title', 'ASC')
             ->get()
@@ -1224,7 +1225,6 @@ class Workflow extends Department_Access_Controller
     function get_team_members_dropdown() {
         $db = \Config\Database::connect();
         $members = $db->table('opm_users')
-            ->where('deleted', 0)
             ->where('status', 'active')
             ->where('user_type', 'staff')
             ->orderBy('first_name', 'ASC')
@@ -1564,7 +1564,6 @@ class Workflow extends Department_Access_Controller
             ->select('wd.*, ws.shipment_number, u.first_name, u.last_name')
             ->join('opm_workflow_shipments ws', 'wd.shipment_id = ws.id', 'left')
             ->join('opm_users u', 'wd.uploaded_by = u.id', 'left')
-            ->where('wd.deleted', 0)
             ->orderBy('wd.created_at', 'DESC')
             ->get()
             ->getResult();
@@ -1605,7 +1604,6 @@ class Workflow extends Department_Access_Controller
             ->join('opm_tasks t', 'wt.task_id = t.id', 'left')
             ->join('opm_workflow_shipments ws', 'wt.shipment_id = ws.id', 'left')
             ->join('opm_users u', 'wt.assigned_to = u.id', 'left')
-            ->where('wt.deleted', 0)
             ->orderBy('t.deadline', 'ASC')
             ->get()
             ->getResult();
@@ -1719,7 +1717,6 @@ class Workflow extends Department_Access_Controller
         $builder->select('s.*, c.company_name');
         $builder->join('opm_clients c', 's.client_id = c.id', 'left');
         $builder->where('s.id', $id);
-        $builder->where('s.deleted', 0);
         
         return $builder->get()->getRow();
     }
@@ -1727,10 +1724,10 @@ class Workflow extends Department_Access_Controller
     private function _delete_shipment($id) {
         $db = \Config\Database::connect();
         
-        // Soft delete - set deleted flag
+        // Soft delete - set status to cancelled
         $result = $db->table('opm_workflow_shipments')
             ->where('id', $id)
-            ->update(['deleted' => 1, 'updated_at' => get_current_utc_time()]);
+            ->update(['status' => 'cancelled', 'updated_at' => get_current_utc_time()]);
         
         return $result;
     }
